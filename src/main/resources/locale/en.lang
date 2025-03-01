@@ -1,0 +1,17 @@
+[racemodui]
+createnewcharacter=New Character
+playername=New Player
+charcreate=Make Character
+nextrace=Next Race
+prevrace=Previous Race
+loading=Loading RaceMod
+[racemod.race]
+human=Human
+testfurry=Furry Person
+[racemod.parts]
+tail=Tail Style
+ears=Ears Style
+muzzle=Muzzle Style
+tailcolor=Tail Color
+earscolor=Ear Color
+muzzlecolor=Muzzle Color
