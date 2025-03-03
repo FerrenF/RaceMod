@@ -127,7 +127,7 @@ public class GamePartsLoader {
 			} else {
 				synchronized (GamePartsLoader.LOCK) {
 					if (GamePartsLoader.this.triggerFirstTimeSetup && !GamePartsLoader.this.firstTimeSetupTriggered) {
-						GameLoadingScreen.drawLoadingString(Localization.translate("loading", "firstsetup"));
+						GameLoadingScreen.drawLoadingString(Localization.translate("racemod.loading", "firstsetup"));
 						GamePartsLoader.this.firstTimeSetupTriggered = true;
 					}
 

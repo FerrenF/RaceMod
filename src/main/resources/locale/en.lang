@@ -5,13 +5,15 @@ charcreate=Make Character
 nextrace=Next Race
 prevrace=Previous Race
 loading=Loading RaceMod
+[racemod.loading]
+firstsetup=Loading and caching RaceMod resources...
 [racemod.race]
 human=Human
 testfurry=Furry Person
-[racemod.parts]
 tail=Tail Style
 ears=Ears Style
 muzzle=Muzzle Style
-tailcolor=Tail Color
-earscolor=Ear Color
-muzzlecolor=Muzzle Color
+tail_color=Tail Color
+ears_color=Ear Color
+muzzle_color=Muzzle Color
+head=Head Shape

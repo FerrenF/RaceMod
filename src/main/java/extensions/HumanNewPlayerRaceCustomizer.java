@@ -76,15 +76,7 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	}	
 	
 	public Point getDrawOffset(BodyPart part) {
-	    switch (part.getPartName()) {
-	        case "SKIN_COLOR": return getSkinFaceDrawOffset();
-	        case "EYE_TYPE":	return getEyeTypeFaceDrawOffset();
-	        case "EYE_COLOR":  return getEyeColorFaceDrawOffset();
-	        case "HAIR_STYLE": 
-	        case "FACIAL_HAIR":
-	        case "HAIR_COLOR": return new Point(0, 0);
-	        default: return new Point(0, 0);
-	    }
+	   return super.baseGetDrawOffset(part);
 	}
 
 	// Returns the modification cost (stub for customization)
@@ -93,34 +85,18 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	}
 
 	// Updates the player look and triggers necessary updates
-	protected void updateBodyPartSelection(BodyPart part, Object id) {
-		this.setLookAttribute(this.getRaceLook(), part, id);		
+	protected void updateBodyPartSelection(BodyPart part, Object id, boolean colorCustomization) {
+		this.setLookAttribute(this.getRaceLook(), part, id, false);		
 		this.onChanged();		
 	}
 
 	
 	//TODO: hey, this can be de-duplicated by moving part of it to the base new player preset form, and overridden only if needed.
 	@Override
-	protected Object getCurrentBodyPartSelection(BodyPart part) {
+	protected Object getCurrentBodyPartSelection(BodyPart part, boolean colorCustomization) {
 		int DEBUG_VALUE = 80;
-	    Object value;  // Store the selected value for logging
-
-	    switch (part.getPartName()) {
-	    	// Base Game Parts
-	        case "SKIN_COLOR": 	            value = this.getRaceLook().getSkin();	            	break;
-	        case "EYE_TYPE": 	            value = this.getRaceLook().getEyeType();	            break;
-	        case "EYE_COLOR": 	            value = this.getRaceLook().getEyeColor();	            break;
-	        case "HAIR_STYLE": 	            value = this.getRaceLook().getHair();	            	break;
-	        case "FACIAL_HAIR": 	        value = this.getRaceLook().getFacialFeature();	        break;
-	        case "HAIR_COLOR": 	            value = this.getRaceLook().getHairColor();	            break;
-	        case "SHIRT_COLOR": 	        value = this.getRaceLook().getShirtColor();	            break;
-	        case "SHOES_COLOR": 	        value = this.getRaceLook().getShoesColor();	            break;
-	      
-	        default: 
-	            value = -1; // Fallback value for unknown parts
-	            break;
-	    }
-	
+	     // Store the selected value for logging
+		 Object value = super.baseGetCurrentBodypartSelection(part);	
 	    RaceMod.handleDebugMessage("getCurrentBodyPartSelection(" + part.getPartName() + ") = " + value 
 		        + " [Type: " + (value != null ? value.getClass().getSimpleName() : "null") + "]", DEBUG_VALUE);
 
@@ -129,7 +105,7 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 
 
 	@Override
-	protected void setLookAttribute(RaceLook look, BodyPart part, Object value) {
+	protected void setLookAttribute(RaceLook look, BodyPart part, Object value, boolean colorCustomization) {
 	    if (value instanceof Integer) {
 	        int intValue = (Integer) value;
 	        switch (part.getPartName()) {
@@ -164,10 +140,10 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	
 	
 	// Draws the preview for each body part selection
-	protected void drawBodyPartPreview(FormContentVarToggleButton button, BodyPart part, int id, int x, int y, int _width, int _height) {
+	protected void drawBodyPartPreview(FormContentVarToggleButton button, BodyPart part, boolean colorCustomization, int id, int x, int y, int _width, int _height) {
 		RaceLook look = new CustomHumanLook(this.getRaceLook());
 		applyLookModifiers(look, part);
-		setLookAttribute(look, part, id);
+		setLookAttribute(look, part, id, colorCustomization);
 		HumanDrawOptions options = new HumanDrawOptions(null, look, false);
 		// Center position for the preview
 		
@@ -185,79 +161,13 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	protected Section createColorCustomSection(BodyPart part, String labelKey, Supplier<Color> colorGetter, 
 		Consumer<Color> colorSetFunc, Function<Color, ArrayList<InventoryItem>> costFunc, Predicate<Section> isCurrent, int _width) {
 				
-		
-		Color[] defaultColors = this.getRaceLookParts().defaultColors();
-		String itemnm = part.getPartName().equals("SHIRT_COLOR") ? "shirt" : 
-            part.getPartName().equals("SHOES_COLOR") ? "shoes" : "";
-		
-		Function<Color, InventoryItem> itemSetter = itemnm.equals("shirt") ?
-			    (cc) -> ShirtArmorItem.addColorData(new InventoryItem(itemnm), cc) :
-			    (cc) -> ShoesArmorItem.addColorData(new InventoryItem(itemnm), cc);
-			    
-		return new Section(
-		(button, drawX, drawY, width, height) -> {
-			
-		    InventoryItem item = itemSetter.apply(colorGetter.get());
-		    int size = Math.min(width, height);
-		    item.drawIcon((PlayerMob) null, drawX + width / 2 - size / 2, drawY + height / 2 - size / 2, size, null);
-		    
-		},
-		new LocalMessage(part.getLabelCategory(), part.getLabelKey()), 
-		this.getSelectionColorOrCustom(extensions.FormNewPlayerRaceCustomizer.BUTTON_SIZE, _width, 
-		    (button, id, drawX, drawY, width, height, current, hovering) -> {
-		    	
-		        Color color = defaultColors[id];
-		        InventoryItem item = itemSetter.apply(color);
-		        int size = Math.min(width, height);
-		        item.drawIcon((PlayerMob) null, drawX + width / 2 - size / 2, drawY + height / 2 - size / 2, size, null);
-		        
-		    }, 
-		    ()->{return colorGetter.get();}, 
-		    (color) -> {		    	
-		    	this.setLookAttribute(this.getRaceLook(), part, color);
-		       // this.updateLook();
-		    },
-		    (color) -> {
-		    	this.updateBodyPartSelection(part, color);              
-		      //  this.updateLook();
-		       // this.updateComponents();          
-		    },
-		    (color)->{return costFunc.apply(color);}
-		),
-		isCurrent
-		);
+		return super.createColorCustomSection(part, labelKey, colorGetter, colorSetFunc, costFunc, isCurrent, _width);
 	}			
 	
 	// Generates sections dynamically for each body part
 	protected Section createBodyPartSection(BodyPart part, Predicate<Section> isCurrent, int _width) {
 
-		if (part.getPartName().equals("SHIRT_COLOR") || part.getPartName().equals("SHOES_COLOR")) {
-			return createColorCustomSection(
-					part,
-					part.getLabelKey(),					 		            
-		            ()->(Color)(this.getCurrentBodyPartSelection(part)),            
-		            (color) -> {this.setLookAttribute(this.getRaceLook(), part, (Color)color);},		            
-		            (color)->this.getPartModificationCost(color),
-		            isCurrent,
-		            _width
-		        );
-		}
-		else {
-			
-			 return new Section(
-			    		(button, drawX, drawY, width, height) -> drawBodyPartIcon(button, part, drawX, drawY, width, height),
-			    			new LocalMessage(part.getLabelCategory(), part.getLabelKey()),	    			
-			        this.getSelectionContent(
-			            extensions.FormNewPlayerRaceCustomizer.BUTTON_SIZE, _width, part.getTotalTextureOptions(),
-			            (button, id, x, y, w, h, current, hovering) -> drawBodyPartPreview(button, part, id, x, y, w, h),
-			            id -> id == (Integer)getCurrentBodyPartSelection(part),
-			            (id, event) -> updateBodyPartSelection(part, id),
-			            (color)->this.getPartModificationCost(new Color(color))
-			        		),
-			        		isCurrent
-			    		);
-			 
-		}	 
+		return super.createBodyPartSection(part, isCurrent, _width);
 	
 	}
 
@@ -304,6 +214,12 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	public ArrayList<InventoryItem> getShirtColorCost(Color color) 	{		return null;	}
 	
 	public ArrayList<InventoryItem> getShoesColorCost(Color color) 	{		return null;	}
+
+	@Override
+	protected Section createBodyPartCustomColorSection(BodyPart part, Predicate<Section> isCurrent, int _width) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	
 

@@ -25,6 +25,7 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import net.bytebuddy.asm.Advice.AllArguments;
 import net.bytebuddy.asm.Advice.Origin;
+import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.dynamic.loading.ClassReloadingStrategy;
 //import overrides.FormNewPlayerPreset.CustomFormPlayerIcon;
@@ -33,7 +34,8 @@ import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import net.bytebuddy.matcher.ElementMatchers;
 import overrides.CustomPlayerMob;
-import patches.RaceModAgent;
+import patches.GetArmorDrawOptionsInterceptor;
+
 	
 @ModEntry
 public class RaceMod {
@@ -76,12 +78,22 @@ public class RaceMod {
        //rebasePlayerMob();
       
        //replaceHumanDrawOptions();
+	   interceptDrawOptions();
        replaceFormNewPlayerPreset();
        replaceFormNewCharacterForms();
       
     }
     
-    public void postInit() {   	
+    private void interceptDrawOptions() {
+    	  new ByteBuddy()
+          .redefine(necesse.gfx.drawOptions.human.HumanDrawOptions.class)
+          .visit(Advice.to(GetArmorDrawOptionsInterceptor.class)
+              .on(ElementMatchers.named("getArmorDrawOptions")))
+          .make()
+          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent());
+	}
+
+	public void postInit() {   	
     	
     	Optional<String> rlist = RaceRegistry.getRaces().stream().map(RaceLook::getRaceID).reduce( (r1, r2) -> {return r1+","+r2;});
     	String dbgRaceLoadedCnt = String.format("%d races loaded: %s",
@@ -135,20 +147,6 @@ public class RaceMod {
         
     }
     
-    public static void replaceFormPlayerIcon() {
-        try {
-        	  new ByteBuddy()
-              .redefine(overrides.FormPlayerIcon.class)  // Your modified version
-              .name("necesse.gfx.forms.components.FormPlayerIcon") // Force rename
-              .make()
-              .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent());
-
-            System.out.println("Successfully replaced FormPlayerIcon. I sure hope it works.");
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
     
 	public static void replaceFormNewPlayerPreset() {
         try {

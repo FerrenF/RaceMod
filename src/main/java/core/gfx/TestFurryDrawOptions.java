@@ -50,34 +50,12 @@ public class TestFurryDrawOptions implements DrawOptions {
 	private int drawX;
 	private int drawY;
 	
-	public static RaceLook getRaceLook(CustomPlayerMob _player) {	
-		
-	    if ("CUSTOM".equals(_player.secondType)) {  // Safe string comparison
-	        if (_player.look instanceof RaceLook) {
-	            return (RaceLook) _player.look;
-	        } else {
-	            System.err.println("Error: newPlayer.look is not an instance of RaceLook!");
-	            return null;  // Handle invalid state gracefully
-	        }
-	    }
-	    
-	    RaceLook converted = racelookFromBase(_player.look);
-	    if (converted == null) {
-	        System.err.println("Error: Failed to convert HumanLook to RaceLook!");
-	    }
-	    return converted;
-	}
-
-	public static TestFurryRaceLook getCustomRaceLook(RaceLook _look) {	
-		if (_look.getRaceID() != TestFurryRaceLook.TEST_FURRY_RACE_ID) {
-			RaceMod.handleDebugMessage(String.format("Draw options for raceID %s requested for non-raceID %s from %.", TestFurryRaceLook.TEST_FURRY_RACE_ID, _look.getRaceID(), _look.getClass().getName()), 25);
-			return null;
-		}
-		return (TestFurryRaceLook)_look;
-	}
-	public static RaceLook racelookFromBase(HumanLook look) {	return new TestFurryRaceLook(look);}
 
 	public TestFurryDrawOptions(Level level) {
+		this.drawEars = false;
+		this.drawMuzzle = false;
+		this.drawTail = false;
+		
 		this.level = level;
 		this.drawOffsetX=0;
 		this.drawOffsetY=0;
@@ -97,7 +75,7 @@ public class TestFurryDrawOptions implements DrawOptions {
 	public TestFurryDrawOptions(Level level, CustomPlayerMob player) {
 		this(level);
 		this.player = player;
-		this.look = getCustomRaceLook(getRaceLook(player));
+		this.look = TestFurryRaceLook.getCustomRaceLook(RaceLook.getRaceLook(player));
 	}
 			
 	public TestFurryDrawOptions(Level level, CustomPlayerMob player, int dir, int spriteX, int spriteY, int spriteRes, int drawX,
@@ -251,6 +229,11 @@ public class TestFurryDrawOptions implements DrawOptions {
 		this.width = i;
 		this.height = j;
 		return this;
+	}
+
+	public DrawOptions getTopDrawOptions() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

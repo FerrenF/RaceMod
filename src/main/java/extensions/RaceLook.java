@@ -22,7 +22,7 @@ import necesse.gfx.GameSkin;
 import necesse.gfx.HumanGender;
 import necesse.gfx.HumanLook;
 import necesse.gfx.gameTexture.GameTexture;
-
+import overrides.CustomPlayerMob;
 import core.gfx.GameParts;
 import core.gfx.GamePartsLoader;
 import core.race.CustomHumanLook;
@@ -46,6 +46,26 @@ public class RaceLook extends HumanLook {
 	public Function<Color, Color> colorLimiterFunction = DEFAULT_COLOR_LIMITER;
 	
 	protected String race_id;
+	
+	public static RaceLook getRaceLook(CustomPlayerMob _player) {	
+		
+	    if ("CUSTOM".equals(_player.secondType)) {  // Safe string comparison
+	        if (_player.look instanceof RaceLook) {
+	            return (RaceLook) _player.look;
+	        } else {
+	            System.err.println("Error: newPlayer.look is not an instance of RaceLook!");
+	            return null;  // Handle invalid state gracefully
+	        }
+	    }
+	    
+	    RaceLook converted = racelookFromBase(_player.look);
+	    if (converted == null) {
+	        System.err.println("Error: Failed to convert HumanLook to RaceLook!");
+	    }
+	    return converted;
+	}
+	public static RaceLook racelookFromBase(HumanLook look) {	return RaceLook.fromHumanLook(look);}
+	
 	public RaceLook(String _race_id) {
 		super();						
 		this.race_id = _race_id;
@@ -304,7 +324,7 @@ public class RaceLook extends HumanLook {
 
 	public void applyLoadData(LoadData save) {
 		super.applyLoadData(save);
-		this.race_id = save.getUnsafeString(race_id);
+		this.race_id = save.getUnsafeString("race_id");
 	    // Load all byte-based appearance attributes
 	    this.appearanceByteMap.forEach((key, value) -> {
 	        this.appearanceByteMap.put(key, save.getByte(key, value));

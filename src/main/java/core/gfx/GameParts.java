@@ -36,6 +36,8 @@ public class GameParts {
 	private static final String PATH_PREFIX = "";
 	private static final String TEXTURE_SUFFIX = ".png";
 	private static final String WIG_TEXTURE_NAME = "wig";
+	
+	private static Point wigAccessoryLocation = new Point(0, -1);
 	public final BodyPart assignedPart;	
 	
 	public GameSkinColors colors;	
@@ -78,7 +80,10 @@ public class GameParts {
 	public int getTextureCount() 		{	return  _textureCount;	}
 
 	public int getColorCount() 			{	return  _colorCount;	}
-
+	
+	public boolean hasAccessoryMap()		{   return this.assignedPart.isHasLastRowAccessoryMap(); }
+	
+	public boolean hasSeparateWigTexture()	{	return this.assignedPart.isHasSeperateWigTexture(); }
 	
 	// This constructor is used after the textures have been found and added into a copy of a newly initialized GameParts class. It represents an 'initialized' state.
 	private GameParts(BodyPart assignedPart) {
@@ -100,7 +105,7 @@ public class GameParts {
 		GameParts newPart = new GameParts(this.assignedPart);
 		GameSkinCache cache = new GameSkinCache(this.getPartPath());		
 		cache.loadCache();
-		
+		this.colors = new GameSkinColors();
 		if(this.hasTextures()) {
 			
 			// First, try and find the textures. Count them, and store the number we found.
@@ -160,25 +165,7 @@ public class GameParts {
 			
 		}
 		
-		if(this.hasWig()) {
-			loadPartWigTexture();
-			
-			if(this.fullWigTexture != null) {
-				RaceMod.handleDebugMessage(
-				        String.format("Loaded wig texture for part: %s",this.getPartName()), 70);
-				
-				loadPartWigTextures(loader, cache);
-				loader.waitForCurrentTasks();
-			}
-			else {
-				RaceMod.handleDebugMessage( String.format("Wig texture is null for part %s.", this.getPartName()), 70  );
-				return;
-			}
-		}
-		else {
-			
-			RaceMod.handleDebugMessage( String.format("Loading wig textures: part %s does not have a wig texture.", this.getPartName()), 70  );
-		}
+		
 		
 		if(!this.texturesInitialized){
 			
@@ -189,8 +176,7 @@ public class GameParts {
 					loader.waitForCurrentTasks();
 					RaceMod.handleDebugMessage( String.format("Loading full textures: part %s loaded %d full textures.", this.getPartName(), this.fullTextures.size()), 70  );
 				
-				
-				
+					
 					if(this.hasSides()) {
 						if(this._textureCount > 0) {
 							this.loadPartFrontTextures(loader, cache);
@@ -215,9 +201,46 @@ public class GameParts {
 			
 		}
 				
-		cache.saveCache();
 		loader.waitForCurrentTasks();
 		
+		if(this.hasWig()) {
+			
+			if(this.assignedPart.isHasSeperateWigTexture()) {
+				loadPartWigTexture();			
+	
+				if(this.fullWigTexture != null) {
+					RaceMod.handleDebugMessage(
+					        String.format("Loaded wig texture for part: %s",this.getPartName()), 70);		
+					
+						loadPartWigTextures(loader, cache);
+					
+				}
+				else {
+					RaceMod.handleDebugMessage( String.format("Wig texture is null for part %s.", this.getPartName()), 70  );
+					return;
+				}
+			}
+			else {
+				
+				if(this.assignedPart.isHasLastRowAccessoryMap() && this._textureCount > 0) {
+					
+					this.loadPartIncludedWigTextures(loader, cache);
+				}
+				else {
+					RaceMod.handleDebugMessage( String.format("Wig texture for part %s is specified as not separate, but the texture does not have an accessory map.", this.getPartName()), 70  );
+					return;
+					
+				}
+				
+			}
+					
+		}
+		else {			
+			RaceMod.handleDebugMessage( String.format("Loading wig textures: part %s does not have a wig texture but specifies that it does.", this.getPartName()), 70  );
+		}
+		
+		cache.saveCache();
+		loader.waitForCurrentTasks();
 		
 		// Finally, set the values on the new part and then add it to the static array.
 		newPart._textureCount = this._textureCount;
@@ -234,6 +257,8 @@ public class GameParts {
 		parts.add(newPart);
 	}
 	
+	
+
 	private static int LEFT_ROW = 3;
 	private static int RIGHT_ROW = 1;
 	private static int FRONT_ROW = 2;
@@ -407,6 +432,89 @@ public class GameParts {
 		
 	}
 	
+	
+	private void loadPartIncludedWigTextures(GamePartsLoader loader, GameSkinCache cache) {
+			
+		for(int t=0; t< this._textureCount; t++) {			
+			if(this.hasColors()) {				
+				for(int c=0; c < this.colors.getSize(); c++) {					
+					this.loadCacheAccessoryMapTextures(loader, cache, true, this.textureMapSize(), this.accessoryMapSize(), t, c);					
+				}
+			}
+			else {
+				this.loadCacheAccessoryMapTextures(loader, cache, true, this.textureMapSize(), this.accessoryMapSize(), t, -1);	
+			}
+			
+		}
+		
+	}
+	private Point accessoryMapSize() {
+		return this.assignedPart.getAccessoryTextureMapSize();
+	}
+
+	private void loadCacheAccessoryMapTextures(GamePartsLoader loader, GameSkinCache cache, boolean makeFinal, Point textureMapSize, Point accessoryMapSize,
+			int ti, int ci) {		
+		
+		GameTexture original = this.fullTextures.get(ti);
+		final int realColorIndex = (ci==-1) ? 0 : ci;
+		if(original == null) {
+			RaceMod.handleDebugMessage(String.format("Failed to retrieve: %s accesory texture number %d for color %d)", this.getPartName(), ti, ci),70);
+			return;
+		}
+		
+		String cacheKey = String.format("%s_wig_%d_%d", this.getPartName().toLowerCase(), ti, realColorIndex);
+		int hash = original.hashCode() + GameRandom.prime(18) * (1+ti) * (this.hasColors() ? colors.getColorHash(ci) : 1);
+	
+		AbstractGameTextureCache.Element element = cache.get(cacheKey);
+		GameTexture texture;
+		if (element != null && element.hash == hash) {
+			try {
+				texture = new GameTexture(String.format("cached%s %s", this.getPartName(), cacheKey), element.textureData);
+				if (makeFinal) {
+					texture.makeFinal();	
+					}				
+				loader.addToList(this.wigTextures.get(realColorIndex),ti, texture);	
+				RaceMod.handleDebugMessage(String.format("Found texture in cache: %s", cacheKey),70);
+				return;
+			} catch (Exception var12) {
+				RaceMod.handleDebugMessage(String.format("Could not load %s cache for %s", this.getPartName(), cacheKey),10);
+			}
+		} else {
+			RaceMod.handleDebugMessage(String.format("Detected invalid: %s", cacheKey),70);
+		}		
+
+		loader.triggerFirstTimeSetup();
+		RaceMod.handleDebugMessage(String.format("Generating new: %s", cacheKey),70);	
+		
+	
+		int wtw = original.getWidth();
+		int wth = original.getHeight();
+		
+		Point m_spriteSize = new Point(wtw/textureMapSize.x, wth/textureMapSize.y);		
+		
+		int accessorySpriteStartY = (textureMapSize.y - 1) * m_spriteSize.y;
+		Point accessorySpriteAreaBegin = new Point(0, accessorySpriteStartY);		
+		Point accessoryMapAreaSize = new Point(wtw, m_spriteSize.y);
+		
+		Point accessoryMapSpriteSize = new Point(accessoryMapAreaSize.x/accessoryMapSize.x, 
+												 accessoryMapAreaSize.y/accessoryMapSize.y);
+		
+		Point accessorySpriteWigTextureLocationOffset = new Point(0, accessoryMapSpriteSize.y); 
+				
+		GameTexture _texture =  new GameTexture(original,
+				accessorySpriteAreaBegin.x + accessorySpriteWigTextureLocationOffset.x,
+				accessorySpriteAreaBegin.y + accessorySpriteWigTextureLocationOffset.y,
+				accessoryMapSpriteSize.x, accessoryMapSpriteSize.y);
+		
+				loader.submitTaskAddToList(this.wigTextures.get(realColorIndex),ti, (String) null, () -> {
+					 if(ci != -1) colors.replaceColors(_texture, realColorIndex);
+					 _texture.runPreAntialias(false);
+					cache.set(cacheKey, hash, _texture);
+					return _texture;
+				}, makeFinal);					
+	}
+	
+	
 	private void loadPartWigTexture() {
 		String wigPath = this.getWigPath();
 		if(this.hasWig()) {
@@ -444,7 +552,7 @@ public class GameParts {
 			String fileName) {
 		
 		GameTexture original = this.fullWigTexture;
-		String cacheKey = String.format("%s_%d_%d", fileName.toLowerCase(), xid, cid);		
+		String cacheKey = String.format("%s_wig_%d_%d", fileName.toLowerCase(), xid, cid);		
 		int hash = original.hashCode() + GameRandom.prime(14) * (1+xid) * (this.hasColors() ? colors.getColorHash(cid) : 1);
 		
 		
@@ -637,13 +745,17 @@ public class GameParts {
 		}
 		
 	}
-
-	public static GameParts getPart(Class<?> sourceClass, String name) {
+	public GameTexture getWigTexture(int styleIndex, int colorIndex) {
+		return this.wigTextures.get(colorIndex).get(styleIndex);
+	}
+	public static GameParts getPart(Class<? extends RaceLookParts> sourceClass, String name) {
+		
 		for( GameParts g : parts) {			
-			if (g.getRacePartsClass().equals(sourceClass) && g.getPartName().toLowerCase().equals(name.toLowerCase())) return g;
+			if (g.getRacePartsClass().equals(sourceClass)
+					&& g.getPartName().toLowerCase().equals(name.toLowerCase())) return g;
 		}
 		  RaceMod.handleDebugMessage(
-		            String.format("Part: %s does not exist for, class %s.", sourceClass.getName()), 
+		            String.format("Part: %s does not exist for class %s.", name, sourceClass.getName()), 
 		            70
 		        );
 		return null;
@@ -676,4 +788,11 @@ public class GameParts {
 			return random.nextInt();
 		}
 	}
+
+	public GameTexture getFullTexture(int textureIndex) {
+		return this.fullTextures.get(textureIndex);
+	}
+
+
+
 }

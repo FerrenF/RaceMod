@@ -57,7 +57,18 @@ public class RaceLookParts{
     	if (bodyParts == null) return List.of();
     	return new ArrayList<>(bodyParts.values());
     }
+    
+    public List<BodyPart> getCustomBodyParts() {
+    	if (bodyParts == null) return List.of();
+    	return new ArrayList<>(bodyParts.values()).stream().filter((part)->!part.isBaseGamePart()).toList();
+    }
+    
+    public List<BodyPart> getReplacerParts() {
+    	if (bodyParts == null) return List.of();
+    	return new ArrayList<>(bodyParts.values()).stream().filter((part)->part.isReplacerPart()).toList();
+    }
 
+    
     public void defineRaceBodyParts() {
     	// these are present in all cases. They are base game parts.
 	  this.addBodyPart("SKIN_COLOR", new BodyPart("SKIN_COLOR", "skincolor", GameSkin.getTotalSkins()));
@@ -73,11 +84,17 @@ public class RaceLookParts{
 	public Color defaultColors(int id) {
 		return DEFAULT_COLORS[id];
 	}
+	
 	public Color[] defaultColors() {
 		return DEFAULT_COLORS;
 	}
 
+	public boolean hasCustomPart(String key) {
+		return hasPart(key) && !this.bodyParts.get(key).isBaseGamePart();
+	}
+	
 	public boolean hasPart(String key) {
 		return this.bodyParts.containsKey(key) || this.bodyParts.containsKey(key+BodyPart.PART_COLOR_NAME_SUFFIX);
 	}
+	
 }

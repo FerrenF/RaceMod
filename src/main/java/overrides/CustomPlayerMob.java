@@ -1,5 +1,8 @@
 package overrides;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import core.race.CustomHumanLook;
 import extensions.RaceLook;
 
@@ -14,9 +17,28 @@ import necesse.engine.util.GameRandom;
 import necesse.entity.particle.FleshParticle;
 import necesse.entity.particle.Particle.GType;
 import necesse.gfx.GameSkin;
+import necesse.gfx.drawOptions.DrawOptions;
+import necesse.gfx.drawOptions.DrawOptionsList;
+import necesse.gfx.shader.ShaderState;
 
 public class CustomPlayerMob extends necesse.entity.mobs.PlayerMob{
 	
+		
+	public Consumer<DrawOptionsList> headOptionsModifier;
+	public void onDrawOptionsInterception(boolean isAttacking, int mobDir, DrawOptions behind,
+			DrawOptions head, DrawOptions eyelids, DrawOptions headBackArmor, DrawOptions headArmor,
+			DrawOptions headFrontArmor, DrawOptions chest, DrawOptions chestBackArmor, DrawOptions chestArmor,
+			DrawOptions chestFrontArmor, DrawOptions feet, DrawOptions feetBackArmor, DrawOptions feetArmor,
+			DrawOptions feetFrontArmor, DrawOptions leftArms, DrawOptions frontLeftArms, DrawOptions rightArms,
+			DrawOptions frontRightArms, DrawOptions holdItem, boolean holdItemInFrontOfArms, DrawOptions onBody,
+			DrawOptions top, final float alpha, final float angle, final int rotationMidX, final int rotationMidY,
+			ShaderState shader, final boolean forcedBufferDraw) {
+		
+			
+			headOptionsModifier.accept((DrawOptionsList)head);
+	
+		
+	}
 	public CustomPlayerMob(long tempNameIdentifier, NetworkClient networkClient) {
 		super(tempNameIdentifier, networkClient);	
 		this.secondType = "CUSTOM";		
