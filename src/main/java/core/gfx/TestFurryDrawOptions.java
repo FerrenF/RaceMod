@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import core.RaceMod;
 import core.race.TestFurryRaceLook;
 import extensions.RaceLook;
+import factory.RaceDataFactory;
 import necesse.entity.mobs.MaskShaderOptions;
 import necesse.entity.mobs.PlayerMob;
 import necesse.gfx.HumanLook;
@@ -15,11 +16,11 @@ import necesse.gfx.gameTexture.GameTexture;
 import necesse.inventory.item.armorItem.ArmorItem;
 import necesse.level.maps.Level;
 import necesse.level.maps.light.GameLight;
-import overrides.CustomPlayerMob;
+
 
 public class TestFurryDrawOptions implements DrawOptions {
 	
-	private CustomPlayerMob player;
+	private PlayerMob player;
 	private final Level level;
 	private RaceLook look;
 	
@@ -72,20 +73,16 @@ public class TestFurryDrawOptions implements DrawOptions {
 		this.look = look;
 		
 	}
-	public TestFurryDrawOptions(Level level, CustomPlayerMob player) {
+	public TestFurryDrawOptions(Level level, PlayerMob player) {
 		this(level);
 		this.player = player;
-		this.look = TestFurryRaceLook.getCustomRaceLook(RaceLook.getRaceLook(player));
+		this.look = TestFurryRaceLook.getCustomRaceLook(RaceDataFactory.getRaceLook(player, new TestFurryRaceLook(true)));
 	}
 			
-	public TestFurryDrawOptions(Level level, CustomPlayerMob player, int dir, int spriteX, int spriteY, int spriteRes, int drawX,
+	public TestFurryDrawOptions(Level level, PlayerMob player, int dir, int spriteX, int spriteY, int spriteRes, int drawX,
 			int drawY, int width, int height, boolean mirrorX, boolean mirrorY, GameLight light, float alpha,
 			MaskShaderOptions mask) {		
 			this(level, player);
-	}
-
-	public TestFurryDrawOptions(Level level2, PlayerMob player2) {
-		this(level2, (CustomPlayerMob)player2);
 	}
 
 	public TestFurryDrawOptions tailTexture(GameTexture tailTexture) {
@@ -149,7 +146,7 @@ public class TestFurryDrawOptions implements DrawOptions {
 		return this;
 	}
 	
-	public TestFurryDrawOptions player(CustomPlayerMob player) {
+	public TestFurryDrawOptions player(PlayerMob player) {
 		this.player = player;
 		return this;
 	}

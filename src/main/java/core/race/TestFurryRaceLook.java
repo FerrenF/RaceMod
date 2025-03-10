@@ -7,38 +7,38 @@ import java.util.function.Function;
 import core.RaceMod;
 import core.gfx.GameParts;
 import core.gfx.GamePartsLoader;
+import core.gfx.TestFurryDrawOptions;
 import core.race.parts.BodyPart;
 import core.race.parts.TestFurryRaceParts;
 import extensions.RaceLook;
 import extensions.TestFurryNewPlayerRaceCustomizer;
+import factory.RaceDataFactory;
 import necesse.engine.network.PacketReader;
-import necesse.engine.util.GameMath;
 import necesse.engine.util.GameRandom;
 import necesse.entity.mobs.MaskShaderOptions;
+import necesse.entity.mobs.PlayerMob;
 import necesse.gfx.GameEyes;
-import necesse.gfx.GameHair;
-import necesse.gfx.GameSkin;
 import necesse.gfx.HumanGender;
 import necesse.gfx.HumanLook;
 import necesse.gfx.drawOptions.DrawOptions;
 import necesse.gfx.drawOptions.DrawOptionsList;
+import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.gameTexture.GameTexture;
 import necesse.level.maps.light.GameLight;
+
 
 public class TestFurryRaceLook extends RaceLook {
 	
 	public static final String TEST_FURRY_RACE_ID = "testfurry";
-	
-	
+
 	public static TestFurryRaceLook getCustomRaceLook(RaceLook _look) {	
-		if (_look.getRaceID() != TestFurryRaceLook.TEST_FURRY_RACE_ID) {
-			RaceMod.handleDebugMessage(String.format("Draw options for raceID %s requested for non-raceID %s from %.", TestFurryRaceLook.TEST_FURRY_RACE_ID, _look.getRaceID(), _look.getClass().getName()), 25);
-			return null;
+		if (!_look.getRaceID().equals(TestFurryRaceLook.TEST_FURRY_RACE_ID)) {
+			RaceMod.handleDebugMessage(String.format("Draw options for raceID %s requested for non-raceID %s from %s. Using defaults.", TestFurryRaceLook.TEST_FURRY_RACE_ID, _look.getRaceID(), _look.getClass().getName()), 25);
+			return new TestFurryRaceLook(true);
 		}
 		return (TestFurryRaceLook)_look;
 	}
-	
-	// the onlyHumanLike prameter is just a proxy.
+
 	public TestFurryRaceLook(GameRandom random, boolean onlyHumanLike) {		
 		this(true);
 		this.randomizer = random;
@@ -60,7 +60,7 @@ public class TestFurryRaceLook extends RaceLook {
 	}
 	
 	public TestFurryRaceLook(int hair, int facialFeature, int hairColor, int skin, int eyeColor, int eyeType, Color shirtColor,
-			Color shoesColor, int tail, int tailColor, int ears, int earsColor, int muzzle, int muzzleColor, int headStyle) {	
+			Color shoesColor, int tail, int tailColor, int ears, int earsColor, int muzzle, int muzzleColor, int headStyle, int headColor, int armsStyle, int armsColor, int bodyStyle, int bodyColor) {	
 		
 		this(true);
 		// Base
@@ -72,14 +72,25 @@ public class TestFurryRaceLook extends RaceLook {
 		this.setShirtColor(shirtColor);
 		this.setShoesColor(shoesColor);
 		this.setEyeType(eyeType);
+		
 		// Custom
 		this.setTailStyle(tail);
 		this.setTailColor(tailColor);
+		
 		this.setEarsStyle(ears);
 		this.setEarsColor(earsColor);
+		
 		this.setMuzzleColor(muzzleColor);
 		this.setMuzzleStyle(muzzle);
+		
 		this.setHeadStyle(headStyle);
+		this.setHeadColor(headColor);
+		
+		this.setArmsStyle(armsStyle);
+		this.setArmsColor(armsColor);
+		
+		this.setBodyStyle(bodyStyle);
+		this.setBodyColor(bodyColor);
 	}
 	
 	
@@ -104,37 +115,64 @@ public class TestFurryRaceLook extends RaceLook {
 				0,
 				0,
 				0,
+				0,
+				0,
+				0,
+				0,
+				0,
 				0);	
 	}	
 
 	public void resetCustomDefault() {
 		super.resetBaseDefault();
+		
 		this.setTailColor(0);
 		this.setTailStyle(0);
+		
 		this.setEarsColor(0);
 		this.setEarsStyle(0);
+		
 		this.setMuzzleColor(0);
-		this.setMuzzleStyle(0);		
+		this.setMuzzleStyle(0);	
+		
 		this.setHeadStyle(0);
+		this.setHeadColor(0);
+		
+		this.setArmsColor(0);
+		this.setArmsStyle(0);
+		
+		this.setBodyColor(0);
+		this.setBodyStyle(0);
 	}
 	
 	public TestFurryRaceLook(TestFurryRaceLook copy) {
 		this(	copy.getHair(),
 				copy.getFacialFeature(),
 				copy.getHairColor(),
-				copy.getSkin(),
+				copy.getSkin(),				
 				copy.getEyeColor(),
 				copy.getEyeType(),
+				
 				copy.getShirtColor(),
 				copy.getShoesColor(),
 				
 				copy.getTailStyle(),
 				copy.getTailColor(),
+				
 				copy.getEarsStyle(),
 				copy.getEarsColor(),
+				
 				copy.getMuzzleStyle(),
 				copy.getMuzzleColor(),
-				copy.getHeadStyle());
+				
+				copy.getHeadStyle(),
+				copy.getHeadColor(),
+				
+				copy.getArmsStyle(),
+				copy.getArmsColor(),
+				
+				copy.getBodyStyle(),
+				copy.getBodyColor());
 		
 	}
 
@@ -172,6 +210,17 @@ public class TestFurryRaceLook extends RaceLook {
 	
 	public int getHeadStyle() 			{	return this.appearanceByteGet("HEAD");	}
 	
+	public int getHeadColor() 			{	return this.appearanceByteGet("HEAD_COLOR");	}
+	
+	public int getBodyStyle() 			{	return this.appearanceByteGet("BODY");	}
+
+	public int getBodyColor() 			{	return this.appearanceByteGet("BODY_COLOR");	}
+	
+	public int getArmsStyle() 			{	return this.appearanceByteGet("ARMS");	}
+
+	public int getArmsColor() 			{	return this.appearanceByteGet("ARMS_COLOR");	}
+	
+	
 	// Setters
 	
 	public int setTailStyle(int id) 	{	return this.appearanceByteSet("TAIL",(byte)id);	}
@@ -188,6 +237,15 @@ public class TestFurryRaceLook extends RaceLook {
 	
 	public int setHeadStyle(int id) 	{	return this.appearanceByteSet("HEAD",(byte)id);	}
 
+	public int setHeadColor(int id) 	{	return this.appearanceByteSet("HEAD_COLOR",(byte)id);	}
+	
+	public int setBodyStyle(int id) 	{	return this.appearanceByteSet("BODY",(byte)id);	}
+	
+	public int setBodyColor(int id) 	{	return this.appearanceByteSet("BODY_COLOR",(byte)id);	}
+	
+	public int setArmsStyle(int id) 	{	return this.appearanceByteSet("ARMS",(byte)id);	}
+	
+	public int setArmsColor(int id) 	{	return this.appearanceByteSet("ARMS_COLOR",(byte)id);	}
 	
 	public static void loadRaceTextures() {	
 		
@@ -196,6 +254,7 @@ public class TestFurryRaceLook extends RaceLook {
 			loader.startLoaderThreads();
 			new GameParts(loader, bp);
 		}
+			
 	}
 
 	public void randomizeLook(GameRandom random) 	{	this.randomizer = random;	this.randomizeLook(random, true, true, true, true, true, true, true, true, true, true);	}
@@ -243,24 +302,85 @@ public class TestFurryRaceLook extends RaceLook {
 	}
 
 	public GameTexture getEarsTexture(int spriteX, int spriteY) {
-		return GameParts.getPart(TestFurryRaceParts.class, "EARS").getTexture(spriteY, getEarsStyle(), getEarsColor(), spriteX);
+		return GameParts.getPart(TestFurryRaceParts.class, "EARS").getTextureSprite(getEarsStyle(), getEarsColor(), spriteX, spriteY);
 	}
 
 	public GameTexture getTailTexture(int spriteX, int spriteY) {
-		return GameParts.getPart(TestFurryRaceParts.class, "TAIL").getTexture(spriteY, getTailStyle(), getTailColor(), spriteX);
+		return GameParts.getPart(TestFurryRaceParts.class, "TAIL").getTextureSprite(getTailStyle(), getTailColor(), spriteX, spriteY);
 	}
 
 	public GameTexture getMuzzleTexture(int spriteX, int spriteY) {
-		return GameParts.getPart(TestFurryRaceParts.class, "MUZZLE").getTexture(spriteY, getMuzzleStyle(), getMuzzleColor(), spriteX);
+		return GameParts.getPart(TestFurryRaceParts.class, "MUZZLE").getTextureSprite(getMuzzleStyle(), getMuzzleColor(), spriteX, spriteY);
 	}
 
 	public GameTexture getHeadTexture(int spriteX, int spriteY) {
-		return GameParts.getPart(TestFurryRaceParts.class, "HEAD").getTexture(spriteY, getMuzzleStyle(), getMuzzleColor(), spriteX);
+		return GameParts.getPart(TestFurryRaceParts.class, "HEAD").getTextureSprite(getMuzzleStyle(), getMuzzleColor(), spriteX, spriteY);
 	}
 
 	public GameTexture getHeadTexture() {
-		return GameParts.getPart(TestFurryRaceParts.class, "HEAD").getFullTexture(getHeadStyle());
+		return GameParts.getPart(TestFurryRaceParts.class, "HEAD").getFullTexture(getHeadStyle(), getHeadColor());
 	}
+
+	public GameTexture getBodyTexture() {
+		return GameParts.getPart(TestFurryRaceParts.class, "BODY").getFullTexture(getBodyStyle(), getBodyColor());
+	}
+
+	public GameTexture getLeftArmTexture() {
+		return GameParts.getPart(TestFurryRaceParts.class, "ARMS").getFullTexture(getArmsStyle(), getArmsColor(), 0);
+	}
+	
+	public GameTexture getRightArmTexture() {
+		return GameParts.getPart(TestFurryRaceParts.class, "ARMS").getFullTexture(getArmsStyle(), getArmsColor(), 1);
+	}
+
+	@Override
+	public HumanDrawOptions modifyHumanDrawOptions(HumanDrawOptions drawOptions) {
+		
+		for( BodyPart part : this.getRaceParts().getReplacerParts()) {
+			switch(part.getReplacer().targetPart) {
+				case BACK:
+					break;
+				case BODY:
+					drawOptions.bodyTexture(getBodyTexture());
+					break;
+				case CHEST:
+					break;
+				case ARMS:
+					drawOptions.leftArmsTexture(getLeftArmTexture());
+					drawOptions.rightArmsTexture(getRightArmTexture());
+					break;
+				case HEAD:
+					drawOptions.headTexture(getHeadTexture());
+					break;
+				case SHOES:
+					break;
+				default:
+					break;			
+			}			
+		}
+		
+		drawOptions.addTopDraw(new TestFurryDrawOptions.FurryDrawOptionsGetter() {
+			
+ 				@Override
+				public DrawOptions getDrawOptions(PlayerMob player, int dir, int spriteX, int spriteY, int spriteRes, int drawX, int drawY,
+						int width, int height, boolean mirrorX, boolean mirrorY, GameLight light, float alpha, MaskShaderOptions mask) {
+ 					TestFurryRaceLook rl = TestFurryRaceLook.getCustomRaceLook(RaceDataFactory.getRaceLook(player, new TestFurryRaceLook(true)));		
+ 					
+					return new TestFurryDrawOptions(player.getLevel(), player)
+							.earsTexture(rl.getEarsTexture(spriteX, spriteY).resize(width, height))
+							.muzzleTexture(rl.getMuzzleTexture(spriteX, spriteY).resize(width, height))
+							.tailTexture(rl.getTailTexture(spriteX, spriteY).resize(width, height))
+							.dir(dir).mirrorX(mirrorX).mirrorY(mirrorY).allAlpha(alpha).light(light)
+							.drawOffset(0, 0).pos(drawX, drawY)
+							.drawEars(true).drawMuzzle(true).drawTail(true);
+
+				}
+			});		
+		return drawOptions;
+	}
+
+
+	
 
 	
 	

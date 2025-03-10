@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import core.RaceMod;
+import core.race.CustomHumanLook;
 import core.registries.RaceRegistry;
 import extensions.FormNewPlayerRaceCustomizer;
 import extensions.HumanNewPlayerRaceCustomizer;
@@ -39,6 +40,7 @@ public class FormNewPlayerPreset extends Form {
 		
 		this.raceIDs = RaceRegistry.getRaces().stream().map((r)->r.getRaceID()).toList();
 		this.newPlayerFormContents = new HumanNewPlayerRaceCustomizer(RACE_SWITCH_FORM_WIDTH, y, width-(RACE_SWITCH_FORM_WIDTH*2), allowSupernaturalChanges, allowClothesChance);
+		this.setLook(new CustomHumanLook(true));
 		this.addComponent(newPlayerFormContents);	
 		this.setHeight(newPlayerFormContents.getHeight());
 		this.setupRaceButtons();
@@ -93,7 +95,7 @@ public class FormNewPlayerPreset extends Form {
 	}
 	
 	private void changeRace(String newRaceID) {		
-		if(this.getLook().getRaceID()!=newRaceID) {
+		if(this.newPlayerFormContents.getRaceID()!=newRaceID) {
 			RaceMod.handleDebugMessage("Player switching to new race " + newRaceID + " from source: New Player Customizer Form" ,40);
 			try {
 
@@ -131,7 +133,11 @@ public class FormNewPlayerPreset extends Form {
 	}
 	
 	public void setLook(RaceLook look) {
-		this.newPlayerFormContents.setLook(look);
+		this.newPlayerFormContents.setRaceLook(look);
+	}
+	
+	public void setLook(HumanLook look) {
+		this.newPlayerFormContents.setLook(RaceLook.fromHumanLook(look));
 	}
 	
 	public RaceLook getLook() {

@@ -1,7 +1,9 @@
 package extensions;
 
 import java.awt.Color;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -16,20 +18,25 @@ import necesse.engine.save.LoadData;
 import necesse.engine.save.SaveData;
 import necesse.engine.util.GameMath;
 import necesse.engine.util.GameRandom;
+import necesse.entity.mobs.Mob;
 import necesse.gfx.GameEyes;
 import necesse.gfx.GameHair;
 import necesse.gfx.GameSkin;
 import necesse.gfx.HumanGender;
 import necesse.gfx.HumanLook;
+import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.gameTexture.GameTexture;
-import overrides.CustomPlayerMob;
-import core.gfx.GameParts;
-import core.gfx.GamePartsLoader;
+import core.RaceMod;
 import core.race.CustomHumanLook;
+import core.race.TestFurryRaceLook;
 import core.race.parts.BodyPart;
+import core.race.parts.HumanRaceParts;
 import core.race.parts.RaceLookParts;
+import core.registries.RaceRegistry;
+import factory.RaceDataFactory;
+import factory.RaceDataFactory.RaceData;
 
-public class RaceLook extends HumanLook {	
+public abstract class RaceLook extends HumanLook {	
 	
 	public static Color DEFAULT_UNKNOWN_COLOR = new Color(64,64,64); // a lovely gray
 	public static Function<Color, Color> DEFAULT_COLOR_LIMITER = (i) -> { return new Color(GameMath.limit(i.getRed(), 25, 225), GameMath.limit(i.getGreen(), 25, 225),
@@ -47,45 +54,16 @@ public class RaceLook extends HumanLook {
 	
 	protected String race_id;
 	
-	public static RaceLook getRaceLook(CustomPlayerMob _player) {	
-		
-	    if ("CUSTOM".equals(_player.secondType)) {  // Safe string comparison
-	        if (_player.look instanceof RaceLook) {
-	            return (RaceLook) _player.look;
-	        } else {
-	            System.err.println("Error: newPlayer.look is not an instance of RaceLook!");
-	            return null;  // Handle invalid state gracefully
-	        }
-	    }
-	    
-	    RaceLook converted = racelookFromBase(_player.look);
-	    if (converted == null) {
-	        System.err.println("Error: Failed to convert HumanLook to RaceLook!");
-	    }
-	    return converted;
-	}
-	public static RaceLook racelookFromBase(HumanLook look) {	return RaceLook.fromHumanLook(look);}
-	
+	// Constructors
 	public RaceLook(String _race_id) {
 		super();						
 		this.race_id = _race_id;
-	}
-
-	public RaceLookParts getRaceParts() {
-		return this.partsList;
-	}
-	public String getRaceID() {
-		return this.race_id;
-	}
-	
-	public static RaceLook fromHumanLook(HumanLook look) {
-		return new RaceLook(CustomHumanLook.HUMAN_RACE_ID);
 	}
 	
 	public RaceLook(RaceLook copy) {
 		this.copy(copy);
 	}
-
+	
 	public RaceLook(PacketReader pr) {	
 		this.applyContentPacket(pr);
 	}
@@ -93,11 +71,29 @@ public class RaceLook extends HumanLook {
 	public RaceLook(RaceLook raceLook, HumanLook look) {
 		this(raceLook);
 		this.copyBase(look);
+		
 	}
 
 	public RaceLook() {
 		super();
 	}
+	
+	
+
+	
+	public static RaceLook racelookFromBase(HumanLook look) {	return RaceLook.fromHumanLook(look);}
+	public static RaceLook fromHumanLook(HumanLook look) {
+		return look.getClass().isAssignableFrom(RaceLook.class) ? (RaceLook)look : new CustomHumanLook(look);
+	}
+	public RaceLookParts getRaceParts() 	{
+		if(this.partsList == null) {
+			return new HumanRaceParts(true);
+		}
+		return this.partsList;	
+		
+	}
+	public String getRaceID() 				{	return this.race_id;	}
+	
 
 	public void copyBase(HumanLook look) {
 		this.setEyeColor(look.getEyeColor());
@@ -256,75 +252,151 @@ public class RaceLook extends HumanLook {
 		applyRandomFeatures(this.appearanceColorMap, this::getRandomColor, colorFlags);
 	}
 
+	@Override
 	public int getRandomHairStyleBasedOnGender(GameRandom random, HumanGender gender) { 
 		return getRandomByteFeature("HAIR_STYLE");			
 	}
 
+	@Override
 	public void setupContentPacket(PacketWriter writer, boolean includeColor) {
-		super.setupContentPacket(writer, includeColor);
 		
 		writer.putNextString(race_id);
-	    // Write a boolean flag indicating whether colors should be included in the packet
-	    writer.putNextBoolean(includeColor);
+		writer.putNextBoolean(includeColor);
+		writer.putNextByte((byte)super.getHair());
+		writer.putNextByte((byte)super.getFacialFeature());
+		writer.putNextByte((byte)super.getHairColor());
+		writer.putNextByte((byte)super.getSkin());
+		writer.putNextByte((byte)super.getEyeType());
+		writer.putNextByte((byte)super.getEyeColor());
+		
+		if (includeColor) {
+			writer.putNextByteUnsigned(super.getShirtColor().getRed());
+			writer.putNextByteUnsigned(super.getShirtColor().getGreen());
+			writer.putNextByteUnsigned(super.getShirtColor().getBlue());
+			writer.putNextByteUnsigned(super.getShoesColor().getRed());
+			writer.putNextByteUnsigned(super.getShoesColor().getGreen());
+			writer.putNextByteUnsigned(super.getShoesColor().getBlue());
+		}
+		
+		writer.putNextInt(appearanceByteMap.size()); // Store the number of entries
+		this.appearanceByteMap.forEach((key, value) -> {
+		    writer.putNextString(key); // Write key
+		    writer.putNextByte(value); // Write value
+		});
+	    
+		if (includeColor) {
+		    writer.putNextInt(appearanceColorMap.size()); // Store size
+		    this.appearanceColorMap.forEach((key, value) -> {
+		        writer.putNextString(key);
+		        writer.putNextByteUnsigned(value.getRed());
+		        writer.putNextByteUnsigned(value.getGreen());
+		        writer.putNextByteUnsigned(value.getBlue());
+		    });
+		}
 
-	    // Write each entry in the appearanceByteMap (ordered by TreeMap)
-	    // This ensures all byte-based appearance attributes (e.g., hair type, eye type) are sent in a consistent order
-	    this.appearanceByteMap.forEach((key, value) -> {
-	        writer.putNextByte(value);
-	    });
-
-	    // If includeColor is true, write each entry in the appearanceColorMap
-	    // Each color is written as three unsigned bytes (Red, Green, Blue)
-	    if (includeColor) {
-	        this.appearanceColorMap.forEach((key, value) -> {
-	            writer.putNextByteUnsigned(value.getRed());
-	            writer.putNextByteUnsigned(value.getGreen());
-	            writer.putNextByteUnsigned(value.getBlue());
-	        });
-	    }
 	}
 
+	@Override
 	public RaceLook applyContentPacket(PacketReader reader) {
-		super.applyContentPacket(reader);
-		this.race_id = reader.getNextString();		
-	    boolean includesClothesColor = reader.getNextBoolean();
+		
+		// Read race ID
+		
+	    this.race_id = reader.getNextString();
+	    
+	    boolean includesClothesColor = reader.getNextBoolean(); // Read first
 
-	    // Read appearance byte values into the map
-	    this.appearanceByteMap.forEach((key, value) -> {
-	        this.appearanceByteMap.put(key, reader.getNextByte());
-	    });
+	    // Read base appearance attributes
+	    super.setHair(reader.getNextByte());
+	    super.setFacialFeature(reader.getNextByte());
+	    super.setHairColor(reader.getNextByte());
+	    super.setSkin(reader.getNextByte());
+	    super.setEyeType(reader.getNextByte());
+	    super.setEyeColor(reader.getNextByte());
 
-	    // Read color values if included
+	    // Read clothing colors if present
 	    if (includesClothesColor) {
-	        this.appearanceColorMap.forEach((key, value) -> {
+	        int shirtRed = reader.getNextByteUnsigned();
+	        int shirtGreen = reader.getNextByteUnsigned();
+	        int shirtBlue = reader.getNextByteUnsigned();
+	        super.setShirtColor(new Color(shirtRed, shirtGreen, shirtBlue));
+	        
+
+	        int shoesRed = reader.getNextByteUnsigned();
+	        int shoesGreen = reader.getNextByteUnsigned();
+	        int shoesBlue = reader.getNextByteUnsigned();
+	        super.setShoesColor(new Color(shoesRed, shoesGreen, shoesBlue));
+	    }  
+
+	    // Read appearance bytes
+	    appearanceByteMap.clear(); // Ensure no old data remains
+	    int byteMapSize = reader.getNextInt(); // Read the actual number of entries
+	    for (int i = 0; i < byteMapSize; i++) {
+	        String key = reader.getNextString();
+	        byte value = reader.getNextByte();
+	        appearanceByteMap.put(key, value);
+	    }
+
+	    System.out.println("After reading: " + this.appearanceByteMap);
+	    
+	    if (includesClothesColor) {
+	        appearanceColorMap.clear();
+	        int colorMapSize = reader.getNextInt(); // Read the actual number of entries
+	        for (int i = 0; i < colorMapSize; i++) {
+	            String key = reader.getNextString();
 	            int red = reader.getNextByteUnsigned();
 	            int green = reader.getNextByteUnsigned();
 	            int blue = reader.getNextByteUnsigned();
-	            this.appearanceColorMap.put(key, new Color(red, green, blue));
-	        });
+	            appearanceColorMap.put(key, new Color(red, green, blue));
+	        }
 	    }
+
 
 	    return this;
 	}
 
-	public void addSaveData(SaveData save) {		
+
+	@Override
+	public void addSaveData(SaveData save) {			
 		super.addSaveData(save);
-		save.addUnsafeString("race_id", race_id);
+		
+		
+	/*	SaveData lkd;
+		if(save.toLoadData().hasLoadDataByName("LOOK")) {
+			lkd = save.toLoadData().getFirstLoadDataByName("LOOK").toSaveData();
+			save.removeFirstSaveDataByName("LOOK");
+		}
+		else {
+			lkd = new SaveData("LOOK");
+		}		*/	
+		
+		
+		
+		save.addSafeString("race_id", race_id);
 	    // Save all byte-based appearance attributes
 	    this.appearanceByteMap.forEach((key, value) -> {
-	        save.addInt(key, value);
+	    	save.addByte(key, value);
 	    });
 
 	    // Save all color-based appearance attributes
 	    this.appearanceColorMap.forEach((key, value) -> {
-	        save.addColor(key, value);
-	    });
-	    
+	    	save.addColor(key, value);
+	    });	    
+	 
+	   // save.addSaveData(lkd);
 	}
 
 	public void applyLoadData(LoadData save) {
+		
 		super.applyLoadData(save);
-		this.race_id = save.getUnsafeString("race_id");
+		
+		LoadData lkd = save;//.getFirstLoadDataByName("LOOK");	
+		String raceString = lkd.getSafeString("race_id", null);
+		
+		if(raceString == null) {
+			RaceMod.handleDebugMessage("Error reading race of content packet at raceFromContentPacker", 25);
+			return;
+		}
+		this.race_id = raceString;
 	    // Load all byte-based appearance attributes
 	    this.appearanceByteMap.forEach((key, value) -> {
 	        this.appearanceByteMap.put(key, save.getByte(key, value));
@@ -335,8 +407,67 @@ public class RaceLook extends HumanLook {
 	        this.appearanceColorMap.put(key, save.getColor(key, value));
 	    });	    
 	}
+	
+	public static RaceLook raceFromContentPacker(PacketReader reader, RaceLook fallback) {	
+		
+		PacketReader cpy = new PacketReader(reader);		
+		String raceString = cpy.getNextString();
+		if(raceString == null) {
+			RaceMod.handleDebugMessage("Error reading race of content packet at raceFromContentPacker", 25);
+			return fallback;
+		}
+		
+		if(RaceRegistry.getRaceID(raceString) != -1) {
+			RaceLook r;
+			try {
+				r = RaceRegistry.getRace(raceString).getClass().getConstructor(boolean.class).newInstance(true);
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				RaceMod.handleDebugMessage(String.format("Error generating new instance of race %s in raceFromContentPacker", raceString), 25);
+				e.printStackTrace();
+				return fallback;
+			}
+			r.applyContentPacket(reader);
+		    return r;
+		}
+		RaceMod.handleDebugMessage(String.format("Failed to load race %s in raceFromContentPacker. returning fallback racelook.", raceString), 25);
+		return fallback;
+	}
 
-
+	public static RaceLook raceFromLoadData(LoadData save, RaceLook fallback) {	
+		
+		LoadData lkd = save.getFirstLoadDataByName("LOOK");		
+		
+		if(lkd == null) {
+			RaceMod.handleDebugMessage("Error loading racein raceFromLoadData: null value from save section LOOK", 25);
+			return fallback;
+		}
+		String _race_id = lkd.getSafeString("race_id", null);
+		
+		if(_race_id != null && RaceRegistry.getRaceID(_race_id) != -1) {
+			RaceLook r;
+			try {
+				r = RaceRegistry.getRace(_race_id).getClass().getConstructor(boolean.class).newInstance(true);
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				RaceMod.handleDebugMessage(String.format("Error generating new instance of race %s in raceFromLoadData", _race_id), 25);
+				e.printStackTrace();
+				return fallback;
+			}
+		    r.appearanceByteMap.forEach((key, value) -> {
+		        r.appearanceByteMap.put(key, lkd.getByte(key, value));
+		    });
+	
+		    // Load all color-based appearance attributes
+		    r.appearanceColorMap.forEach((key, value) -> {
+		        r.appearanceColorMap.put(key, lkd.getColor(key, value));
+		    });	    
+		    return r;
+		}
+		RaceMod.handleDebugMessage(String.format("Failed to load race %s in raceFromLoadData. returning fallback racelook.", _race_id), 25);
+		return fallback;
+	}
+	
 	protected int appearanceByteGet(String f) {
 		return this.appearanceByteMap.getOrDefault(f,(byte) 0);
 	}
@@ -344,6 +475,7 @@ public class RaceLook extends HumanLook {
 	protected int appearanceByteSet(String f, byte b) {
 		if(this.appearanceByteMap.containsKey(f)) return this.appearanceByteMap.put(f, b);
 		this.appearanceByteMap.put(f, b);
+		
 		return b;
 	}
 	
@@ -352,7 +484,9 @@ public class RaceLook extends HumanLook {
 	}
 	
 	protected Color appearanceColorSet(String f, Color c) {
-		return (Color)this.appearanceColorMap.put(f, c);
+		Color res = (Color)this.appearanceColorMap.put(f, c);
+	
+		return res;
 	}
 	
 	public void setHair(int value) {
@@ -451,6 +585,6 @@ public class RaceLook extends HumanLook {
 	}
 
 	
-
+	public abstract HumanDrawOptions modifyHumanDrawOptions(HumanDrawOptions drawOptions);
 
 }

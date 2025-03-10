@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import core.registries.RaceRegistry.RaceRegistryElement;
 import extensions.RaceLook;
 import necesse.engine.GameLoadingScreen;
 import necesse.engine.localization.Localization;
@@ -45,11 +46,11 @@ public class RaceRegistry extends GameRegistry<core.registries.RaceRegistry.Race
 	}
 	
 	public static RaceLook getRace(int id) {
-		return id == -1 ? null : ((RaceRegistryElement) instance.getElement(id)).race;
+		return id == -1 ? null : ((RaceRegistryElement<?>) instance.getElement(id)).race;
 	}
 	
 	public static List<RaceLook> getRaces() {
-		return (List) instance.streamElements().map((e) -> {
+		return (List<RaceLook>) instance.streamElements().map((e) -> {
 			return e.race;
 		}).collect(Collectors.toList());
 	}
@@ -62,10 +63,10 @@ public class RaceRegistry extends GameRegistry<core.registries.RaceRegistry.Race
 		instance.streamElements().map((e) -> {
 			return e.race;
 		}).forEach(RaceLook::getRaceID);
-		Iterator var1 = this.getElements().iterator();
+		Iterator<RaceRegistryElement<?>> var1 = this.getElements().iterator();
 
 		while (var1.hasNext()) {
-			RaceRegistryElement<?> element = (RaceRegistryElement) var1.next();
+			RaceRegistryElement<?> element = (RaceRegistryElement<?>) var1.next();
 			element.race.onRaceRegistryClosed();
 		}
 

@@ -84,7 +84,7 @@ public class BodyPart {
         this.texturePath = null;
         this.colorPath = null;
         this.belongsToClass = HumanRaceParts.class;
-        
+        this.partReplacer=null;
     }
     
     public BodyPart(Class<? extends RaceLookParts> belongsToClass,
@@ -126,7 +126,7 @@ public class BodyPart {
         this.hasLastRowAccessoryMap = hasLastRowAccessoryMap;
         this.hasSeparateWigTexture = hasSeparateWigTexture;
         this.accessoryTextureMapSize = accessoryTextureMapSize;
-        
+        this.partReplacer = replacer;
     }
 
 

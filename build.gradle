@@ -56,6 +56,7 @@ sourceSets.main.java.outputDir = file("build/mod/")
 sourceSets.main.compileClasspath += configurations.libDepends // Adds libDepends configuration to classpath
 def buildLocation = "build/jar/"
 
+
 compileJava.options.encoding = "UTF-8"
 
 if (!file(gameDirectory + "/Necesse.jar").exists()) {
@@ -86,7 +87,7 @@ task createModInfoFile(type: JavaExec) {
     group "necesse"
     description "Creates the mod info file"
 
-    classpath = files(gameDirectory + "/Necesse.jar")
+    classpath = files(gameDirectory + "/Necesse.jar", "${buildLocation}${jarName}.jar")
 
     main = "CreateModInfoFile"
     args "-file", "${sourceSets.main.java.outputDir}/mod.info",
@@ -158,3 +159,4 @@ task buildModJar(type: Jar) {
     archiveName "${jarName}.jar"
     destinationDir file(buildLocation)
 }
+

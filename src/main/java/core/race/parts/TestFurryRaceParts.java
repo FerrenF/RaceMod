@@ -27,14 +27,14 @@ public class TestFurryRaceParts extends RaceLookParts{
 		    			 "racemod.race",
 		    			 "tail",
 		    			 true,
-		    			 true,
+		    			 false,
 		    			 false,
 		    			 true,
 		    			 true,
 		    			 false,
 		    			 "player/race/testfurry/tail/tailcolors",
 		    			 "player/race/testfurry/tail/",
-		    			 new Point(7,5),
+		    			 new Point(64,64),
 		    			 null,
 		    			 null));
     	 
@@ -44,15 +44,15 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "racemod.race",
         				 "ears",
         				 true,
-        				 true,
+        				 false,
         				 true,
         				 true,
         				 false,
         				 true,
         				 "player/race/testfurry/skincolors",
         				 "player/race/testfurry/ears/",
-        				 new Point(7,5),
-        				 new Point(14,2), null));
+        				 new Point(64,64),
+        				 new Point(32,32), null));
          
          this.addBodyPart("MUZZLE",
         		 new BodyPart(TestFurryRaceParts.class,
@@ -60,15 +60,15 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "racemod.race",
         				 "muzzle",
         				 true,
-        				 true,
+        				 false,
         				 true,
         				 true,
         				 false,
         				 true,
         				 "player/race/testfurry/skincolors",
         				 "player/race/testfurry/muzzle/",
-        				 new Point(7,5),
-        				 new Point(14, 2), null));
+        				 new Point(64,64),
+        				 new Point(32, 32), null));
          
          this.addBodyPart("HEAD",
         		 new BodyPart(TestFurryRaceParts.class,
@@ -76,18 +76,52 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "racemod.race",
         				 "head",
         				 true,
-        				 true,
         				 false,
+        				 true,
         				 true,
         				 false,
         				 true,
         				 "player/race/testfurry/skincolors",
         				 "player/race/testfurry/head/",
-        				 new Point(7,5),
-        				 new Point(14, 2), new TextureReplacer(TextureReplacer.TARGET.HEAD)	));
+        				 new Point(64,64),
+        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.HEAD)	));
+         
+         this.addBodyPart("BODY",
+        		 new BodyPart(TestFurryRaceParts.class,
+        				 "BODY",
+        				 "racemod.race",
+        				 "body",
+        				 true,
+        				 false,
+        				 true,
+        				 true,
+        				 false,
+        				 true,
+        				 "player/race/testfurry/body/skincolors",
+        				 "player/race/testfurry/body/",
+        				 new Point(64,64),
+        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.BODY)	));
+         
+         this.addBodyPart("ARMS",
+        		 new BodyPart(TestFurryRaceParts.class,
+        				 "ARMS",
+        				 "racemod.race",
+        				 "arms",
+        				 true,
+        				 true,
+        				 true,
+        				 true,
+        				 false,
+        				 true,
+        				 "player/race/testfurry/arms/skincolors",
+        				 "player/race/testfurry/arms/",
+        				 new Point(64,64),
+        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.ARMS)	));
           
-         //  this.addBodyPart("TAIL_COLOR", new BodyPart("TAIL_COLOR", "racemod.race", "tailcolor", true, true,"player/race/testfurry/tail/tailcolors"));
-         //  this.addBodyPart("EARS_COLOR", new BodyPart("EARS_COLOR", "racemod.race", "earscolor", true, true,));
+         this.hidePartCustomizer("SKIN_COLOR");
+        // this.hidePartCustomizer("EYE_COLOR");
+        // this.hidePartCustomizer("EYE_TYPE");
+         
     }
     
 

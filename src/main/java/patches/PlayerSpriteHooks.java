@@ -1,4 +1,4 @@
-package overrides;
+package patches;
 
 import java.awt.Point;
 import java.util.function.Consumer;
@@ -7,7 +7,6 @@ import necesse.engine.window.WindowManager;
 import necesse.entity.mobs.MaskShaderOptions;
 import necesse.entity.mobs.Mob;
 import necesse.entity.mobs.PlayerMob;
-import overrides.CustomPlayerMob;
 import necesse.entity.mobs.buffs.BuffModifiers;
 import necesse.gfx.GameResources;
 import necesse.gfx.camera.GameCamera;
@@ -19,12 +18,20 @@ import necesse.level.maps.light.GameLight;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 
-public class PlayerSprite {
+import core.RaceMod;
+import core.gfx.TestFurryDrawOptions;
+import core.race.TestFurryRaceLook;
+import core.race.parts.BodyPart;
+import extensions.RaceLook;
+import factory.RaceDataFactory;
+import factory.RaceDataFactory.RaceData;
+
+public class PlayerSpriteHooks {
 	public static void drawInForms(DrawInFormsLogic drawLogic, int drawX, int drawY) {
 		GameWindow window = WindowManager.getWindow();
-		drawInForms(drawLogic, drawX, drawY, window.getHudWidth() / 2, window.getHudHeight() / 2);
+		drawInForms(drawLogic, drawX, drawY-100, window.getHudWidth() / 2, window.getHudHeight() / 2);
 	}
-
+	
 	public static void drawInForms(DrawInFormsLogic drawLogic, int drawX, int drawY, int width, int height) {
 		GameWindow window = WindowManager.getWindow();
 		int translateX = Math.max(window.getHudWidth() / 2 - width / 2, 0);
@@ -44,30 +51,44 @@ public class PlayerSprite {
 		});
 	}
 
-	public static DrawOptions getIconDrawOptions(int drawX, int drawY, int width, int height, CustomPlayerMob player,
+	public static DrawOptions getIconDrawOptions(int drawX, int drawY, int width, int height, PlayerMob player,
 			int spriteX, int dir) {
 		return getIconDrawOptions(drawX, drawY, width, height, player, spriteX, dir, 1.0F, new GameLight(150.0F));
 	}
 
-	public static DrawOptions getIconDrawOptions(int drawX, int drawY, int width, int height, CustomPlayerMob player,
+	public static DrawOptions getIconDrawOptions(int drawX, int drawY, int width, int height, PlayerMob player,
 			int spriteX, int dir, float alpha, GameLight light) {
 		return getIconDrawOptions(width, height, player, spriteX, dir, light, (Consumer) null).alpha(alpha).pos(drawX,
 				drawY);
 	}
 
-	public static HumanDrawOptions getIconDrawOptions(int width, int height, CustomPlayerMob player, int spriteX, int dir,
+	public static HumanDrawOptions getIconDrawOptions(int width, int height, PlayerMob player, int spriteX, int dir,
 			GameLight light, Consumer<HumanDrawOptions> humanDrawOptionsModifier) {
+		
+		
+		RaceLook custom = null;
+		if(RaceDataFactory.hasRaceData(player)) {			
+			RaceData customRaceData = RaceDataFactory.getRaceData(player);	
+			custom = customRaceData.getRaceLook();
+		}
+		
 		InventoryItem helmet = getPlayerDisplayArmor(player, 0);
 		InventoryItem chestplate = getPlayerDisplayArmor(player, 1);
 		InventoryItem boots = getPlayerDisplayArmor(player, 2);
-		HumanDrawOptions humanDrawOptions = (new HumanDrawOptions(player.getLevel(), player.look, false)).player(player)
+		HumanDrawOptions humanDrawOptions = (new HumanDrawOptions(player.getLevel(),  player.look, false)).player(player)
 				.blinking(player.isBlinking()).helmet(helmet).chestplate(chestplate).boots(boots).size(width, height)
 				.invis((Boolean) player.buffManager.getModifier(BuffModifiers.INVISIBILITY)).sprite(spriteX, dir)
 				.dir(dir).light(light);
+		
+		
 		if (humanDrawOptionsModifier != null) {
 			humanDrawOptionsModifier.accept(humanDrawOptions);
 		}
-
+		if (custom != null) {
+			custom.modifyHumanDrawOptions(humanDrawOptions);	
+		}
+	
+		
 		return humanDrawOptions;
 	}
 
@@ -85,17 +106,17 @@ public class PlayerSprite {
 		return null;
 	}
 
-	public static DrawOptions getIconAnimationDrawOptions(int x, int y, int width, int height, CustomPlayerMob player) {
+	public static DrawOptions getIconAnimationDrawOptions(int x, int y, int width, int height, PlayerMob player) {
 		int dir = player.getDir();
 		Point sprite = player.getAnimSprite(player.getX(), player.getY(), dir);
 		return getIconDrawOptions(x, y, width, height, player, sprite.x, dir);
 	}
 
-	public static DrawOptions getIconDrawOptions(int x, int y, CustomPlayerMob player) {
+	public static DrawOptions getIconDrawOptions(int x, int y, PlayerMob player) {
 		return getIconDrawOptions(x, y, 32, 32, player, 0, 2);
 	}
 
-	public static DrawOptions getDrawOptions(CustomPlayerMob player, int x, int y, GameLight light, GameCamera camera,
+	public static DrawOptions getDrawOptions(PlayerMob player, int x, int y, GameLight light, GameCamera camera,
 			Consumer<HumanDrawOptions> humanDrawOptionsModifier) {
 		Level level = player.getLevel();
 		if (level == null) {
@@ -150,17 +171,18 @@ public class PlayerSprite {
 				options.mask(mask);
 			}
 
-			float attackAnimProgress = player.getAttackAnimProgress();
-			if (player.isAttacking) {
-				options.itemAttack(player.attackingItem, player, attackAnimProgress, player.attackDir.x,
-						player.attackDir.y);
-			}
-
-			//player.buffManager.addHumanDraws(HumanDrawOptions.fromCustom(level, options));
-			//player.modifyExpressionDrawOptions(HumanDrawOptions.fromCustom(level, options));
-			
+			player.setupAttackDraw(options);
+			player.buffManager.addHumanDraws(options);
+			player.modifyExpressionDrawOptions(options);
 			if (humanDrawOptionsModifier != null) {
 				humanDrawOptionsModifier.accept(options);
+			}
+			
+			RaceLook custom = null;
+			if(RaceDataFactory.hasRaceData(player)) {			
+				RaceData customRaceData = RaceDataFactory.getRaceData(player);	
+				custom = customRaceData.getRaceLook();
+				custom.modifyHumanDrawOptions(options);
 			}
 
 			return options.pos(drawX, drawY);

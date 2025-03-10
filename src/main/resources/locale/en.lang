@@ -17,3 +17,6 @@ tail_color=Tail Color
 ears_color=Ear Color
 muzzle_color=Muzzle Color
 head=Head Shape
+head_color=Head Color
+body=Body Shape
+body_color=Body Color

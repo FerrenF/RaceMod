@@ -1,45 +1,33 @@
 package core;
 
 
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
+import java.lang.instrument.Instrumentation;
 import java.util.Optional;
-
 import core.race.CustomHumanLook;
 import core.race.TestFurryRaceLook;
 import core.registries.RaceRegistry;
 import extensions.RaceLook;
+import factory.RaceDataFactory;
 import necesse.engine.GameLoadingScreen;
 import necesse.engine.GameLog;
 import necesse.engine.localization.Localization;
 import necesse.engine.modLoader.LoadedMod;
 import necesse.engine.modLoader.annotations.ModEntry;
-import necesse.engine.network.NetworkClient;
-import necesse.engine.network.server.Server;
-import necesse.entity.mobs.PlayerMob;
-import necesse.gfx.drawOptions.human.HumanDrawOptions;
-import necesse.gfx.forms.components.componentPresets.FormNewPlayerPreset;
+import necesse.gfx.PlayerSprite;
 import necesse.gfx.res.ResourceEncoder;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.ByteBuddyAgent;
-import net.bytebuddy.asm.Advice.AllArguments;
-import net.bytebuddy.asm.Advice.Origin;
 import net.bytebuddy.asm.Advice;
-import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.dynamic.loading.ClassReloadingStrategy;
-//import overrides.FormNewPlayerPreset.CustomFormPlayerIcon;
-import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.implementation.MethodDelegation;
-import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import net.bytebuddy.matcher.ElementMatchers;
-import overrides.CustomPlayerMob;
-import patches.GetArmorDrawOptionsInterceptor;
+import patches.PlayerSpriteHooks;
 
 	
 @ModEntry
 public class RaceMod {
 
+	public static Instrumentation byteBuddyInst;
 	public static int RACE_MOD_DEBUG_LEVEL = 75;
 	public static int getDebugLevel() {
 		return RACE_MOD_DEBUG_LEVEL;
@@ -55,11 +43,12 @@ public class RaceMod {
 		
 	public void preInit() {
 		GameLog.out.println("Race mod initialized. Oh boy let's rebuild some classes...");
-    	ByteBuddyAgent.install();
+    	byteBuddyInst = ByteBuddyAgent.install();
     	
+    	RaceDataFactory.initialize(byteBuddyInst);
     	LoadedMod l = LoadedMod.getRunningMod();
     	ResourceEncoder.addModResources(l);
-		
+    	
 	}
 	
 	public void initResources() {
@@ -68,30 +57,22 @@ public class RaceMod {
     public void init() {    	
     	
     	GameLoadingScreen.drawLoadingString(Localization.translate("racemodui", "loading"));
-    	    	
+    	
     	handleDebugMessage("Registering races...", 0);
 		RaceRegistry.registerRace(CustomHumanLook.HUMAN_RACE_ID, new CustomHumanLook());
 		RaceRegistry.registerRace(TestFurryRaceLook.TEST_FURRY_RACE_ID, new TestFurryRaceLook());
 		handleDebugMessage("Registering races textures...", 40);
 		TestFurryRaceLook.loadRaceTextures();
-       //replacePlayerSprite();
-       //rebasePlayerMob();
-      
+		
+		replacePlayerSprite();
+           
        //replaceHumanDrawOptions();
-	   interceptDrawOptions();
+	 //  interceptDrawOptions();
        replaceFormNewPlayerPreset();
        replaceFormNewCharacterForms();
-      
+   
     }
     
-    private void interceptDrawOptions() {
-    	  new ByteBuddy()
-          .redefine(necesse.gfx.drawOptions.human.HumanDrawOptions.class)
-          .visit(Advice.to(GetArmorDrawOptionsInterceptor.class)
-              .on(ElementMatchers.named("getArmorDrawOptions")))
-          .make()
-          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent());
-	}
 
 	public void postInit() {   	
     	
@@ -103,41 +84,37 @@ public class RaceMod {
     }
     
     private static void rebasePlayerMob() {
+  
+    	/* new ByteBuddy()
+         .rebase(overrides.NetworkClient.class) // Your modified version
+         .name("necesse.engine.network.NetworkClient") // Force rename
+         .make()
+         .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent());*/
     	
-    	new ByteBuddy()
-        .redefine(PlayerMob.class)
-        .method(ElementMatchers.isConstructor())
-        .intercept(MethodDelegation.to(ConstructorInterceptor.class))
-        .make()
-        .load(PlayerMob.class.getClassLoader(), ClassReloadingStrategy.fromInstalledAgent());
+        	 
+    	
 
-        System.out.println("Successfully subclassed PlayerMob. I sure hope it works.");
+    	
+        System.out.println("Successfully replaced PlayerMob instances. I sure hope it works.");
 
     }
-    
-    public static class ConstructorInterceptor {
-        @RuntimeType
-        public static Object intercept(@Origin Constructor<?> constructor, @AllArguments Object[] args) {
-        	
-        	if (args[0] instanceof Long && args[1] instanceof NetworkClient) {
-                return new CustomPlayerMob((Long) args[0], (NetworkClient) args[1]);
-            }
-            throw new UnsupportedOperationException("Unknown PlayerMob constructor called");
-            
-        }
-    }
-    
+       
+
+
     public static void replacePlayerSprite() {
     	
         try {
         	
-        	  new ByteBuddy()
-              .redefine(overrides.PlayerSprite.class)  // Your modified version
-              .name("necesse.gfx.PlayerSprite") // Force rename
-              .make()
-              .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent());
+        	new ByteBuddy()
+            .redefine(PlayerSprite.class)
+            .method(ElementMatchers.named("getIconDrawOptions"))
+            .intercept(MethodDelegation.to(PlayerSpriteHooks.class)) // Redirect to custom logic
+            .method(ElementMatchers.named("getDrawOptions"))
+            .intercept(MethodDelegation.to(PlayerSpriteHooks.class)) // Redirect to custom logic
+            .make()
+            .load(PlayerSprite.class.getClassLoader(), ClassReloadingStrategy.fromInstalledAgent());
 
-            System.out.println("Successfully replaced PlayerSprite. I sure hope it works.");
+        System.out.println("Successfully patched PlayerSprite methods!");
             
         } catch (Exception e) {
         	
@@ -165,7 +142,21 @@ public class RaceMod {
 	
     public static void replaceFormNewCharacterForms() {
         try {        	
+        	/*new ByteBuddy()
+            .redefine(Class.forName("necesse.gfx.forms.presets.CharacterSelectForm$1")) // Hook the anonymous inner class
+            .method(ElementMatchers.named("onCreatePressed")) // Target the specific method
+            .intercept(MethodDelegation.to(NewCharacterFormCreateButtonPressedHook.class)) // Use delegation
+            .make()
+            .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent());*/
+
         	
+        	 new ByteBuddy()
+             .redefine(overrides.FormCharacterSaveComponent.class) // Your modified version
+             .name("necesse.gfx.forms.components.FormCharacterSaveComponent") // Force rename
+             .make()
+             .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent());
+
+         System.out.println("Successfully replaced FormCharacterSaveComponent. I sure hope it works.");
          
             new ByteBuddy()
                 .redefine(overrides.NewCharacterForm.class) // Your modified version

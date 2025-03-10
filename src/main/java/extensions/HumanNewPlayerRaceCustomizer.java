@@ -18,7 +18,6 @@ import necesse.entity.mobs.PlayerMob;
 import necesse.gfx.GameHair;
 import necesse.gfx.HumanLook;
 import necesse.gfx.drawOptions.DrawOptions;
-import overrides.CustomPlayerMob;
 import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.forms.components.FormContentVarToggleButton;
 import necesse.gfx.forms.components.FormPlayerIcon;
@@ -53,7 +52,7 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 
 	public void initializeIcon(int x, int iconY, int width) {
 		// Create the FormPlayerIcon and cast it to FormComponent if necessary
-	    FormPlayerIcon formPlayerIcon = new FormPlayerIcon(x, iconY, 128, 128, this.newPlayer) {
+	    FormPlayerIcon formPlayerIcon = new FormPlayerIcon(x, iconY, 128, 128, this.getPlayerHelper()) {
 	        @Override
 	        public void modifyHumanDrawOptions(HumanDrawOptions drawOptions) {
 	            super.modifyHumanDrawOptions(drawOptions);
@@ -86,8 +85,9 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 
 	// Updates the player look and triggers necessary updates
 	protected void updateBodyPartSelection(BodyPart part, Object id, boolean colorCustomization) {
-		this.setLookAttribute(this.getRaceLook(), part, id, false);		
+		this.setLookAttribute(this.getRaceLook(), part, id, colorCustomization);		
 		this.onChanged();		
+		
 	}
 
 	
@@ -177,9 +177,6 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	
 	public Point getEyeColorFaceDrawOffset() 	{	return new Point(-22, -26);	}
 
-	public void reset() {
-		this.setPlayer(new CustomPlayerMob(0L, (NetworkClient) null));
-	}
 
 	public void randomize() {		
 		this.getCustomRaceLook().randomizeLook();	
@@ -187,15 +184,6 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	}
 		
 	public void onChanged() {	}
-
-	protected void updateLook() {
-		this.newPlayer.getInv().giveLookArmor();
-	}
-
-	public PlayerMob getNewPlayer() {
-		this.newPlayer.getInv().giveStarterItems();
-		return this.newPlayer;
-	}
 
 	public void modifyHumanDrawOptions(HumanDrawOptions drawOptions) {	}
 
@@ -217,13 +205,8 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 
 	@Override
 	protected Section createBodyPartCustomColorSection(BodyPart part, Predicate<Section> isCurrent, int _width) {
-		// TODO Auto-generated method stub
-		return null;
+		return super.createBodyPartSection(part, isCurrent, _width);
 	}
 
-	
-
-
-	
 
 }

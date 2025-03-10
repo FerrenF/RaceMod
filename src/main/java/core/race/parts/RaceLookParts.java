@@ -3,8 +3,10 @@ package core.race.parts;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.RowFilter.Entry;
 
@@ -24,9 +26,11 @@ public class RaceLookParts{
 			new Color(4325504), new Color(14249157), new Color(14221489), new Color(8388712)};
 	
 	private Map<String, BodyPart> bodyParts;
-
+	private Set<String> customizerHiders;
+	
 	public RaceLookParts() {
 	  this.bodyParts = new HashMap<>();
+	  this.customizerHiders = new HashSet<>();
 	}
 	
     public RaceLookParts(boolean init) {
@@ -64,13 +68,16 @@ public class RaceLookParts{
     }
     
     public List<BodyPart> getReplacerParts() {
-    	if (bodyParts == null) return List.of();
+    	if (bodyParts == null) return new ArrayList<>();
     	return new ArrayList<>(bodyParts.values()).stream().filter((part)->part.isReplacerPart()).toList();
     }
 
+    public Set<String> getHiddenParts(){
+    	return this.customizerHiders;
+    }
     
     public void defineRaceBodyParts() {
-    	// these are present in all cases. They are base game parts.
+    	// Base Game part definitions.
 	  this.addBodyPart("SKIN_COLOR", new BodyPart("SKIN_COLOR", "skincolor", GameSkin.getTotalSkins()));
       this.addBodyPart("EYE_TYPE", new BodyPart("EYE_TYPE", "eyetype", GameEyes.getTotalEyeTypes()));
       this.addBodyPart("EYE_COLOR", new BodyPart("EYE_COLOR", "eyecolor", GameEyes.getTotalColors()));
@@ -88,6 +95,10 @@ public class RaceLookParts{
 	public Color[] defaultColors() {
 		return DEFAULT_COLORS;
 	}
+	
+	public boolean isHiddenPart(String key) {
+		return this.customizerHiders.contains(key);
+	}
 
 	public boolean hasCustomPart(String key) {
 		return hasPart(key) && !this.bodyParts.get(key).isBaseGamePart();
@@ -97,4 +108,11 @@ public class RaceLookParts{
 		return this.bodyParts.containsKey(key) || this.bodyParts.containsKey(key+BodyPart.PART_COLOR_NAME_SUFFIX);
 	}
 	
+	public boolean hidePartCustomizer(String key) {
+		if(this.hasPart(key)) {
+			this.customizerHiders.add(key);
+			return true;
+		}
+		return false;
+	}
 }

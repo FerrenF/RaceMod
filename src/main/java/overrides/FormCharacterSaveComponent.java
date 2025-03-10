@@ -10,16 +10,13 @@ import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.save.CharacterSave;
 import necesse.engine.util.GameUtils;
 import necesse.entity.mobs.PlayerMob;
-
-import overrides.PlayerSprite;
-
 import necesse.gfx.fairType.FairType.TextAlign;
 
 import necesse.gfx.forms.Form;
 import necesse.gfx.forms.components.FormButton;
 import necesse.gfx.forms.components.FormContentIconButton;
-import necesse.gfx.forms.components.FormFlow;
 import necesse.gfx.forms.components.FormCustomDraw;
+import necesse.gfx.forms.components.FormFlow;
 import necesse.gfx.forms.components.FormLabel;
 import necesse.gfx.forms.components.FormFairTypeLabel;
 import necesse.gfx.forms.components.FormInputSize;
@@ -28,30 +25,20 @@ import necesse.gfx.gameFont.FontOptions;
 import necesse.gfx.gameTexture.GameTexture;
 import necesse.gfx.gameTexture.GameTexture.BlendQuality;
 import necesse.gfx.ui.ButtonColor;
+import patches.PlayerSpriteHooks;
 
-public abstract class FormCharacterSaveComponent extends Form {
+public abstract class FormCharacterSaveComponent extends Form{
 	public final File file;
 	public final CharacterSave character;
 
+
 	public FormCharacterSaveComponent(int width, File file, CharacterSave character, boolean worldHasCheatsEnabled,
 			boolean canEnableCheats) {
-		
 		super("character" + character.characterUniqueID, width, 74);
 		this.file = file;
 		this.character = character;
 		this.drawBase = false;
-		this.addComponent(new FormCustomDraw(5, 5, 64, 64) {
-			
-			public void draw(TickManager tickManager, PlayerMob perspective, Rectangle renderBox) {
-				PlayerSprite.drawInForms((drawX, drawY) -> {
-					GameTexture.overrideBlendQuality = BlendQuality.NEAREST;
-					PlayerSprite.getIconDrawOptions(drawX, drawY, 64, 64,
-							(CustomPlayerMob) FormCharacterSaveComponent.this.character.player, 0, 2).draw();
-					GameTexture.overrideBlendQuality = null;
-				}, 5, 0, 64, 64);
-			}
-			
-		});
+		this.addComponent(new CustomFormCustomDraw(this, 5, 5, 64, 64));
 		GameMessage canUseError = null;
 		GameMessage useWarning = null;
 		if (!worldHasCheatsEnabled) {
@@ -152,4 +139,26 @@ public abstract class FormCharacterSaveComponent extends Form {
 	public abstract void onDeletePressed();
 
 	public abstract void onDownloadPressed();
+	
+	public static class CustomFormCustomDraw extends FormCustomDraw {
+        private final Form parent;
+
+        public CustomFormCustomDraw(Form parent, int x, int y, int width, int height) {
+            super(x, y, width, height);
+            this.parent = parent;
+        }
+
+        @Override
+        public void draw(TickManager tickManager, PlayerMob perspective, Rectangle renderBox) {
+            PlayerSpriteHooks.drawInForms((drawX, drawY) -> {
+            	if (parent instanceof FormCharacterSaveComponent) {
+                    PlayerSpriteHooks.getIconDrawOptions(drawX, drawY, 64, 64, 
+                        ((FormCharacterSaveComponent) parent).character.player, 0, 2).draw();
+                } else if (parent instanceof necesse.gfx.forms.components.FormCharacterSaveComponent) {
+                    PlayerSpriteHooks.getIconDrawOptions(drawX, drawY, 64, 64, 
+                        ((necesse.gfx.forms.components.FormCharacterSaveComponent) parent).character.player, 0, 2).draw();
+                }
+            }, 5, 0, 64, 64);
+        }
+    }
 }
