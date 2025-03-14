@@ -1,4 +1,4 @@
-package extensions;
+package core.forms;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -169,7 +169,14 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		this.allowSupernaturalChanges = allowSupernaturalChanges;
 		this.allowClothesChance = allowClothesChance;		
 		
-		FormFlow flow = new FormFlow(5);		
+		FormFlow flow = new FormFlow(0);			
+		
+		FormLocalLabel raceLabel = new FormLocalLabel("racemodui", "makerace",
+				new FontOptions(16), 0, x + (width / 2) - FormNewPlayerPreset.RACE_SWITCH_FORM_WIDTH, 0, width);
+		raceLabel.addLine(this.getRaceLook().getRaceDisplayName());
+		this.addComponent((FormLocalLabel) flow.nextY(raceLabel));
+		flow.next(5);
+		
 		this.addComponent((FormLocalLabel) flow.nextY(
 				new FormLocalLabel("ui", "clickplayerrotate", new FontOptions(12), 0, x + (width / 2) - FormNewPlayerPreset.RACE_SWITCH_FORM_WIDTH, 0, width - 20)));
 		
@@ -285,6 +292,9 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	            this.icon.setRotation(this.icon.getRotation() - 1);
 	        }
 	    });
+	    
+	    this.addComponent(leftRotateButton);
+	    this.addComponent(rightRotateButton);
 	}
 	
 	protected abstract Point getDrawOffset(BodyPart part);
@@ -335,7 +345,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 			    
 			},
 			new LocalMessage(part.getLabelCategory(), part.getLabelKey()), 
-			this.getSelectionColorOrCustom(extensions.FormNewPlayerRaceCustomizer.BUTTON_SIZE, _width, 
+			this.getSelectionColorOrCustom(core.forms.FormNewPlayerRaceCustomizer.BUTTON_SIZE, _width, 
 			    (button, id, drawX, drawY, width, height, current, hovering) -> {
 			    	
 			        Color color = defaultColors[id];
@@ -380,7 +390,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		 return new Section(					 
     		(button, drawX, drawY, width, height) -> drawBodyPartIcon(button, part, drawX, drawY, width, height),
     			new LocalMessage(part.getLabelCategory(), part.getLabelKey()),			    			
-    			this.getSelectionContent(	extensions.FormNewPlayerRaceCustomizer.BUTTON_SIZE, _width, part.getTotalTextureOptions(),
+    			this.getSelectionContent(	core.forms.FormNewPlayerRaceCustomizer.BUTTON_SIZE, _width, part.getTotalTextureOptions(),
             (button, id, x, y, w, h, current, hovering) -> drawBodyPartPreview(button, part, false, id, x, y, w, h),
             id -> id == (Integer)getCurrentBodyPartSelection(part, false),
             (id, event) -> updateBodyPartSelection(part, id, false),

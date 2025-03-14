@@ -3,26 +3,33 @@ package overrides;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import core.forms.FormNewPlayerRaceCustomizer;
+import core.forms.events.ComponentSizeChanged;
+import core.forms.events.ComponentSizeChangedListener;
 import core.race.CustomHumanLook;
 import core.race.RaceLook;
 import core.registries.RaceRegistry;
-import extensions.FormNewPlayerRaceCustomizer;
-import extensions.HumanNewPlayerRaceCustomizer;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.gameLoop.tickManager.TickManager;
 import necesse.engine.localization.message.GameMessage;
+import necesse.engine.localization.message.LocalMessage;
+import necesse.gfx.GameBackground;
 import necesse.gfx.HumanLook;
 import necesse.gfx.forms.Form;
 import necesse.gfx.forms.components.FormButton;
+import necesse.gfx.forms.components.FormContentBox;
 import necesse.gfx.forms.components.FormFlow;
+import necesse.gfx.forms.components.FormIconButton;
 import necesse.gfx.forms.components.localComponents.FormLocalLabel;
 import necesse.gfx.forms.components.localComponents.FormLocalTextButton;
+import necesse.gfx.forms.events.FormEventListener;
 import necesse.gfx.forms.events.FormInputEvent;
 import necesse.gfx.gameFont.FontOptions;
+import necesse.gfx.ui.ButtonStateTextures;
+import necesse.gfx.ui.GameInterfaceStyle;
 
 
 public class FormNewPlayerPreset extends Form {	
@@ -37,6 +44,9 @@ public class FormNewPlayerPreset extends Form {
 	public int currentRaceIndex = 0;
 	public boolean allowRaceChange;
 	public Class<? extends RaceLook> startingRaceClass;
+	
+	private final List<ComponentSizeChangedListener> componentSizeChanged = new ArrayList<>();
+	
 	public FormNewPlayerPreset(int x, int y, int width, boolean allowSupernaturalChanges, boolean allowClothesChance) {
 		this(x, y, width, allowSupernaturalChanges, allowClothesChance, true, new CustomHumanLook(true));
 	}
@@ -51,38 +61,43 @@ public class FormNewPlayerPreset extends Form {
 	
 	protected void setupCustomizer(int x, int y, int width, boolean allowSupernaturalChanges, boolean allowClothesChance, RaceLook startingRace) {
 		startingRaceClass = startingRace.getClass();
-		try {		
-			this.newPlayerFormContents = startingRace.getAssociatedCustomizerForm()
-					.getConstructor(int.class, int.class, int.class, boolean.class, boolean.class)
-					.newInstance(RACE_SWITCH_FORM_WIDTH, this.getY(), this.getWidth()-(RACE_SWITCH_FORM_WIDTH*2), true, true);	
-			DebugHelper.handleFormattedDebugMessage("Player switching to new race %s with new form %s" ,40, MESSAGE_TYPE.DEBUG, new Object[] {startingRace.getClass().getName(), newPlayerFormContents.getClass().getName()});
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
-			e.printStackTrace();
-			this.newPlayerFormContents = new HumanNewPlayerRaceCustomizer(RACE_SWITCH_FORM_WIDTH, y, width-(RACE_SWITCH_FORM_WIDTH*2), allowSupernaturalChanges, allowClothesChance);
-		}		
-		this.setLook(startingRace);
-		this.addComponent(newPlayerFormContents);	
-		this.setHeight(newPlayerFormContents.getHeight());
+		changeRace(startingRace.getRaceID());
 	}
 	
 	protected void setupRaceButtons() {
 		
 		if(!allowRaceChange) return;
 		int modifiedRaceButtonSize = (RACE_SWITCH_FORM_WIDTH + 50);
-		this.prevRaceButton = (FormLocalTextButton) this.addComponent(new FormLocalTextButton("racemodui", "prevrace", 5 , 25, modifiedRaceButtonSize - 10));		
-		this.prevRaceButton.onClicked((e) -> {
-			
-			this.onPrevRaceButtonClicked(e);
-		});
+		//int x, int y, int width, FormInputSize size, ButtonColor color, ButtonIcon icon,	GameMessage... tooltips
 		
-		this.nextRaceButton = (FormLocalTextButton) this.addComponent(new FormLocalTextButton("racemodui", "nextrace",  this.getWidth() - (modifiedRaceButtonSize + 10) , 25, (modifiedRaceButtonSize - 10)));		
-		this.nextRaceButton.onClicked((e) -> {
-			
-			this.onNextRaceButtonClicked(e);
-		});
+		List<RaceLook> rlist = RaceRegistry.getRaces();
 		
-		this.updateRaceButtons();
+		int raceButtonSize = 64;
+		int padding = 10;
+		int x = 5;
+		int yi = 0;
+		int increment = 64+padding;
+		for(RaceLook r : rlist) {
+			int y = (this.getHeight() / 2) - (increment * rlist.size())/2;
+			int sy = y+(yi*increment); 
+			FormContentBox formWrapper = new FormContentBox(x, sy, raceButtonSize, raceButtonSize, GameBackground.form);
+			FormIconButton testButton = new FormIconButton(
+					0,
+					0,
+					new ButtonStateTextures(GameInterfaceStyle.getStyle("primal"), r.getCustomizerIconPath()),
+					raceButtonSize, raceButtonSize,
+					new LocalMessage("racemod.race", r.getRaceID())					
+					);
+			
+			testButton.onClicked((FormEventListener<FormInputEvent<FormButton>>)(event)->{
+				FormNewPlayerPreset.this.changeRace(r.getRaceID());
+			});
+			formWrapper.addComponent(testButton);
+			this.addComponent(formWrapper);
+			yi+=1;
+		}
+
+		//this.updateRaceButtons();
 	}
 	
 	protected void updateRaceButtons() {
@@ -99,14 +114,16 @@ public class FormNewPlayerPreset extends Form {
 		this.nextRaceButton.setText(nextRace.getRaceDisplayName().translate());
 	}
 	
-	private void onPrevRaceButtonClicked(FormInputEvent<FormButton> e) {
-		this.alternateRace(-1);
+	public void onComponentSizeChanged(ComponentSizeChangedListener listener) {
+	        this.componentSizeChanged.add(listener);
 	}
 	
-	private void onNextRaceButtonClicked(FormInputEvent<FormButton> e) {
-		this.alternateRace(1);
-	}
-	
+	private void triggerComponentResized() {
+        ComponentSizeChanged event = new ComponentSizeChanged(this);
+        for (ComponentSizeChangedListener listener : this.componentSizeChanged) {
+            listener.handleEvent(event);
+        }
+	 }
 	protected void alternateRace(int direction) {
 		
 		if(!allowRaceChange) return;
@@ -123,27 +140,29 @@ public class FormNewPlayerPreset extends Form {
 	}
 	
 	public void changeRace(String newRaceID) {	
-		
-		if(!allowRaceChange) return;
-		if(this.newPlayerFormContents.getRaceID()!=newRaceID) {
-			
-			try {
-				Constructor<? extends RaceLook> constructor = RaceRegistry.getRace(newRaceID).getClass().getConstructor(boolean.class);	
-				RaceLook newRaceLook = constructor.newInstance(true);
-				this.removeComponent(newPlayerFormContents);
-				this.newPlayerFormContents = newRaceLook.associatedCustomizerForm
-						.getConstructor(int.class, int.class, int.class, boolean.class, boolean.class)
-						.newInstance(RACE_SWITCH_FORM_WIDTH, this.getY(), this.getWidth()-(RACE_SWITCH_FORM_WIDTH*2), true, true);
-				this.newPlayerFormContents.setRaceLook(newRaceLook);		
-				this.addComponent(newPlayerFormContents);		
-				DebugHelper.handleFormattedDebugMessage("Player switching to new race %s with new form %s" ,40, MESSAGE_TYPE.DEBUG, new Object[] {newRaceLook.getClass().getName(), newPlayerFormContents.getClass().getName()});
-				
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				DebugHelper.handleDebugMessage("Failed to switch to new race " + newRaceID + " from source: New Player Customizer Form with error: "+e.getMessage() ,5);
-				e.printStackTrace();
-			}
+		DebugHelper.handleDebugMessage("Change race requested with new race ID "+newRaceID, 50, MESSAGE_TYPE.DEBUG);
+		if(RaceRegistry.getRace(newRaceID) == null) {
+			newRaceID = this.raceIDs.get(0);
 		}
+		try {
+			Constructor<? extends RaceLook> constructor = RaceRegistry.getRace(newRaceID).getClass().getConstructor(boolean.class);	
+			RaceLook newRaceLook = constructor.newInstance(true);
+			if(this.newPlayerFormContents!=null)this.removeComponent(newPlayerFormContents);
+			this.newPlayerFormContents = newRaceLook.associatedCustomizerForm
+					.getConstructor(int.class, int.class, int.class, boolean.class, boolean.class)
+					.newInstance(RACE_SWITCH_FORM_WIDTH, this.getY(), this.getWidth()-(RACE_SWITCH_FORM_WIDTH*2), true, true);
+			this.newPlayerFormContents.setRaceLook(newRaceLook);		
+			this.addComponent(newPlayerFormContents);		
+			this.setHeight(newPlayerFormContents.getHeight());
+			this.onChanged();
+			DebugHelper.handleFormattedDebugMessage("Player switching to new race %s with new form %s" ,40, MESSAGE_TYPE.DEBUG, new Object[] {newRaceLook.getClass().getName(), newPlayerFormContents.getClass().getName()});
+			
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			DebugHelper.handleDebugMessage("Failed to switch to new race " + newRaceID + " from source: New Player Customizer Form with error: "+e.getMessage() ,5);
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public void drawEdge(TickManager tickManager) {
@@ -166,7 +185,7 @@ public class FormNewPlayerPreset extends Form {
 	}
 	
 	public void setLook(HumanLook look) {
-		this.newPlayerFormContents.setLook(RaceLook.fromHumanLook(look, this.startingRaceClass));
+		this.newPlayerFormContents.setRaceLook(RaceLook.fromHumanLook(look, this.startingRaceClass));
 	}
 	
 	public RaceLook getRaceLook() {
@@ -178,7 +197,13 @@ public class FormNewPlayerPreset extends Form {
 	}
 	
 	public void onChanged() {
+		this.triggerComponentResized();
 		this.newPlayerFormContents.onChanged();
+	}
+
+	public void reset() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

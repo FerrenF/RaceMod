@@ -1,6 +1,8 @@
 package core.race;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -28,40 +30,40 @@ import necesse.gfx.HumanLook;
 import necesse.gfx.drawOptions.DrawOptions;
 import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.gameTexture.GameTexture;
+import necesse.gfx.res.ResourceEncoder;
+import necesse.gfx.res.ResourceFile;
 import net.bytebuddy.implementation.bind.annotation.Super;
+import core.forms.FormNewPlayerRaceCustomizer;
 import core.race.factory.RaceDataFactory;
 import core.race.factory.RaceDataFactory.RaceData;
 import core.race.parts.BodyPart;
 import core.race.parts.HumanRaceParts;
 import core.race.parts.RaceLookParts;
 import core.registries.RaceRegistry;
-import extensions.FormNewPlayerRaceCustomizer;
 import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 
 public abstract class RaceLook extends HumanLook {	
 	
+	public static final String iconTexturePath = "race/";
 	public static Color DEFAULT_UNKNOWN_COLOR = new Color(64,64,64); // a lovely gray
-	public static Function<Color, Color> DEFAULT_COLOR_LIMITER = (i) -> { return new Color(GameMath.limit(i.getRed(), 25, 225), GameMath.limit(i.getGreen(), 25, 225),
-			GameMath.limit(i.getBlue(), 25, 225));};
+	
+	protected GameRandom randomizer;
+	public IDData idData = new IDData();
+	public Function<Color, Color> colorLimiterFunction = DEFAULT_COLOR_LIMITER;
+	
+	public static Function<Color, Color> DEFAULT_COLOR_LIMITER = 
+			(i) -> { return new Color(GameMath.limit(i.getRed(), 25, 225), GameMath.limit(i.getGreen(), 25, 225),GameMath.limit(i.getBlue(), 25, 225));};
 			
 	public Class<? extends FormNewPlayerRaceCustomizer> associatedCustomizerForm;
-	public IDData idData = new IDData();
-
-	protected GameRandom randomizer;
-	// We are replacing hard coded definitions for part IDs with mutable, ordered maps.
+	
 	protected SortedMap<String, Byte> appearanceByteMap = new TreeMap<>();
 	protected SortedMap<String, Color> appearanceColorMap = new TreeMap<>();
 	
-	public Function<Color, Color> colorLimiterFunction = DEFAULT_COLOR_LIMITER;
-	
-	
 	protected RaceLookParts partsList;
-	protected String race_id;
 	
-	// Constructors
 	public RaceLook(String _race_id) {
 		super();			
-		this.race_id = _race_id;
 	}
 	
 	public RaceLook(RaceLook copy) {
@@ -97,7 +99,7 @@ public abstract class RaceLook extends HumanLook {
 		}
 	}
 	
-	public String getRaceID() 				{	return this.race_id;	}
+	public abstract String getRaceID();
 	
 
 	public void copyBase(HumanLook look) {
@@ -119,14 +121,13 @@ public abstract class RaceLook extends HumanLook {
 	}
 	
 	public void copy(RaceLook look) {
-		if (look.race_id != this.race_id) {
-			throw new IllegalArgumentException(String.format("Error: When copying a race into an already existing instance, both ID's must match. Source race_id: %s, Target race id: %s", this.race_id, look.race_id));
+		if (look.getRaceID()!= this.getRaceID()) {
+			throw new IllegalArgumentException(String.format("Error: When copying a race into an already existing instance, both ID's must match. Source race_id: %s, Target race id: %s", this.getRaceID(), look.getRaceID()));
 		}
 		this.appearanceByteMap.clear();
 		this.appearanceColorMap.clear();
 		this.appearanceByteMap.putAll(look.appearanceByteMap);
 		this.appearanceColorMap.putAll(look.appearanceColorMap);
-		this.race_id = look.race_id;
 	}
 	
 	public byte getRandomByteFeature(String key) {		
@@ -188,11 +189,6 @@ public abstract class RaceLook extends HumanLook {
 		this.setSkin(0);
 		this.setShirtColor(this.getRaceParts().defaultColors()[0]);
 		this.setShoesColor(this.getRaceParts().defaultColors()[0]);		
-	}
-
-	public void randomizeLook() {
-		this.randomizeLook(	this.appearanceByteMap.keySet().stream().map((k)->{return true;}).toList(),
-							this.appearanceColorMap.keySet().stream().map((k)->{return true;}).toList());
 	}
 	
 	public void randomizeLook(GameRandom random, boolean onlyHumanLike) {
@@ -264,7 +260,7 @@ public abstract class RaceLook extends HumanLook {
 
 	@Override
 	public void setupContentPacket(PacketWriter writer, boolean includeColor) {
-		writer.putNextString(race_id);
+		writer.putNextString(this.getRaceID());
 		writer.putNextBoolean(includeColor);
 		writer.putNextByte((byte)super.getHair());
 		writer.putNextByte((byte)super.getFacialFeature());
@@ -307,7 +303,11 @@ public abstract class RaceLook extends HumanLook {
 		
 		// Read race ID
 		
-	    this.race_id = reader.getNextString();	   
+	    String race_id = reader.getNextString();
+
+	    if(!race_id.equals(this.getRaceID())) {
+	    	DebugHelper.handleFormattedDebugMessage("Received bad content packet. Race %s does not equal the race applied to, %s.", 0, MESSAGE_TYPE.ERROR, new Object[] {race_id, this.getRaceID()});
+	    }
 	    boolean includesClothesColor = reader.getNextBoolean(); // Read first
 
 	    // Read base appearance attributes
@@ -364,7 +364,7 @@ public abstract class RaceLook extends HumanLook {
 		super.addSaveData(save);
 		
 			
-		save.addSafeString("race_id", race_id);
+		save.addSafeString("race_id", this.getRaceID());
 	    // Save all byte-based appearance attributes
 	    this.appearanceByteMap.forEach((key, value) -> {
 	    	save.addByte(key, value);
@@ -383,13 +383,17 @@ public abstract class RaceLook extends HumanLook {
 		super.applyLoadData(save);
 		
 		LoadData lkd = save;//.getFirstLoadDataByName("LOOK");	
-		String raceString = lkd.getSafeString("race_id", null);
+		String race_id = lkd.getSafeString("race_id", null);
 		
-		if(raceString == null) {
+		if(race_id == null) {
 			DebugHelper.handleDebugMessage("Error reading race of content packet at raceFromContentPacker", 25);
 			return;
 		}
-		this.race_id = raceString;
+		
+		 if(!race_id.equals(this.getRaceID())) {
+		    	DebugHelper.handleFormattedDebugMessage("Attempted bad load data. Race %s does not equal the race applied to, %s.", 0, MESSAGE_TYPE.ERROR, new Object[] {race_id, this.getRaceID()});
+		}
+		
 	    // Load all byte-based appearance attributes
 	    this.appearanceByteMap.forEach((key, value) -> {
 	        this.appearanceByteMap.put(key, save.getByte(key, value));
@@ -577,6 +581,13 @@ public abstract class RaceLook extends HumanLook {
 	public GameTexture getBackFacialFeatureTexture() 	{	return GameHair.getFacialFeature(this.getFacialFeature()).getBackHairTexture(this.getHairColor());	}
 	
 	public GameSkin getGameSkin(boolean onlyHumanlike) 	{	return GameSkin.getSkin(this.getSkin(), onlyHumanlike);	}	
+
+	public String getCustomizerIconPath() {		
+		String ra_id = this.getRaceID();
+		if(ra_id == null) return null;
+		String target_texture = iconTexturePath+"icon_"+ra_id.toLowerCase();
+		return target_texture;		
+	}
 		
 	public static Color limitClothesColor(Color color) {
 		return new Color(GameMath.limit(color.getRed(), 25, 225), GameMath.limit(color.getGreen(), 25, 225),

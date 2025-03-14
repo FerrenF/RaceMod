@@ -2,6 +2,7 @@ package overrides;
 
 import java.lang.reflect.Field;
 
+import core.forms.FormNewPlayerRaceCustomizer;
 import core.race.CustomHumanLook;
 import core.race.RaceLook;
 import core.race.factory.RaceDataFactory;
@@ -16,12 +17,14 @@ import necesse.engine.window.WindowManager;
 import necesse.entity.mobs.PlayerMob;
 import necesse.gfx.HumanLook;
 import necesse.gfx.forms.Form;
+import necesse.gfx.forms.components.FormComponent;
 import necesse.gfx.forms.components.FormFlow;
 import necesse.gfx.forms.components.FormInputSize;
 import necesse.gfx.forms.components.FormTextInput;
 import necesse.gfx.forms.components.localComponents.FormLocalLabel;
 import necesse.gfx.forms.components.localComponents.FormLocalTextButton;
 import necesse.gfx.forms.position.FormPosition;
+import necesse.gfx.forms.position.FormPositionContainer;
 import necesse.gfx.gameFont.FontOptions;
 
 public abstract class NewCharacterForm extends Form {
@@ -42,8 +45,9 @@ public abstract class NewCharacterForm extends Form {
 				flow.next(25)));		
 
 		overrides.FormNewPlayerPreset np = new overrides.FormNewPlayerPreset(0, 0, PRESET_FORM_WIDTH, true, true);
+		
 		this.newPlayerFormPreset = this.addComponent((FormNewPlayerPreset)flow.nextY(np, 20));		
-	
+		
 		
 		this.addComponent(new FormLocalLabel("racemodui", "playername", new FontOptions(16), -1, 5, flow.next(18)));
 		
@@ -81,12 +85,43 @@ public abstract class NewCharacterForm extends Form {
 		});
 		
 		this.updateCreateButton();
-		this.setHeight(flow.next());
+		this.setHeight(flow.next());	
 		this.onWindowResized(WindowManager.getWindow());
+		
+		this.newPlayerFormPreset.onComponentSizeChanged((event) -> {
+			
+		    int totalHeight = 0;
+		    for (FormComponent c : this.getComponents()) {
+		        if (c == this.newPlayerFormPreset) continue; // Skip the preset
+
+		        if (c instanceof Form) { 
+		            totalHeight += ((Form) c).getHeight();
+		        } else {
+		            totalHeight += c.getBoundingBox().height;
+		        }
+		    }
+		    
+		    totalHeight += this.newPlayerFormPreset.getHeight();
+		    
+		    int currentHeight = this.getHeight();
+		    int componentOffset = totalHeight - currentHeight;
+		    for (FormComponent c : this.getComponents()) {
+		    	if (c instanceof FormPositionContainer) {
+		    		FormPositionContainer pc = ((FormPositionContainer)c);
+		    		if(pc.getY()>newPlayerFormPreset.getY()) {
+		    			pc.setY(pc.getY()+componentOffset);
+		    		}
+		    	}
+		    }
+		    
+		    this.setHeight(totalHeight);
+		});
+	
 	}
 	
 	public void setLook(HumanLook look) {
 		this.setLook(new CustomHumanLook(look));
+		//do NUFFIN
 	}
 	
 	public void setLook(RaceLook look) {
@@ -103,7 +138,7 @@ public abstract class NewCharacterForm extends Form {
 
 	public void reset() {
 		
-		this.newPlayerFormPreset.newPlayerFormContents.reset();
+		this.newPlayerFormPreset.reset();
 		this.nameInput.setText("");
 		String userName = PlatformManager.getPlatform().getUserName();
 		if (userName != null && GameUtils.isValidPlayerName(userName) == null) {

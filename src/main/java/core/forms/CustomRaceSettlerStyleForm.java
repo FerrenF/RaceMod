@@ -1,4 +1,4 @@
-package extensions;
+package core.forms;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.Predicate;
+
+import extensions.CustomRaceStylistContainer;
 import necesse.engine.Settings;
 import necesse.engine.gameLoop.tickManager.TickManager;
 import necesse.engine.localization.Language;

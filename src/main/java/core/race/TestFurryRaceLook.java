@@ -5,17 +5,16 @@ import java.awt.Point;
 import java.util.List;
 import java.util.function.Function;
 
+import core.forms.FormNewPlayerRaceCustomizer;
+import core.forms.TestFurryNewPlayerRaceCustomizer;
 import core.gfx.GameParts;
 import core.gfx.GamePartsLoader;
 import core.gfx.TestFurryDrawOptions;
 import core.race.factory.RaceDataFactory;
 import core.race.parts.BodyPart;
-import core.race.parts.HumanRaceParts;
-import core.race.parts.RaceLookParts;
 import core.race.parts.TestFurryRaceParts;
-import extensions.FormNewPlayerRaceCustomizer;
-import extensions.TestFurryNewPlayerRaceCustomizer;
 import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.network.PacketReader;
 import necesse.engine.util.GameRandom;
 import necesse.entity.mobs.MaskShaderOptions;
@@ -33,7 +32,7 @@ import necesse.level.maps.light.GameLight;
 public class TestFurryRaceLook extends RaceLook {
 	
 	public static final String TEST_FURRY_RACE_ID = "testfurry";
-	
+	public static GameTexture raceCustomizerIcon;
 	public static TestFurryRaceLook getCustomRaceLook(RaceLook _look) {	
 		if (!_look.getRaceID().equals(TestFurryRaceLook.TEST_FURRY_RACE_ID)) {
 			DebugHelper.handleDebugMessage(String.format("Draw options for raceID %s requested for non-raceID %s from %s. Using defaults.", TestFurryRaceLook.TEST_FURRY_RACE_ID, _look.getRaceID(), _look.getClass().getName()), 25);
@@ -96,10 +95,14 @@ public class TestFurryRaceLook extends RaceLook {
 	}
 	
 	
-	
 	// Note: This does not set valid DEFAULT parts. Just makes sure the keys are there.
 	public void initCustomParts() {		
 		// not used in CustomHumanLook
+	}
+	
+	@Override
+	public String getRaceID() {
+		return TestFurryRaceLook.TEST_FURRY_RACE_ID;
 	}
 	
 	public TestFurryRaceLook(HumanLook copy) {
@@ -197,6 +200,14 @@ public class TestFurryRaceLook extends RaceLook {
 	
 	public int getRandomMuzzleColor() 	{	return this.getRandomByteColorFeature("MUZZLE_COLOR");	}
 	
+	public int getRandomHeadStyle() 	{	return this.getRandomByteFeature("HEAD");	}
+	
+	public int getRandomHeadColor() 	{	return this.getRandomByteColorFeature("HEAD_COLOR");	}
+	
+	public int getRandomBodyStyle() 	{	return this.getRandomByteFeature("BODY");	}
+	
+	public int getRandomBodyColor() 	{	return this.getRandomByteColorFeature("BODY_COLOR");	}
+	
 	// Getters
 	
 	public int getTailStyle() 			{	return this.appearanceByteGet("TAIL");	}
@@ -251,26 +262,44 @@ public class TestFurryRaceLook extends RaceLook {
 	public int setArmsColor(int id) 	{	return this.appearanceByteSet("ARMS_COLOR",(byte)id);	}
 	
 	public static void loadRaceTextures() {	
-		
+		DebugHelper.handleDebugMessage("Loading race textures for race " + TestFurryRaceLook.TEST_FURRY_RACE_ID, 50, MESSAGE_TYPE.DEBUG);
 		for(BodyPart bp : new TestFurryRaceParts().getCustomBodyParts()) {			
 			GamePartsLoader loader = new GamePartsLoader();
 			loader.startLoaderThreads();
 			new GameParts(loader, bp);
 		}
-			
+		
 	}
 
-	public void randomizeLook(GameRandom random) 	{	this.randomizer = random;	this.randomizeLook(random, true, true, true, true, true, true, true, true, true, true);	}
+	public void randomizeLook(GameRandom random) 
+	{
+		this.randomizer = random;	
+		this.randomizeLook(random, true, true, true, true, true, true, true, true, true, true);	
+	}
 
-	public void randomizeLook() 					{	this.randomizeLook(this.getRandomizer());	}
+	public void randomizeLook() 	
+	{	this.randomizeLook(this.getRandomizer());	}
 	
 	public void randomizeLook(GameRandom random, boolean randomTail, boolean randomTailColor, boolean randomEars, boolean randomEarsColor, boolean randomMuzzle, boolean randomMuzzleColor, 
 			boolean randomSkin, boolean changeEyeType, boolean randomEyeColor, boolean randomFacialFeature) {
+				
+		this.setTailStyle(this.getRandomTailStyle());
+		this.setTailColor(this.getRandomTailColor());
 		
-		// FUTURE GENDER SURGERY POINT HERE
+		this.setMuzzleStyle(this.getRandomMuzzleStyle());
+		this.setMuzzleColor(this.getRandomMuzzleColor());
+		
+		this.setEarsStyle(this.getRandomEarsStyle());
+		this.setEarsColor(this.getRandomEarsColor());
+		
+		this.setHeadStyle(this.getRandomHeadStyle());
+		this.setHeadColor(this.getRandomHeadColor());
+		
+		this.setBodyStyle(this.getRandomBodyStyle());
+		this.setBodyColor(this.getRandomBodyColor());
+		
 		HumanGender gender = (HumanGender) random.getOneOf(new HumanGender[]{HumanGender.MALE, HumanGender.FEMALE, HumanGender.NEUTRAL});
-		
-		this.randomizeLook(random, false, gender, randomSkin, changeEyeType, randomEyeColor,	randomFacialFeature);
+		super.randomizeLook(random, false, gender, randomSkin, changeEyeType, randomEyeColor,	randomFacialFeature);
 	}
 
 	
@@ -404,6 +433,7 @@ public class TestFurryRaceLook extends RaceLook {
 	public Class<? extends FormNewPlayerRaceCustomizer> getAssociatedCustomizerForm() {
 		return this.associatedCustomizerForm;
 	}
+
 
 
 	

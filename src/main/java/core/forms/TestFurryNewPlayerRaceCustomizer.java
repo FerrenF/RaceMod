@@ -1,4 +1,4 @@
-package extensions;
+package core.forms;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -126,7 +126,6 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 
 	@Override
 	protected Object getCurrentBodyPartSelection(BodyPart part, boolean colorCustomization) {
-		int DEBUG_VALUE = 80;
 	    Object value;  // Store the selected value for logging
 
 	    TestFurryRaceLook ccr = this.getCustomRaceLook();
@@ -148,9 +147,6 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 	        default:        value = super.baseGetCurrentBodypartSelection(part);	break;
 	    }
 	
-	    DebugHelper.handleDebugMessage("getCurrentBodyPartSelection(" + targetPartName+ ") = " + value 
-		        + " [Type: " + (value != null ? value.getClass().getSimpleName() : "null") + "]", 60);
-
 	    return value;
 	}
 
@@ -311,7 +307,7 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 		 return new Section(					 
     		(button, drawX, drawY, width, height) -> drawBodyPartIcon(button, part, drawX, drawY, width, height),
     			new LocalMessage(part.getLabelCategory(), part.getLabelColorKey()),			    			
-    			this.getSelectionContent(	extensions.FormNewPlayerRaceCustomizer.BUTTON_SIZE, _width, part.getTotalColorOptions(),
+    			this.getSelectionContent(	core.forms.FormNewPlayerRaceCustomizer.BUTTON_SIZE, _width, part.getTotalColorOptions(),
             (button, id, x, y, w, h, current, hovering) -> drawBodyPartPreview(button, part, true, id, x, y, w, h),
             id -> id == (Integer)getCurrentBodyPartSelection(part, true),
             (id, event) -> updateBodyPartSelection(part, id, true),
@@ -334,24 +330,6 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 		super.onChanged();
 	}
 	
-
-	public ArrayList<InventoryItem> getSkinColorCost(int id) 		{		return null;	}
-	
-	public ArrayList<InventoryItem> getEyeTypeCost(int id) 			{		return null;	}
-	
-	public ArrayList<InventoryItem> getEyeColorCost(int id) 		{		return null;	}
-	
-	public ArrayList<InventoryItem> getHairStyleCost(int id) 		{		return null;	}
-	
-	public ArrayList<InventoryItem> getFacialFeatureCost(int id) 	{		return null;	}
-	
-	public ArrayList<InventoryItem> getHairColorCost(int id) 		{		return null;	}
-	
-	public ArrayList<InventoryItem> getShirtColorCost(Color color) 	{		return null;	}
-	
-	public ArrayList<InventoryItem> getShoesColorCost(Color color) 	{		return null;	}
-
-	public ArrayList<InventoryItem> getHeadColorCost(Color color) 	{		return null;	}
 
 
 	

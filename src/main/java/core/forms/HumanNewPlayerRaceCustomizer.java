@@ -1,4 +1,4 @@
-package extensions;
+package core.forms;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import core.race.CustomHumanLook;
 import core.race.RaceLook;
+import core.race.TestFurryRaceLook;
 import core.race.factory.RaceDataFactory;
 import core.race.parts.BodyPart;
 import helpers.DebugHelper;
@@ -40,7 +41,7 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	
 	@SuppressWarnings("unchecked")
 	public CustomHumanLook getCustomRaceLook() {	
-		if (this.getRaceID() != CustomHumanLook.HUMAN_RACE_ID) {
+		if (!this.getRaceLook().getRaceID().equals(CustomHumanLook.HUMAN_RACE_ID)) {
 			DebugHelper.handleFormattedDebugMessage("Problem converting base RaceLook class with race %s at form %s", 5, MESSAGE_TYPE.ERROR, new Object[] {this.getRaceID(), this.getClass().getName()});
 			return new CustomHumanLook(true);
 		}
@@ -50,6 +51,12 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	@Override
 	public RaceLook getRaceLook() {
 	    return RaceDataFactory.getRaceLook(this.getPlayerHelper(), new CustomHumanLook(true));
+	}
+	
+	@Override
+	public void setLook(HumanLook look) {
+		this.setRaceLook(RaceLook.fromHumanLook(look, CustomHumanLook.class));
+		this.updateComponents();
 	}
 	
 	@Override
@@ -102,10 +109,7 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	@Override
 	protected Object getCurrentBodyPartSelection(BodyPart part, boolean colorCustomization) {
 		int DEBUG_VALUE = 80;
-	     // Store the selected value for logging
-		 Object value = super.baseGetCurrentBodypartSelection(part);	
-	    DebugHelper.handleDebugMessage("getCurrentBodyPartSelection(" + part.getPartName() + ") = " + value 
-		        + " [Type: " + (value != null ? value.getClass().getSimpleName() : "null") + "]", DEBUG_VALUE);
+		 Object value = super.baseGetCurrentBodypartSelection(part);		   
 
 	    return value;
 	}
@@ -193,21 +197,6 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 
 	public void modifyHumanDrawOptions(HumanDrawOptions drawOptions) {	}
 
-	public ArrayList<InventoryItem> getSkinColorCost(int id) 		{		return null;	}
-	
-	public ArrayList<InventoryItem> getEyeTypeCost(int id) 			{		return null;	}
-	
-	public ArrayList<InventoryItem> getEyeColorCost(int id) 		{		return null;	}
-	
-	public ArrayList<InventoryItem> getHairStyleCost(int id) 		{		return null;	}
-	
-	public ArrayList<InventoryItem> getFacialFeatureCost(int id) 	{		return null;	}
-	
-	public ArrayList<InventoryItem> getHairColorCost(int id) 		{		return null;	}
-	
-	public ArrayList<InventoryItem> getShirtColorCost(Color color) 	{		return null;	}
-	
-	public ArrayList<InventoryItem> getShoesColorCost(Color color) 	{		return null;	}
 
 	@Override
 	protected Section createBodyPartCustomColorSection(BodyPart part, Predicate<Section> isCurrent, int _width) {
@@ -217,7 +206,6 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	@Override
 	public void reset() {
 		this.setPlayerHelper(new PlayerMob(0L, (NetworkClient) null));
-		this.updateComponents();
 	}
 
 

@@ -1,4 +1,4 @@
-package extensions;
+package core.forms;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -49,7 +49,7 @@ public abstract class CustomRaceStyleForm extends Form {
       super("playerStyle", 408, 10);
       this.container = container;
       FormFlow flow = new FormFlow(5);
-      
+
       RaceLook ra = RaceDataFactory.getRaceLook(this.container.client.playerMob, RaceLook.fromHumanLook(this.container.client.playerMob.look, CustomHumanLook.class));
       DebugHelper.handleFormattedDebugMessage("Style form opened for player %s with race %s", 50, MESSAGE_TYPE.DEBUG, new Object[] {this.container.client.playerMob.playerName, ra.getRaceID()});
       this.addComponent(new FormLocalLabel("ui", "stylistchange", new FontOptions(20), 0, this.getWidth() / 2, flow.next(25)));

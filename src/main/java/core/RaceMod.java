@@ -27,11 +27,9 @@ import necesse.engine.registries.ContainerRegistry;
 import necesse.engine.registries.PacketRegistry;
 import necesse.entity.mobs.friendly.human.humanShop.StylistHumanMob;
 import necesse.gfx.PlayerSprite;
-import necesse.gfx.forms.presets.containerComponent.mob.StylistContainerForm;
 import necesse.gfx.res.ResourceEncoder;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.ByteBuddyAgent;
-import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.dynamic.loading.ClassReloadingStrategy;
 import net.bytebuddy.implementation.MethodDelegation;
@@ -48,21 +46,19 @@ public class RaceMod {
 	public static Instrumentation byteBuddyInst;
 	public static SettingsHelper settings = new SettingsHelper();
 	public void preInit() {
+		
+		byteBuddyInst = ByteBuddyAgent.install();
 		SettingsHelper.initialize();
 		DebugHelper.initialize();
-		DebugHelper.handleDebugMessage("Race mod initialized. Oh boy let's rebuild some classes...");
-    	byteBuddyInst = ByteBuddyAgent.install();
-    	
-    	
+		DebugHelper.handleDebugMessage("Race mod beginning pre-initialization. Let's get some hooks into this bad boy.", 5, MESSAGE_TYPE.INFO);
+ 	
     	deployPreInitHook();
     	
     	RaceDataFactory.initialize(byteBuddyInst);
     	LoadedMod l = LoadedMod.getRunningMod();
-    	ResourceEncoder.addModResources(l);
     	
-		
-	
-		  DebugHelper.handleDebugMessage("Successfully replaced NewCharacterForm. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG); 
+    	DebugHelper.handleDebugMessage("RaceMod looking for resources...");
+    	ResourceEncoder.addModResources(l);	
 	}
 	
 	private void deployPreInitHook() {
@@ -78,31 +74,31 @@ public class RaceMod {
 		  
 		  
 		  new ByteBuddy()
-          .redefine(Server.class)
-          .method(ElementMatchers.named("addClient")
-          .and(ElementMatchers.takesArguments(NetworkInfo.class, long.class, String.class, boolean.class, boolean.class))
-          ).intercept(MethodDelegation.to(ServerAddClientPatch.class)) 
-          .make() 
-          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 		  
+	          .redefine(Server.class)
+	          .method(ElementMatchers.named("addClient")
+	          .and(ElementMatchers.takesArguments(NetworkInfo.class, long.class, String.class, boolean.class, boolean.class))
+	          ).intercept(MethodDelegation.to(ServerAddClientPatch.class)) 
+	          .make() 
+	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 		  
 		  
 		  DebugHelper.handleDebugMessage("Deployed ServerAddClientPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
 		  
 		  new ByteBuddy()
-		  .redefine(ClientLoadingSelectCharacter.class)
-          .method(ElementMatchers.named("submitConnectAccepted"))
-          .intercept(MethodDelegation.to(ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch.class)) 
-          .make() 
-          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 
+			  .redefine(ClientLoadingSelectCharacter.class)
+	          .method(ElementMatchers.named("submitConnectAccepted"))
+	          .intercept(MethodDelegation.to(ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch.class)) 
+	          .make() 
+	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 
 		  
 		  DebugHelper.handleDebugMessage("Deployed ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
 		  
 		  
 		  new ByteBuddy()
-		  .redefine(StylistHumanMob.class)
-          .method(ElementMatchers.named("getOpenShopPacket"))
-          .intercept(Advice.to(getStylistOpenShopPacketPatch.class)) 
-          .make() 
-          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 
+			  .redefine(StylistHumanMob.class)
+	          .method(ElementMatchers.named("getOpenShopPacket"))
+	          .intercept(Advice.to(getStylistOpenShopPacketPatch.class)) 
+	          .make() 
+	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 
 		  
 		  DebugHelper.handleDebugMessage("Deployed getStylistOpenShopPacketPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
 
@@ -119,23 +115,26 @@ public class RaceMod {
     	DebugHelper.handleDebugMessage("Deploying hooks...");
 		replaceFormNewCharacterForms();
 		replacePlayerSprite();          
-        replaceFormNewPlayerPreset();
         
+        DebugHelper.handleDebugMessage("Registering containers...");
+        registerContainers();
         
     	DebugHelper.handleDebugMessage("Registering races...");
 		RaceRegistry.registerRace(CustomHumanLook.HUMAN_RACE_ID, new CustomHumanLook());
 		RaceRegistry.registerRace(TestFurryRaceLook.TEST_FURRY_RACE_ID, new TestFurryRaceLook());
-		DebugHelper.handleDebugMessage("Registering textures...");
+		
+		DebugHelper.handleDebugMessage("Registering extra textures...");
 		TestFurryRaceLook.loadRaceTextures();
-		    
-        replaceStylistForms();
+		CustomHumanLook.loadRaceTextures();  
+       
     	DebugHelper.handleDebugMessage("Registering network utilities...");
 		PacketRegistry.registerPacket(CustomPacketConnectApproved.class);
     }
     
 
-	public void postInit() {   	
-	
+	public void postInit() {   		
+		
+		DebugHelper.handleDebugMessage("Race mod initialized. That was easy!", 5, MESSAGE_TYPE.INFO);
     	Optional<String> rlist = RaceRegistry.getRaces().stream().map(RaceLook::getRaceID).reduce( (r1, r2) -> {return r1+","+r2;});
     	DebugHelper.handleFormattedDebugMessage("%d races loaded: %s", 0, DebugHelper.MESSAGE_TYPE.INFO, new Object[] {RaceRegistry.getTotalRaces(),rlist.get()});
     }
@@ -154,58 +153,28 @@ public class RaceMod {
         
         	DebugHelper.handleDebugMessage("Successfully patched PlayerSprite methods. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);    
             
-        } catch (Exception e) {
-        	
-            e.printStackTrace();
-            
+        } catch (Exception e) {	
+            e.printStackTrace();         
         }
         
     }
     
-    public static void replaceStylistForms() {
+    public static void registerContainers() {
         try {
-        	/*  new ByteBuddy()
-              .redefine(overrides.CustomRaceStyleForm.class) 
-              .name("necesse.gfx.forms.presets.containerComponent.mob.PlayerStyleForm") // Force rename
-              .make()
-              .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent());
-
-        	  DebugHelper.handleDebugMessage("Successfully replaced PlayerStyleForm. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);     	*/
-        	  
+        	        	  
         	  CUSTOM_STYLIST_CONTAINER =  ContainerRegistry.registerMobContainer((client, uniqueSeed, mob, content) -> {
       			return new CustomRaceStylistContainerForm<CustomRaceStylistContainer>(client, new CustomRaceStylistContainer(client.getClient(), uniqueSeed,
     					(StylistHumanMob) mob, new PacketReader(content)));
     		}, (client, uniqueSeed, mob, content, serverObject) -> {
     			return new CustomRaceStylistContainer(client, uniqueSeed, (StylistHumanMob) mob, new PacketReader(content));
     		});
-        	  
-        	  /*new ByteBuddy()
-              .redefine(overrides.CustomRaceStylistContainer.class) 
-              .name("necesse.inventory.container.mob.StylistContainer") // Force rename
-              .make()
-              .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent());
-
-        	  DebugHelper.handleDebugMessage("Successfully replaced StylistContainer. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);     	*/ 
+        	          	
             
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     
-	public static void replaceFormNewPlayerPreset() {
-        try {
-        	 /* new ByteBuddy()
-              .redefine(overrides.FormNewPlayerPreset.class)  // Your modified version
-              .name("necesse.gfx.forms.components.componentPresets.FormNewPlayerPreset") // Force rename
-              .make()
-              .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent());
-
-        	  DebugHelper.handleDebugMessage("Successfully replaced FormNewPlayerPreset. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);     	*/  
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 	
     public static void replaceFormNewCharacterForms() {
         try {        	

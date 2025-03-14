@@ -1,5 +1,7 @@
 package extensions;
 
+import core.forms.CustomRaceSettlerStyleForm;
+import core.forms.CustomRaceStyleForm;
 import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.network.client.Client;
 import necesse.engine.window.GameWindow;

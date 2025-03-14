@@ -48,10 +48,12 @@ public abstract class RaceLookParts{
     // New races have the colors built in to the BodyPart class.
     
     public BodyPart getBodyPart(String partName) {
-    	
+    	if(partName==null) return null;
     	// test reduction to base name
-    	BodyPart try1 =  (BodyPart)(bodyParts.getOrDefault(partName.subSequence(0, partName.indexOf('_')), null));    	
-    	if(try1 != null) return try1;    	
+    	if(partName.contains("_")) {
+	    	BodyPart try1 = (BodyPart)(bodyParts.getOrDefault(partName.subSequence(0, partName.indexOf('_')), null));    	
+	    	if(try1 != null) return try1;    	
+    	}
         return (BodyPart)(bodyParts.get(partName));
     }
         
@@ -102,7 +104,7 @@ public abstract class RaceLookParts{
 	}
 	
 	public boolean hasPart(String key) {
-		return this.bodyParts.containsKey(key) || this.bodyParts.containsKey(key+BodyPart.PART_COLOR_NAME_SUFFIX);
+		return this.bodyParts.containsKey(key) || this.bodyParts.containsKey(key.replace(BodyPart.PART_COLOR_NAME_SUFFIX, ""));
 	}
 	
 	public boolean hidePartCustomizer(String key) {

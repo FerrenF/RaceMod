@@ -1,20 +1,24 @@
 package core.race;
 
 import java.awt.Color;
+
+import core.forms.FormNewPlayerRaceCustomizer;
+import core.forms.HumanNewPlayerRaceCustomizer;
 import core.race.parts.HumanRaceParts;
 import core.race.parts.RaceLookParts;
 import core.race.parts.TestFurryRaceParts;
-import extensions.FormNewPlayerRaceCustomizer;
-import extensions.HumanNewPlayerRaceCustomizer;
 import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.network.PacketReader;
 import necesse.engine.util.GameRandom;
 import necesse.entity.mobs.MaskShaderOptions;
 import necesse.gfx.HumanLook;
 import necesse.gfx.drawOptions.human.HumanDrawOptions;
+import necesse.gfx.gameTexture.GameTexture;
 
 public class CustomHumanLook extends RaceLook {
-
+	
+	public static GameTexture raceCustomizerIcon;
 	public static final String HUMAN_RACE_ID = "human";
 	public CustomHumanLook(GameRandom random, boolean onlyHumanLike) {		
 		this(true);
@@ -59,6 +63,8 @@ public class CustomHumanLook extends RaceLook {
 		this.setShoesColor(shoesColor);
 		this.setEyeType(eyeType);
 	}
+	
+
 	
 	// Note: This does not set valid DEFAULT parts. Just makes sure the keys are there.
 	public void defineCustomRaceBodyParts() {		
@@ -110,6 +116,15 @@ public class CustomHumanLook extends RaceLook {
 	@Override
 	public Class<? extends FormNewPlayerRaceCustomizer> getAssociatedCustomizerForm() {
 		return this.associatedCustomizerForm;
+	}
+	
+	public static void loadRaceTextures() {
+		DebugHelper.handleDebugMessage("Loading race textures for race " + CustomHumanLook.HUMAN_RACE_ID, 50, MESSAGE_TYPE.DEBUG);
+	}
+
+	@Override
+	public String getRaceID() {
+		return CustomHumanLook.HUMAN_RACE_ID;
 	}
 
 }
