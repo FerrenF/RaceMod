@@ -1,19 +1,20 @@
 package core.gfx;
 
 import java.awt.Point;
-import java.util.LinkedList;
+import java.nio.ByteBuffer;
 
-import core.RaceMod;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
+
+import core.race.RaceLook;
 import core.race.TestFurryRaceLook;
-import extensions.RaceLook;
-import factory.RaceDataFactory;
+import core.race.factory.RaceDataFactory;
 import necesse.entity.mobs.MaskShaderOptions;
 import necesse.entity.mobs.PlayerMob;
-import necesse.gfx.HumanLook;
 import necesse.gfx.drawOptions.DrawOptions;
 import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.gameTexture.GameTexture;
-import necesse.inventory.item.armorItem.ArmorItem;
 import necesse.level.maps.Level;
 import necesse.level.maps.light.GameLight;
 
@@ -22,7 +23,7 @@ public class TestFurryDrawOptions implements DrawOptions {
 	
 	private PlayerMob player;
 	private final Level level;
-	private RaceLook look;
+	private TestFurryRaceLook look;
 	
 	private GameTexture tailTexture;
 	private GameTexture earsTexture;
@@ -51,7 +52,8 @@ public class TestFurryDrawOptions implements DrawOptions {
 	private int drawX;
 	private int drawY;
 	
-
+	private MaskShaderOptions mask;
+	
 	public TestFurryDrawOptions(Level level) {
 		this.drawEars = false;
 		this.drawMuzzle = false;
@@ -68,15 +70,21 @@ public class TestFurryDrawOptions implements DrawOptions {
 		this.spriteRes = 64;
 		
 	}	
-	public TestFurryDrawOptions(Level level, RaceLook look) {
-		this(level);
-		this.look = look;
-		
+	
+	public TestFurryDrawOptions size(Point p) {
+		this.width = p.x;
+		this.height = p.y;
+		return this;
 	}
+	
+	public TestFurryDrawOptions(Level level, TestFurryRaceLook look) {
+		this(level);
+		this.look = look;		
+	}
+	
 	public TestFurryDrawOptions(Level level, PlayerMob player) {
 		this(level);
 		this.player = player;
-		this.look = TestFurryRaceLook.getCustomRaceLook(RaceDataFactory.getRaceLook(player, new TestFurryRaceLook(true)));
 	}
 			
 	public TestFurryDrawOptions(Level level, PlayerMob player, int dir, int spriteX, int spriteY, int spriteRes, int drawX,
@@ -85,18 +93,18 @@ public class TestFurryDrawOptions implements DrawOptions {
 			this(level, player);
 	}
 
-	public TestFurryDrawOptions tailTexture(GameTexture tailTexture) {
-		this.tailTexture = tailTexture;
+	public TestFurryDrawOptions tailTexture(TestFurryRaceLook _look, int spriteX, int spriteY, boolean resize) {
+		this.tailTexture = resize ? _look.getTailTexture(spriteX, spriteY, width, height) : _look.getTailTexture(spriteX, spriteY);
 		return this;
 	}
 	
-	public TestFurryDrawOptions earsTexture(GameTexture earsTexture) {
-		this.earsTexture = earsTexture;
+	public TestFurryDrawOptions earsTexture(TestFurryRaceLook _look, int spriteX, int spriteY, boolean resize) {
+		this.earsTexture = resize ? _look.getEarsTexture(spriteX, spriteY, width, height) : _look.getEarsTexture(spriteX, spriteY);
 		return this;
 	}
 	
-	public TestFurryDrawOptions muzzleTexture(GameTexture muzzleTexture) {
-		this.muzzleTexture = muzzleTexture;
+	public TestFurryDrawOptions muzzleTexture(TestFurryRaceLook _look, int spriteX, int spriteY, boolean resize) {
+		this.muzzleTexture = resize ? _look.getMuzzleTexture(spriteX, spriteY, width, height) : _look.getMuzzleTexture(spriteX, spriteY);
 		return this;
 	}
 	
@@ -128,8 +136,8 @@ public class TestFurryDrawOptions implements DrawOptions {
 	}
 
 	private TestFurryDrawOptions sprite(int x, int y) {
-		// TODO Auto-generated method stub
-		return null;
+
+		return this.sprite(x, y);
 	}
 
 	public TestFurryDrawOptions dir(int dir) {
@@ -194,18 +202,38 @@ public class TestFurryDrawOptions implements DrawOptions {
 		return this;
 	}
 	
+
 	@Override
 	public void draw() {
-		
-		if(this.drawEars) {
-			this.earsTexture.initDraw().pos(drawX+drawOffsetX, drawY+drawOffsetY).size(width, height).alpha(this.allAlpha).light(this.light).draw();
-		}
-		if(this.drawMuzzle) {
-			this.muzzleTexture.initDraw().pos(drawX+drawOffsetX, drawY+drawOffsetY).size(width, height).alpha(this.allAlpha).light(this.light).draw();
-		}
-		if(this.drawTail) {
-			this.tailTexture.initDraw().pos(drawX+drawOffsetX, drawY+drawOffsetY).size(width, height).alpha(this.allAlpha).light(this.light).draw();
-		}
+	    if (this.drawEars) {
+	        this.earsTexture.initDraw()
+	            .pos(drawX + drawOffsetX, drawY + drawOffsetY)
+	            .size(width, height)
+	            .alpha(this.allAlpha)
+	            .light(this.light)
+	            .addMaskShader(mask)
+	            .draw();
+	    }
+
+	    if (this.drawMuzzle) {
+	        this.muzzleTexture.initDraw()
+	            .pos(drawX + drawOffsetX, drawY + drawOffsetY)
+	            .size(width, height)
+	            .alpha(this.allAlpha)
+	            .light(this.light)
+	            .addMaskShader(mask)
+	            .draw();
+	    }
+
+	    if (this.drawTail) {
+	        this.tailTexture.initDraw()
+	            .pos(drawX + drawOffsetX, drawY + drawOffsetY)
+	            .size(width, height)
+	            .alpha(this.allAlpha)
+	            .light(this.light)
+	            .addMaskShader(mask)
+	            .draw();
+	    }
 	}
 	
 
@@ -233,4 +261,23 @@ public class TestFurryDrawOptions implements DrawOptions {
 		return null;
 	}
 	
+	public TestFurryDrawOptions mask(MaskShaderOptions mask) {
+		this.mask = mask;
+		return this;
+	}
+
+	public TestFurryDrawOptions mask(GameTexture mask, int xOffset, int yOffset) {
+		this.mask = new MaskShaderOptions(mask, 0, 0, xOffset, yOffset);
+		return this;
+	}
+
+	public TestFurryDrawOptions mask(GameTexture mask) {
+		return this.mask(mask, 0, 0);
+	}
+
+	public TestFurryDrawOptions spriteRes(int spriteRes) {
+		this.spriteRes = spriteRes;
+		return this;
+	}
+
 }

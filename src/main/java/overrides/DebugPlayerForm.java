@@ -2,7 +2,7 @@ package overrides;
 
 import java.lang.reflect.Field;
 
-import extensions.RaceLook;
+import core.race.RaceLook;
 import necesse.engine.network.client.Client;
 import necesse.engine.network.client.ClientClient;
 import necesse.engine.network.packet.PacketMobHealth;

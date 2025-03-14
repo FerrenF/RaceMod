@@ -1,18 +1,21 @@
 package core.race;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.util.List;
 import java.util.function.Function;
 
-import core.RaceMod;
 import core.gfx.GameParts;
 import core.gfx.GamePartsLoader;
 import core.gfx.TestFurryDrawOptions;
+import core.race.factory.RaceDataFactory;
 import core.race.parts.BodyPart;
+import core.race.parts.HumanRaceParts;
+import core.race.parts.RaceLookParts;
 import core.race.parts.TestFurryRaceParts;
-import extensions.RaceLook;
+import extensions.FormNewPlayerRaceCustomizer;
 import extensions.TestFurryNewPlayerRaceCustomizer;
-import factory.RaceDataFactory;
+import helpers.DebugHelper;
 import necesse.engine.network.PacketReader;
 import necesse.engine.util.GameRandom;
 import necesse.entity.mobs.MaskShaderOptions;
@@ -30,10 +33,10 @@ import necesse.level.maps.light.GameLight;
 public class TestFurryRaceLook extends RaceLook {
 	
 	public static final String TEST_FURRY_RACE_ID = "testfurry";
-
+	
 	public static TestFurryRaceLook getCustomRaceLook(RaceLook _look) {	
 		if (!_look.getRaceID().equals(TestFurryRaceLook.TEST_FURRY_RACE_ID)) {
-			RaceMod.handleDebugMessage(String.format("Draw options for raceID %s requested for non-raceID %s from %s. Using defaults.", TestFurryRaceLook.TEST_FURRY_RACE_ID, _look.getRaceID(), _look.getClass().getName()), 25);
+			DebugHelper.handleDebugMessage(String.format("Draw options for raceID %s requested for non-raceID %s from %s. Using defaults.", TestFurryRaceLook.TEST_FURRY_RACE_ID, _look.getRaceID(), _look.getClass().getName()), 25);
 			return new TestFurryRaceLook(true);
 		}
 		return (TestFurryRaceLook)_look;
@@ -54,11 +57,10 @@ public class TestFurryRaceLook extends RaceLook {
 		this();
 		if(init) {
 			this.partsList = new TestFurryRaceParts(init);
-			this.resetCustomDefault();	
-			this.initCustomParts();			
+			this.resetCustomDefault();		
 		}
 	}
-	
+			
 	public TestFurryRaceLook(int hair, int facialFeature, int hairColor, int skin, int eyeColor, int eyeType, Color shirtColor,
 			Color shoesColor, int tail, int tailColor, int ears, int earsColor, int muzzle, int muzzleColor, int headStyle, int headColor, int armsStyle, int armsColor, int bodyStyle, int bodyColor) {	
 		
@@ -178,6 +180,7 @@ public class TestFurryRaceLook extends RaceLook {
 
 	public TestFurryRaceLook(PacketReader pr) {
 		super(pr);
+		
 	}	
 	
 	// Randomization
@@ -304,19 +307,35 @@ public class TestFurryRaceLook extends RaceLook {
 	public GameTexture getEarsTexture(int spriteX, int spriteY) {
 		return GameParts.getPart(TestFurryRaceParts.class, "EARS").getTextureSprite(getEarsStyle(), getEarsColor(), spriteX, spriteY);
 	}
-
+	
+	public GameTexture getEarsTexture(int spriteX, int spriteY, int resizeX, int resizeY) {
+		return GameParts.getPart(TestFurryRaceParts.class, "EARS").getTextureSprite(getEarsStyle(), getEarsColor(), spriteX, spriteY, resizeX, resizeY);
+	}
+	
 	public GameTexture getTailTexture(int spriteX, int spriteY) {
 		return GameParts.getPart(TestFurryRaceParts.class, "TAIL").getTextureSprite(getTailStyle(), getTailColor(), spriteX, spriteY);
 	}
-
+	
+	public GameTexture getTailTexture(int spriteX, int spriteY, int resizeX, int resizeY) {
+		return GameParts.getPart(TestFurryRaceParts.class, "TAIL").getTextureSprite(getTailStyle(), getTailColor(), spriteX, spriteY, resizeX, resizeY);
+	}
+	
 	public GameTexture getMuzzleTexture(int spriteX, int spriteY) {
 		return GameParts.getPart(TestFurryRaceParts.class, "MUZZLE").getTextureSprite(getMuzzleStyle(), getMuzzleColor(), spriteX, spriteY);
 	}
-
-	public GameTexture getHeadTexture(int spriteX, int spriteY) {
-		return GameParts.getPart(TestFurryRaceParts.class, "HEAD").getTextureSprite(getMuzzleStyle(), getMuzzleColor(), spriteX, spriteY);
+	
+	public GameTexture getMuzzleTexture(int spriteX, int spriteY, int resizeX, int resizeY) {
+		return GameParts.getPart(TestFurryRaceParts.class, "MUZZLE").getTextureSprite(getMuzzleStyle(), getMuzzleColor(), spriteX, spriteY, resizeX, resizeY);
 	}
 
+	public GameTexture getHeadTexture(int spriteX, int spriteY) {
+		return GameParts.getPart(TestFurryRaceParts.class, "HEAD").getTextureSprite(getHeadStyle(), getHeadColor(), spriteX, spriteY);
+	}
+	
+	public GameTexture getHeadTexture(int spriteX, int spriteY, int resizeX, int resizeY) {
+		return GameParts.getPart(TestFurryRaceParts.class, "HEAD").getTextureSprite(getHeadStyle(), getHeadColor(), spriteX, spriteY, resizeX, resizeY);
+	}
+	
 	public GameTexture getHeadTexture() {
 		return GameParts.getPart(TestFurryRaceParts.class, "HEAD").getFullTexture(getHeadStyle(), getHeadColor());
 	}
@@ -334,7 +353,7 @@ public class TestFurryRaceLook extends RaceLook {
 	}
 
 	@Override
-	public HumanDrawOptions modifyHumanDrawOptions(HumanDrawOptions drawOptions) {
+	public HumanDrawOptions modifyHumanDrawOptions(HumanDrawOptions drawOptions, MaskShaderOptions mask) {
 		
 		for( BodyPart part : this.getRaceParts().getReplacerParts()) {
 			switch(part.getReplacer().targetPart) {
@@ -360,23 +379,30 @@ public class TestFurryRaceLook extends RaceLook {
 		}
 		
 		drawOptions.addTopDraw(new TestFurryDrawOptions.FurryDrawOptionsGetter() {
-			
+						
  				@Override
 				public DrawOptions getDrawOptions(PlayerMob player, int dir, int spriteX, int spriteY, int spriteRes, int drawX, int drawY,
 						int width, int height, boolean mirrorX, boolean mirrorY, GameLight light, float alpha, MaskShaderOptions mask) {
- 					TestFurryRaceLook rl = TestFurryRaceLook.getCustomRaceLook(RaceDataFactory.getRaceLook(player, new TestFurryRaceLook(true)));		
  					
-					return new TestFurryDrawOptions(player.getLevel(), player)
-							.earsTexture(rl.getEarsTexture(spriteX, spriteY).resize(width, height))
-							.muzzleTexture(rl.getMuzzleTexture(spriteX, spriteY).resize(width, height))
-							.tailTexture(rl.getTailTexture(spriteX, spriteY).resize(width, height))
+ 					TestFurryRaceLook rl = (TestFurryRaceLook)RaceDataFactory.getRaceLook(player, TestFurryRaceLook.this);
+					return new TestFurryDrawOptions(player.getLevel(), rl)
+							.spriteRes(spriteRes)
+							.size(new Point(width, height))
+							.earsTexture(rl, spriteX, spriteY, true)
+							.muzzleTexture(rl, spriteX, spriteY, true)
+							.tailTexture(rl, spriteX, spriteY, true)
 							.dir(dir).mirrorX(mirrorX).mirrorY(mirrorY).allAlpha(alpha).light(light)
-							.drawOffset(0, 0).pos(drawX, drawY)
+							.drawOffset(mask == null ? 0 : mask.drawXOffset, mask == null ? 0 : mask.drawYOffset).pos(drawX, drawY).mask(mask)
 							.drawEars(true).drawMuzzle(true).drawTail(true);
 
 				}
 			});		
 		return drawOptions;
+	}
+
+	@Override
+	public Class<? extends FormNewPlayerRaceCustomizer> getAssociatedCustomizerForm() {
+		return this.associatedCustomizerForm;
 	}
 
 

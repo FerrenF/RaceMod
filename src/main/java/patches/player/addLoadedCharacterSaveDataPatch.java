@@ -1,10 +1,10 @@
 package patches.player;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.This;
-import core.RaceMod;
-import extensions.RaceLook;
-import factory.RaceDataFactory;
-import factory.RaceDataFactory.RaceData;
+import core.race.RaceLook;
+import core.race.factory.RaceDataFactory;
+import core.race.factory.RaceDataFactory.RaceData;
+import helpers.DebugHelper;
 import necesse.engine.modLoader.annotations.ModMethodPatch;
 import necesse.engine.save.LoadData;
 import necesse.engine.save.SaveData;
@@ -23,7 +23,7 @@ public class addLoadedCharacterSaveDataPatch {
         		if(r.raceDataInitialized) {   		
         			//r.getRaceLook().addSaveData(save);    			
         			
-        			RaceMod.handleDebugMessage(String.format(
+        			DebugHelper.handleDebugMessage(String.format(
                             "addLoadedCharacterSaveData for PlayerMob %s intercepted.",
                            th.playerName
                         ), 25);

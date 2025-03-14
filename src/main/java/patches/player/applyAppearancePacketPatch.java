@@ -1,35 +1,48 @@
 package patches.player;
 
-import net.bytebuddy.asm.Advice.Argument;
-import net.bytebuddy.asm.Advice.This;
-import core.RaceMod;
-import factory.RaceDataFactory;
-import factory.RaceDataFactory.RaceData;
+import core.race.RaceLook;
+import core.race.factory.RaceDataFactory;
+import core.race.factory.RaceDataFactory.RaceData;
+import helpers.DebugHelper;
 import necesse.engine.modLoader.annotations.ModMethodPatch;
-import necesse.engine.network.PacketReader;
 import necesse.engine.network.packet.PacketPlayerAppearance;
-import necesse.engine.save.LoadData;
 import necesse.entity.mobs.PlayerMob;
 import net.bytebuddy.asm.Advice;
-
+import core.race.CustomHumanLook;
 @ModMethodPatch(target = PlayerMob.class, name = "applyAppearancePacket", arguments = {PacketPlayerAppearance.class})
 public class applyAppearancePacketPatch {
-
+	
+	@Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class)
+    static boolean onEnter(@Advice.This PlayerMob th, @Advice.Argument(0) PacketPlayerAppearance packet) {	      
+		if(RaceDataFactory.mobUniqueID(th)!=-1) {
+			
+	    	RaceData r = RaceDataFactory.getOrRegisterRaceData(th);	
+	    	RaceLook ra = RaceLook.fromHumanLook(packet.look, r.raceDataInitialized ? r.getRaceLook().getClass() : CustomHumanLook.class);
+	    	th.refreshClientUpdateTime();
+	    	th.look = ra;
+	    	r.addRaceData(ra);
+	    	th.getInv().giveLookArmor(false);
+	    	th.playerName = packet.name;
+	    	DebugHelper.handleDebugMessage(String.format(
+	                "applyAppearancePacket for PlayerMob %s intercepted.",
+	                th.playerName
+	            ), 25);
+	    	
+	        return true;
+			}
+		return false;
+    }
+	
     @Advice.OnMethodExit
     static void onExitApplyAppearancePacketPatch(@Advice.This PlayerMob th, @Advice.Argument(0) PacketPlayerAppearance packet) {
-        // Call the original method manually to apply load data
-    	if(RaceDataFactory.hasRaceData(th)) {
-    		RaceData r = RaceDataFactory.getRaceData(th);
-    		if(r.raceDataInitialized) {
-    			
-    			PacketReader reader = new PacketReader(packet);
-    			r.getRaceLook().applyContentPacket(reader);
-    			RaceMod.handleDebugMessage(String.format(
-                        "applyAppearancePacket for PlayerMob %s intercepted.",
-                        th.playerName
-                    ), 25);
-    		}
-    	}
+    	
+    	
      
     }
 }
+/*
+this.refreshClientUpdateTime();
+this.look = new HumanLook(packet.look);
+this.inv.giveLookArmor(false);
+this.playerName = packet.name;
+*/

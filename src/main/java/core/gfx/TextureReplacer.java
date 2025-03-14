@@ -1,9 +1,5 @@
 package core.gfx;
 
-import core.race.parts.BodyPart;
-import necesse.gfx.drawOptions.human.HumanDrawOptions;
-import necesse.gfx.gameTexture.GameTexture;
-
 public class TextureReplacer {
     	
     	public boolean targetBaseGamePart;

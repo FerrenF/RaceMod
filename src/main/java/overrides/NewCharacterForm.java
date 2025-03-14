@@ -2,10 +2,10 @@ package overrides;
 
 import java.lang.reflect.Field;
 
-import core.RaceMod;
 import core.race.CustomHumanLook;
-import extensions.RaceLook;
-import factory.RaceDataFactory;
+import core.race.RaceLook;
+import core.race.factory.RaceDataFactory;
+import helpers.DebugHelper;
 import necesse.engine.localization.message.GameMessage;
 import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.platforms.PlatformManager;
@@ -42,8 +42,7 @@ public abstract class NewCharacterForm extends Form {
 				flow.next(25)));		
 
 		overrides.FormNewPlayerPreset np = new overrides.FormNewPlayerPreset(0, 0, PRESET_FORM_WIDTH, true, true);
-		this.newPlayerFormPreset = this.addComponent((FormNewPlayerPreset)flow.nextY(np, 20));
-		
+		this.newPlayerFormPreset = this.addComponent((FormNewPlayerPreset)flow.nextY(np, 20));		
 	
 		
 		this.addComponent(new FormLocalLabel("racemodui", "playername", new FontOptions(16), -1, 5, flow.next(18)));
@@ -70,8 +69,7 @@ public abstract class NewCharacterForm extends Form {
 		
 		this.createButton.onClicked((e) -> {
 			
-			PlayerMob player = this.getPlayer();
-									
+			PlayerMob player = this.getPlayer();									
 			this.onCreatePressed(player);
 		});
 		
@@ -96,7 +94,7 @@ public abstract class NewCharacterForm extends Form {
 	}
 	
 	public RaceLook getLook() {		
-		return this.newPlayerFormPreset.getLook();
+		return this.newPlayerFormPreset.getRaceLook();
 	}
 	
 	public abstract void onCreatePressed(PlayerMob var1);
@@ -144,10 +142,10 @@ public abstract class NewCharacterForm extends Form {
 		PlayerMob player = this.newPlayerFormPreset.newPlayerFormContents.getNewPlayer();
 		player.playerName = this.nameInput.getText().trim();		
 		
-		RaceMod.handleDebugMessage("Attempting to save player " + player.playerName + " with race "+this.newPlayerFormPreset.newPlayerFormContents.getRaceID() ,45);
+		DebugHelper.handleDebugMessage("Attempting to save player " + player.playerName + " with race "+this.newPlayerFormPreset.newPlayerFormContents.getRaceID() ,45);
 		RaceDataFactory.getOrRegisterRaceData(player,getMeFirst);
-		RaceMod.handleDebugMessage("Check factory exists: " + (RaceDataFactory.hasRaceData(player) ? "true" : "false") ,45);
-		RaceMod.handleDebugMessage("Check factory race exists: " + (RaceDataFactory.getRaceData(player).raceDataInitialized ? "true" : "false") ,45);
+		DebugHelper.handleDebugMessage("Check factory exists: " + (RaceDataFactory.hasRaceData(player) ? "true" : "false") ,45);
+		DebugHelper.handleDebugMessage("Check factory race exists: " + (RaceDataFactory.getRaceData(player).raceDataInitialized ? "true" : "false") ,45);
 		
 		return player;
 	}

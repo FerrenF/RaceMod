@@ -7,10 +7,14 @@ import core.gfx.TextureReplacer;
 
 public class BodyPart {
 	
+	public static int STYLIST_COST_DEFAULT = 100;
 	public static String COLOR_LABEL_SUFFIX = "_color";
 	public static String PART_COLOR_NAME_SUFFIX = "_COLOR";
 	private Class<? extends RaceLookParts> belongsToClass;
 	
+	private int stylistCost = STYLIST_COST_DEFAULT;
+	private boolean costIsShards = false;
+
 	private int totalOptions = 0;
 	
     private String name;
@@ -40,31 +44,35 @@ public class BodyPart {
 
 	public Point getAccessoryTextureMapSize() 	{	return accessoryTextureMapSize;	}
 
-	public boolean isBaseGamePart() 			{	return isBaseGamePart;	}
+	public boolean isBaseGamePart() 			{	return isBaseGamePart;			}
     
-	public boolean isHasTexture() 				{	return hasTexture;	}
+	public boolean isHasTexture() 				{	return hasTexture;				}
 	
-	public boolean isReplacerPart()				{	return partReplacer != null; }
+	public boolean isReplacerPart()				{	return partReplacer != null; 	}
 	
-	public boolean isHasColor() 				{	return hasColor;	}
+	public boolean isHasColor() 				{	return hasColor;				}
 	
-	public String getTexturePath() 				{	return texturePath;	}	
+	public String getTexturePath() 				{	return texturePath;				}	
 
-    public boolean isHasWigTexture() 			{	return hasWigTexture;	}
+    public boolean isHasWigTexture() 			{	return hasWigTexture;			}
     
 	public Point getTextureSpriteMapSize() 		{	return textureSpriteMapSize;	}
 	
-    public String getPartName() 				{  	return name;   }
+    public String getPartName() 				{  	return name;   					}
     
     public String getPartColorName() 			{ 	return name + PART_COLOR_NAME_SUFFIX;  }
     
-    public String getLabelKey() 				{  	return this.labelKey;    }
+    public String getLabelKey() 				{  	return this.labelKey;    		}
     
-	public String getLabelCategory() 			{	return this.labelCategory;	}
+	public String getLabelCategory() 			{	return this.labelCategory;		}
 	
-	public String getColorPath() 				{	return this.colorPath;	}	
+	public String getColorPath() 				{	return this.colorPath;			}	
 	
-	public boolean isHasSides() 				{	return hasSides;	}
+	public boolean isHasSides() 				{	return hasSides;				}
+	
+	public int getStylistCost() 				{	return stylistCost;				}
+
+	public boolean isCostShards() 				{	return costIsShards;			}
     
 	public Class<? extends RaceLookParts> getOwnerClass() { return this.belongsToClass;}
 	public String getLabelColorKey() 			{		return getLabelKey() + COLOR_LABEL_SUFFIX;	}
@@ -112,7 +120,9 @@ public class BodyPart {
     		String texturePath,    		
     		Point spriteMapSize,
     		Point accessoryTextureMapSize,
-    		TextureReplacer replacer) {
+    		TextureReplacer replacer,
+    		int stylistCost,
+    		boolean costIsShards) {
     	
     	this(belongsToClass, name, labelCategory, labelKey);
         
@@ -127,6 +137,8 @@ public class BodyPart {
         this.hasSeparateWigTexture = hasSeparateWigTexture;
         this.accessoryTextureMapSize = accessoryTextureMapSize;
         this.partReplacer = replacer;
+        this.stylistCost = stylistCost;
+        this.costIsShards = costIsShards;
     }
 
 

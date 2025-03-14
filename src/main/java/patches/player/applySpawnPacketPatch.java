@@ -1,11 +1,11 @@
 package patches.player;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.This;
-import core.RaceMod;
 import core.race.CustomHumanLook;
-import extensions.RaceLook;
-import factory.RaceDataFactory;
-import factory.RaceDataFactory.RaceData;
+import core.race.RaceLook;
+import core.race.factory.RaceDataFactory;
+import core.race.factory.RaceDataFactory.RaceData;
+import helpers.DebugHelper;
 import necesse.engine.modLoader.annotations.ModMethodPatch;
 import necesse.engine.network.PacketReader;
 import necesse.engine.save.LoadData;
@@ -23,7 +23,7 @@ public class applySpawnPacketPatch {
 	    	RaceData r = RaceDataFactory.getOrRegisterRaceData(th);
     		if(r.raceDataInitialized) {	    			
     			th.look = r.getRaceLook();
-    			RaceMod.handleDebugMessage(String.format(
+    			DebugHelper.handleDebugMessage(String.format(
                         "applySpawnPacket for PlayerMob %s intercepted.",
                         th.playerName
                     ), 25);
@@ -32,7 +32,7 @@ public class applySpawnPacketPatch {
     			RaceLook toApply = RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true));
     			th.look = toApply;
     			r.addRaceData(toApply);
-    			RaceMod.handleDebugMessage(String.format(
+    			DebugHelper.handleDebugMessage(String.format(
                         "applySpawnPacket for PlayerMob %s intercepted and interpreted from packet.",
                         th.playerName
                     ), 25);

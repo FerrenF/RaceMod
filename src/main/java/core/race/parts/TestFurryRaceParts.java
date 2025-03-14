@@ -1,6 +1,10 @@
 package core.race.parts;
 
 import java.awt.Point;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import core.gfx.TextureReplacer;
 
@@ -14,13 +18,10 @@ public class TestFurryRaceParts extends RaceLookParts{
         super(init);
         defineCustomRaceBodyParts();
      }	
-	
-    
+	    
     public void defineCustomRaceBodyParts() {
-    	      
-    	
-    //   public BodyPart(String name, String labelCategory, String labelKey, boolean hasTexture, boolean hasColor, String colorPath, String texturePath, int totalOptions) {
-
+ 
+ 	  
     	 this.addBodyPart("TAIL",
     			 new BodyPart(TestFurryRaceParts.class,
 		    			 "TAIL",
@@ -36,7 +37,7 @@ public class TestFurryRaceParts extends RaceLookParts{
 		    			 "player/race/testfurry/tail/",
 		    			 new Point(64,64),
 		    			 null,
-		    			 null));
+		    			 null, 5, true));
     	 
          this.addBodyPart("EARS",
         		 new BodyPart(TestFurryRaceParts.class,
@@ -52,7 +53,7 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "player/race/testfurry/skincolors",
         				 "player/race/testfurry/ears/",
         				 new Point(64,64),
-        				 new Point(32,32), null));
+        				 new Point(32,32), null, 5, true));
          
          this.addBodyPart("MUZZLE",
         		 new BodyPart(TestFurryRaceParts.class,
@@ -68,7 +69,7 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "player/race/testfurry/skincolors",
         				 "player/race/testfurry/muzzle/",
         				 new Point(64,64),
-        				 new Point(32, 32), null));
+        				 new Point(32, 32), null, 5, true));
          
          this.addBodyPart("HEAD",
         		 new BodyPart(TestFurryRaceParts.class,
@@ -84,7 +85,7 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "player/race/testfurry/skincolors",
         				 "player/race/testfurry/head/",
         				 new Point(64,64),
-        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.HEAD)	));
+        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.HEAD), 5, true	));
          
          this.addBodyPart("BODY",
         		 new BodyPart(TestFurryRaceParts.class,
@@ -100,7 +101,7 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "player/race/testfurry/body/skincolors",
         				 "player/race/testfurry/body/",
         				 new Point(64,64),
-        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.BODY)	));
+        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.BODY), 5, true	));
          
          this.addBodyPart("ARMS",
         		 new BodyPart(TestFurryRaceParts.class,
@@ -116,13 +117,14 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "player/race/testfurry/arms/skincolors",
         				 "player/race/testfurry/arms/",
         				 new Point(64,64),
-        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.ARMS)	));
+        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.ARMS), 5, true	));
           
          this.hidePartCustomizer("SKIN_COLOR");
         // this.hidePartCustomizer("EYE_COLOR");
         // this.hidePartCustomizer("EYE_TYPE");
          
     }
-    
+
+
 
 }

@@ -28,10 +28,12 @@ import necesse.inventory.item.armorItem.ArmorItem.HairDrawMode;
 import necesse.level.maps.Level;
 import necesse.level.maps.light.GameLight;
 import org.lwjgl.opengl.GL11;
+
+import core.race.RaceLook;
+
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.ArrayList;
-import extensions.RaceLook;
 
 public class HumanDrawOptions {
 	private final Level level;

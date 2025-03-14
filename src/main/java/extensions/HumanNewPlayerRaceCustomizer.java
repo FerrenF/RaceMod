@@ -8,9 +8,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import core.RaceMod;
 import core.race.CustomHumanLook;
+import core.race.RaceLook;
+import core.race.factory.RaceDataFactory;
 import core.race.parts.BodyPart;
+import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.Settings;
 import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.network.NetworkClient;
@@ -38,10 +41,15 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	@SuppressWarnings("unchecked")
 	public CustomHumanLook getCustomRaceLook() {	
 		if (this.getRaceID() != CustomHumanLook.HUMAN_RACE_ID) {
-			RaceMod.handleDebugMessage("Problem converting base RaceLook class to super "+this.getClass().getName(), 25);
-			return null;
+			DebugHelper.handleFormattedDebugMessage("Problem converting base RaceLook class with race %s at form %s", 5, MESSAGE_TYPE.ERROR, new Object[] {this.getRaceID(), this.getClass().getName()});
+			return new CustomHumanLook(true);
 		}
 		return (CustomHumanLook)this.getRaceLook();
+	}
+	
+	@Override
+	public RaceLook getRaceLook() {
+	    return RaceDataFactory.getRaceLook(this.getPlayerHelper(), new CustomHumanLook(true));
 	}
 	
 	@Override
@@ -51,7 +59,7 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	}
 
 	public void initializeIcon(int x, int iconY, int width) {
-		// Create the FormPlayerIcon and cast it to FormComponent if necessary
+		DebugHelper.handleFormattedDebugMessage("Player Icon form initialized for %s with race %s", 50, MESSAGE_TYPE.DEBUG, new Object[] {this.getPlayerHelper().playerName, this.getRaceID()});
 	    FormPlayerIcon formPlayerIcon = new FormPlayerIcon(x, iconY, 128, 128, this.getPlayerHelper()) {
 	        @Override
 	        public void modifyHumanDrawOptions(HumanDrawOptions drawOptions) {
@@ -59,7 +67,6 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	            HumanNewPlayerRaceCustomizer.this.modifyHumanDrawOptions(drawOptions);
 	        }
 	    };
-
 	    // Add the FormPlayerIcon to the component list
 	    this.icon = (FormPlayerIcon) this.addComponent(formPlayerIcon);
 
@@ -97,7 +104,7 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 		int DEBUG_VALUE = 80;
 	     // Store the selected value for logging
 		 Object value = super.baseGetCurrentBodypartSelection(part);	
-	    RaceMod.handleDebugMessage("getCurrentBodyPartSelection(" + part.getPartName() + ") = " + value 
+	    DebugHelper.handleDebugMessage("getCurrentBodyPartSelection(" + part.getPartName() + ") = " + value 
 		        + " [Type: " + (value != null ? value.getClass().getSimpleName() : "null") + "]", DEBUG_VALUE);
 
 	    return value;
@@ -160,15 +167,12 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 
 	protected Section createColorCustomSection(BodyPart part, String labelKey, Supplier<Color> colorGetter, 
 		Consumer<Color> colorSetFunc, Function<Color, ArrayList<InventoryItem>> costFunc, Predicate<Section> isCurrent, int _width) {
-				
 		return super.createColorCustomSection(part, labelKey, colorGetter, colorSetFunc, costFunc, isCurrent, _width);
 	}			
 	
 	// Generates sections dynamically for each body part
 	protected Section createBodyPartSection(BodyPart part, Predicate<Section> isCurrent, int _width) {
-
 		return super.createBodyPartSection(part, isCurrent, _width);
-	
 	}
 
 	public Point getSkinFaceDrawOffset() 		{	return new Point(-3, -4);	}
@@ -183,7 +187,9 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 		this.updateComponents();
 	}
 		
-	public void onChanged() {	}
+	public void onChanged() {	
+		super.onChanged();
+	}
 
 	public void modifyHumanDrawOptions(HumanDrawOptions drawOptions) {	}
 
@@ -206,6 +212,12 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	@Override
 	protected Section createBodyPartCustomColorSection(BodyPart part, Predicate<Section> isCurrent, int _width) {
 		return super.createBodyPartSection(part, isCurrent, _width);
+	}
+
+	@Override
+	public void reset() {
+		this.setPlayerHelper(new PlayerMob(0L, (NetworkClient) null));
+		this.updateComponents();
 	}
 
 

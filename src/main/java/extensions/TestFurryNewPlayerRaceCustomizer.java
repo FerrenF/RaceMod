@@ -2,42 +2,30 @@ package extensions;
 
 import java.awt.Color;
 import java.awt.Point;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import core.RaceMod;
 import core.gfx.GameParts;
-import core.gfx.TestFurryDrawOptions;
-import core.gfx.TextureReplacer;
 import core.race.CustomHumanLook;
+import core.race.RaceLook;
 import core.race.TestFurryRaceLook;
+import core.race.factory.RaceDataFactory;
 import core.race.parts.BodyPart;
 import core.race.parts.TestFurryRaceParts;
-import extensions.FormNewPlayerRaceCustomizer.Section;
-import factory.RaceDataFactory;
-import necesse.engine.Settings;
+import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.network.NetworkClient;
-import necesse.entity.mobs.MaskShaderOptions;
 import necesse.entity.mobs.PlayerMob;
-import necesse.gfx.GameHair;
 import necesse.gfx.HumanLook;
-import necesse.gfx.drawOptions.DrawOptions;
 import necesse.gfx.drawOptions.human.HumanDrawOptions;
-import necesse.gfx.drawOptions.human.HumanDrawOptions.HumanDrawOptionsGetter;
 import necesse.gfx.forms.components.FormContentVarToggleButton;
 import necesse.gfx.forms.components.FormPlayerIcon;
-import necesse.gfx.gameTexture.GameSprite;
 import necesse.gfx.gameTexture.GameTexture;
-import necesse.gfx.gameTexture.GameTexture.BlendQuality;
 import necesse.inventory.InventoryItem;
-import necesse.inventory.item.armorItem.cosmetics.misc.ShirtArmorItem;
-import necesse.inventory.item.armorItem.cosmetics.misc.ShoesArmorItem;
-import necesse.level.maps.light.GameLight;
 
 public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 			
@@ -47,20 +35,32 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 	
 	@SuppressWarnings("unchecked")
 	public TestFurryRaceLook getCustomRaceLook() {	
-		if (this.getRaceLook().getRaceID() != TestFurryRaceLook.TEST_FURRY_RACE_ID) {
-			RaceMod.handleDebugMessage("Problem converting base RaceLook class to super "+this.getClass().getName(), 25);
-			return null;
+		if (!this.getRaceLook().getRaceID().equals(TestFurryRaceLook.TEST_FURRY_RACE_ID)) {
+			DebugHelper.handleFormattedDebugMessage("Problem converting base RaceLook class with race %s at form %s", 5, MESSAGE_TYPE.ERROR, new Object[] {this.getRaceID(), this.getClass().getName()});
+			return new TestFurryRaceLook(true);
 		}
 		return (TestFurryRaceLook)this.getRaceLook();
 	}
-		
+	
+	@Override
+	public RaceLook getRaceLook() {
+	    return RaceDataFactory.getRaceLook(this.getPlayerHelper(), new TestFurryRaceLook(true));
+	}
+	
+	@Override
+	public void setLook(HumanLook look) {
+		this.setRaceLook(RaceLook.fromHumanLook(look, TestFurryRaceLook.class));
+		this.updateComponents();
+	}
+	
 	@Override
 	protected RaceLook racelookFromBase(HumanLook look) {
 		return new TestFurryRaceLook(look);
 	}
 
 	public void initializeIcon(int x, int iconY, int width) {
-		// Create the FormPlayerIcon and cast it to FormComponent if necessary
+
+		DebugHelper.handleFormattedDebugMessage("Player Icon form initialized for %s with race %s", 50, MESSAGE_TYPE.DEBUG, new Object[] {this.getPlayerHelper().playerName, this.getRaceID()});
 	    FormPlayerIcon formPlayerIcon = new FormPlayerIcon(x, iconY, 128, 128, this.getPlayerHelper()) {
 	        @Override
 	        public void modifyHumanDrawOptions(HumanDrawOptions drawOptions) {
@@ -82,18 +82,10 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 	        }
 	    });
 	}	
-	public void modifyHumanDrawOptions(FormPlayerIcon form, HumanDrawOptions drawOptions) {
-		
-		//(this.player, this.dir, this.spriteX, this.spriteY, this.spriteRes,
-		//drawX, drawY, this.width, this.height, this.mirrorX, this.mirrorY, this.light, this.alpha,
-		//this.mask)
 	
-		//headOptions.add(this.headTexture.initDraw().sprite(this.spriteX, this.spriteY, this.spriteRes)
-		//		.size(this.width, this.height).mirror(this.mirrorX, this.mirrorY).light(this.light)
-		//		.alpha(this.alpha).addMaskShader(this.mask).pos(drawX, drawY));
-		this.getCustomRaceLook().modifyHumanDrawOptions(drawOptions);
+	public void modifyHumanDrawOptions(FormPlayerIcon form, HumanDrawOptions drawOptions) {		
 		
-		
+		this.getCustomRaceLook().modifyHumanDrawOptions(drawOptions, null);		
 	}
 	public Point getDrawOffset(BodyPart part) {
 	    switch (part.getPartName()) {
@@ -152,13 +144,12 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 	        case "BODY": 	        		value = ccr.getBodyStyle();	    	break;
 	        case "BODY_COLOR": 	        	value = ccr.getBodyColor();	    	break;
 	        case "ARMS": 	        		value = ccr.getArmsStyle();	    	break;
-	        case "ARMS_COLOR": 	        	value = ccr.getArmsColor();	    	break;
-	        
+	        case "ARMS_COLOR": 	        	value = ccr.getArmsColor();	    	break;	        
 	        default:        value = super.baseGetCurrentBodypartSelection(part);	break;
 	    }
 	
-	    RaceMod.handleDebugMessage("getCurrentBodyPartSelection(" + targetPartName+ ") = " + value 
-		        + " [Type: " + (value != null ? value.getClass().getSimpleName() : "null") + "]", DEBUG_VALUE);
+	    DebugHelper.handleDebugMessage("getCurrentBodyPartSelection(" + targetPartName+ ") = " + value 
+		        + " [Type: " + (value != null ? value.getClass().getSimpleName() : "null") + "]", 60);
 
 	    return value;
 	}
@@ -180,8 +171,10 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 	            
 	            case "TAIL": 	    	ccr.setTailStyle(intValue);	            break;
 		        case "TAIL_COLOR": 		ccr.setTailColor(intValue);	            break;
+		        
 		        case "EARS": 	    	ccr.setEarsStyle(intValue);	            break;
 		        case "EARS_COLOR": 		ccr.setEarsColor(intValue);	            break;
+		        
 		        case "MUZZLE": 	    	ccr.setMuzzleStyle(intValue);	        break;
 		        case "MUZZLE_COLOR":	ccr.setMuzzleColor(intValue);	        break;
 		        
@@ -231,10 +224,8 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 		   // GameTexture styleTexture = partParts.getTexture(2, styleIndex, colorIndex, PREVIEW_TEXTURE_X_POSITION);	
 		    GameTexture wigTexture = partParts.getWigTexture(styleIndex, colorIndex);	
 		    if(wigTexture == null) {
-		    	  RaceMod.handleDebugMessage(
-		  	            String.format("Part: %s for race %s could not load style index %d.", this.getRaceID(), part.getPartName(), styleIndex), 
-		  	            70
-		  	        );
+		    	  DebugHelper.handleFormattedDebugMessage(
+		  	            "Part: %s for race %s could not load style index %d.", 5, MESSAGE_TYPE.ERROR, new Object[] {this.getRaceID(), part.getPartName(), styleIndex} 	        );
 		    }
 		    wigTexture.initDraw()
 		              .size(_height)
@@ -280,8 +271,12 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 			
 			GameTexture wigTexture = partParts.getWigTexture(styleIndex, colorIndex);	
 			if(wigTexture == null) {
-				RaceMod.handleDebugMessage( String.format("Could not load style texture ID %d for part %s with color %d in form %s.",
-						styleIndex, part.getPartName(), colorIndex, this.getClass().getName()), 70  );
+				
+				  DebugHelper.handleFormattedDebugMessage(
+			  	            "Could not load style texture ID %d for part %s with color %d in form %s.",
+			  	            5, MESSAGE_TYPE.ERROR, new Object[] {styleIndex, part.getPartName(), colorIndex, this.getClass().getName()} );
+
+			
 			}
 			wigTexture.initDraw().size(_height).posMiddle(drawX+offset.x, drawY+offset.y).draw();		    
 		    
@@ -325,19 +320,19 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
     		);
 	}
 
-
-
-
 	public void randomize() {		
 		this.getCustomRaceLook().randomizeLook();	
 		this.updateComponents();
 	}
+	
 	@Override
 	public void reset() {
 		this.setPlayerHelper(new PlayerMob(0L, (NetworkClient) null));
-		this.setRaceLook(new TestFurryRaceLook(true));
 	}
-	public void onChanged() {	}
+	
+	public void onChanged() {
+		super.onChanged();
+	}
 	
 
 	public ArrayList<InventoryItem> getSkinColorCost(int id) 		{		return null;	}

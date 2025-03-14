@@ -1,41 +1,30 @@
 package core.race;
 
 import java.awt.Color;
-import java.util.List;
-import java.util.function.Function;
-
-import core.RaceMod;
 import core.race.parts.HumanRaceParts;
+import core.race.parts.RaceLookParts;
+import core.race.parts.TestFurryRaceParts;
+import extensions.FormNewPlayerRaceCustomizer;
 import extensions.HumanNewPlayerRaceCustomizer;
-import extensions.RaceLook;
+import helpers.DebugHelper;
 import necesse.engine.network.PacketReader;
-import necesse.engine.util.GameMath;
 import necesse.engine.util.GameRandom;
 import necesse.entity.mobs.MaskShaderOptions;
-import necesse.gfx.GameEyes;
-import necesse.gfx.GameHair;
-import necesse.gfx.GameSkin;
-import necesse.gfx.HumanGender;
 import necesse.gfx.HumanLook;
-import necesse.gfx.drawOptions.DrawOptions;
-import necesse.gfx.drawOptions.DrawOptionsList;
 import necesse.gfx.drawOptions.human.HumanDrawOptions;
-import necesse.gfx.gameTexture.GameTexture;
-import necesse.level.maps.light.GameLight;
 
 public class CustomHumanLook extends RaceLook {
-	
+
 	public static final String HUMAN_RACE_ID = "human";
 	public CustomHumanLook(GameRandom random, boolean onlyHumanLike) {		
 		this(true);
 		this.randomizer = random;
-		this.randomizeLook(random, onlyHumanLike);
-		
+		this.randomizeLook(random, onlyHumanLike);	
 	}
 	
 	public static CustomHumanLook getCustomRaceLook(RaceLook _look) {	
 		if (!_look.getRaceID().equals(CustomHumanLook.HUMAN_RACE_ID)) {
-			RaceMod.handleDebugMessage(String.format("Draw options for raceID %s requested for non-raceID %s from %s. Using defaults.", TestFurryRaceLook.TEST_FURRY_RACE_ID, _look.getRaceID(), _look.getClass().getName()), 25);
+			DebugHelper.handleDebugMessage(String.format("Draw options for raceID %s requested for non-raceID %s from %s. Using defaults.", TestFurryRaceLook.TEST_FURRY_RACE_ID, _look.getRaceID(), _look.getClass().getName()), 25);
 			return new CustomHumanLook(true);
 		}
 		return (CustomHumanLook)_look;
@@ -48,7 +37,7 @@ public class CustomHumanLook extends RaceLook {
 	}
 	
 	public CustomHumanLook(boolean init) {
-		super(HUMAN_RACE_ID);
+		super();
 		this.associatedCustomizerForm = HumanNewPlayerRaceCustomizer.class;
 		if(init) {
 			this.partsList = new HumanRaceParts(init);
@@ -113,9 +102,14 @@ public class CustomHumanLook extends RaceLook {
 	}
 
 	@Override
-	public HumanDrawOptions modifyHumanDrawOptions(HumanDrawOptions drawOptions) {
+	public HumanDrawOptions modifyHumanDrawOptions(HumanDrawOptions drawOptions, MaskShaderOptions mask) {
 		
 		return drawOptions;
 	}
 	
+	@Override
+	public Class<? extends FormNewPlayerRaceCustomizer> getAssociatedCustomizerForm() {
+		return this.associatedCustomizerForm;
+	}
+
 }

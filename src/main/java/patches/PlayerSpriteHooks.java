@@ -18,13 +18,9 @@ import necesse.level.maps.light.GameLight;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 
-import core.RaceMod;
-import core.gfx.TestFurryDrawOptions;
-import core.race.TestFurryRaceLook;
-import core.race.parts.BodyPart;
-import extensions.RaceLook;
-import factory.RaceDataFactory;
-import factory.RaceDataFactory.RaceData;
+import core.race.RaceLook;
+import core.race.factory.RaceDataFactory;
+import core.race.factory.RaceDataFactory.RaceData;
 
 public class PlayerSpriteHooks {
 	public static void drawInForms(DrawInFormsLogic drawLogic, int drawX, int drawY) {
@@ -66,6 +62,7 @@ public class PlayerSpriteHooks {
 			GameLight light, Consumer<HumanDrawOptions> humanDrawOptionsModifier) {
 		
 		
+		
 		RaceLook custom = null;
 		if(RaceDataFactory.hasRaceData(player)) {			
 			RaceData customRaceData = RaceDataFactory.getRaceData(player);	
@@ -84,8 +81,9 @@ public class PlayerSpriteHooks {
 		if (humanDrawOptionsModifier != null) {
 			humanDrawOptionsModifier.accept(humanDrawOptions);
 		}
+		
 		if (custom != null) {
-			custom.modifyHumanDrawOptions(humanDrawOptions);	
+			custom.modifyHumanDrawOptions(humanDrawOptions, null);	
 		}
 	
 		
@@ -148,7 +146,7 @@ public class PlayerSpriteHooks {
 
 			drawY += level.getTile(x / 32, y / 32).getMobSinkingAmount(player);
 			int armSpriteX = sprite.x;
-			MaskShaderOptions mask;
+			MaskShaderOptions mask = null;
 			if (mount != null) {
 				armSpriteX = mount.getRiderArmSpriteX();
 				sprite.x = mount.getRiderSpriteX();
@@ -182,7 +180,9 @@ public class PlayerSpriteHooks {
 			if(RaceDataFactory.hasRaceData(player)) {			
 				RaceData customRaceData = RaceDataFactory.getRaceData(player);	
 				custom = customRaceData.getRaceLook();
-				custom.modifyHumanDrawOptions(options);
+				if(custom!=null) {
+				custom.modifyHumanDrawOptions(options, mask);
+				}
 			}
 
 			return options.pos(drawX, drawY);

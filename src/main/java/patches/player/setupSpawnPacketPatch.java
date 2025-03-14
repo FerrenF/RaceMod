@@ -4,8 +4,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import core.RaceMod;
-import factory.RaceDataFactory;
-import factory.RaceDataFactory.RaceData;
+import core.race.factory.RaceDataFactory;
+import core.race.factory.RaceDataFactory.RaceData;
 import necesse.engine.modLoader.annotations.ModMethodPatch;
 import necesse.engine.network.PacketWriter;
 import necesse.entity.mobs.PlayerMob;

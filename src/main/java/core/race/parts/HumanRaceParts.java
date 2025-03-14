@@ -1,21 +1,20 @@
 package core.race.parts;
 
-import java.awt.Color;
-
-import necesse.gfx.GameEyes;
-import necesse.gfx.GameHair;
-import necesse.gfx.GameSkin;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class HumanRaceParts extends RaceLookParts{	
+		
+	public HumanRaceParts() {
+		super();
+	}
 	
-	public HumanRaceParts() {}
     public HumanRaceParts(boolean init) {
        super(init);
-       defineCustomRaceBodyParts();
     }
     
-    public void defineCustomRaceBodyParts() {
-    	      
-      // add custom parts here
-    }
+    public void defineCustomRaceBodyParts() {}
+   
 }

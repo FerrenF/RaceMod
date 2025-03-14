@@ -14,12 +14,14 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import core.RaceMod;
 import core.race.CustomHumanLook;
+import core.race.RaceLook;
+import core.race.factory.RaceDataFactory;
+import core.race.factory.RaceDataFactory.RaceData;
 import core.race.parts.BodyPart;
 import core.race.parts.RaceLookParts;
-import factory.RaceDataFactory;
-import factory.RaceDataFactory.RaceData;
+import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.Settings;
 import necesse.engine.localization.message.GameMessage;
 import necesse.engine.localization.message.LocalMessage;
@@ -90,22 +92,28 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	}
 	
 	public PlayerMob setPlayerHelper(PlayerMob newPlayerMob) {
-		 newPlayer = newPlayerMob;
+		newPlayer = newPlayerMob;
 	    if (!RaceDataFactory.hasRaceData(newPlayer)) {
 	        RaceDataFactory.registerRaceData(newPlayer);
 	    }	   
+	   
 	    return newPlayer;
+	}
+	
+	public void dispose() {
+		this.icon.dispose();
+		super.dispose();
 	}
 
 	public String getRaceID() {
 	    RaceLook data = this.getRaceLook();
 	    return (data != null) ? data.getRaceID() : "unknown"; 
 	}
-
+	
 	public RaceLook getRaceLook() {
-	    return RaceDataFactory.getRaceLook(this.getPlayerHelper(), new CustomHumanLook(true));
+		RaceData r = RaceDataFactory.getRaceData(newPlayer);
+	    return r.getRaceLook();
 	}
-
 	protected abstract RaceLook racelookFromBase(HumanLook look);
 
 	// Uses racelook to access superclass private field PlayerMob newPlayer
@@ -113,24 +121,21 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		
 	    RaceLook look = this.getRaceLook();
 	    if (look.getRaceParts() == null) {
-	    	RaceMod.handleDebugMessage( String.format("Error: getRaceLook returned a race %s with null parts in %s!",
+	    	DebugHelper.handleDebugMessage( String.format("Error: getRaceLook returned a race %s with null parts in %s!",
 	    			look.getClass().getName(), this.getClass().getName()), 20  );	    
 	        System.err.println("Error: RaceLook partsList is null!");
 	    }
 	    return look.getRaceParts();
 	}
 	
-	public void setRaceLook(RaceLook raceLook) {    
-		this.newPlayer.look = raceLook;
-	    if (this.getPlayerHelper() != null) {
-	        RaceDataFactory.getOrRegisterRaceData(this.getPlayerHelper(), raceLook);
-	    } else {
-	        RaceMod.handleDebugMessage("Error: setRaceLook called with null PlayerMob!", 20);
-	    }
+	public void setRaceLook(RaceLook raceLook) { 
+		RaceData ra = RaceDataFactory.getOrRegisterRaceData(this.getPlayerHelper());
+		ra.addRaceData(raceLook);	   
+		this.getPlayerHelper().look = raceLook;
 	}
 
 	public void setLook(HumanLook look) {
-		this.setRaceLook(RaceLook.racelookFromBase(look));
+		this.setRaceLook(RaceLook.fromHumanLook(look, CustomHumanLook.class));
 		this.updateComponents();
 	}
 	
@@ -140,7 +145,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	}
 
 	public void updateComponents() {
-		this.icon.setPlayer(newPlayer);
+		this.icon.setPlayer(this.getPlayerHelper());
 		this.updateLook();
 	}
 
@@ -152,19 +157,13 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		this.getPlayerHelper().getInv().giveLookArmor();	
 	}
 	
-	public void reset() {
-		//this.setRaceLook(new CustomHumanLook());
-		this.setPlayerHelper(new PlayerMob(0L, (NetworkClient) null));
-		this.setRaceLook(new CustomHumanLook());
-	}
+	public abstract void reset() ;
 
 
 	public FormNewPlayerRaceCustomizer(RaceLook raceLook, int x, int y, int width, boolean allowSupernaturalChanges, boolean allowClothesChance) {		
 		super(width, 0);		
 		this.setPlayerHelper(new PlayerMob(0L, (NetworkClient) null));
 		this.setRaceLook(raceLook);
-		
-		
 		this.setPosition(x, y);		
 		this.drawBase = false;
 		this.allowSupernaturalChanges = allowSupernaturalChanges;
@@ -174,15 +173,15 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		this.addComponent((FormLocalLabel) flow.nextY(
 				new FormLocalLabel("ui", "clickplayerrotate", new FontOptions(12), 0, x + (width / 2) - FormNewPlayerPreset.RACE_SWITCH_FORM_WIDTH, 0, width - 20)));
 		
-		int iconY = flow.next(128);		
-		
+		int iconY = flow.next(128);			
 		int iconX = (width / 2 - 64);
-		this.initializeIcon(iconX, iconY, width);		
-		
+		this.initializeIcon(iconX, iconY, width);	
+
 		int buttonX = (width / 2);
 		this.setupRotationButtons(buttonX, width, iconY);
 		
 		this.initializeFormSwitcher(width, flow);
+		this.updateComponents();
 	}
 	
 	protected void initializeFormSwitcher(int width, FormFlow flow) {
@@ -353,7 +352,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 			    },
 			    (color) -> {
 			    	this.updateBodyPartSelection(part, color, false);              
-			       // this.updateLook();
+			        this.updateLook();
 			       // this.updateComponents();          
 			    },
 			    (color)->{return costFunc.apply(color);}
@@ -391,6 +390,8 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		}	 
 	}
 
+	public BiConsumer<ArrayList<Section>, Predicate<Section>> sectionListModifier = null;
+	
 	protected ArrayList<Section> getSections(Predicate<Section> isCurrent, int width) {
 		ArrayList<Section> sections = new ArrayList<Section>();		
 		sections.add(new Section(new DrawButtonFunction() {
@@ -412,16 +413,15 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		
 		RaceLookParts parts = this.getRaceLookParts();
 	    if (parts == null) {
-	        System.err.println("Error: getRaceLookParts() returned null! Skipping body parts.");
+	        DebugHelper.handleDebugMessage("Error: getRaceLookParts() returned null! Skipping body parts.", 0, MESSAGE_TYPE.ERROR);
 	        return sections;
 	    }
 
-	    RaceMod.handleDebugMessage("Parts Initializing:",50);
-	    this.getRaceLookParts().getBodyParts().forEach((part)->RaceMod.handleDebugMessage(part.getPartName()+",",50));	
+	    DebugHelper.handleDebugMessage("Parts Initializing:",70, MESSAGE_TYPE.DEBUG);
+	    parts.getBodyParts().forEach((part)->DebugHelper.handleDebugMessage(part.getPartName()+",",70, MESSAGE_TYPE.DEBUG));	
 	    
 	    
-	    for (BodyPart part : parts.getBodyParts()) {
-	    	
+	    for (BodyPart part : parts.getBodyParts()) {	    	
 	    	if(!parts.isHiddenPart(part.getPartName())) {
 		        sections.add(createBodyPartSection(part, isCurrent, width));
 		        if(part.isHasColor() && !part.isBaseGamePart()) {
@@ -429,6 +429,11 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		        }
 	    	}
 	    }
+	    
+		 if(sectionListModifier != null) {
+			 sectionListModifier.accept(sections, isCurrent);
+		 }
+		 
 		return sections;
 	}
 	protected abstract Section createBodyPartCustomColorSection(BodyPart part, Predicate<Section> isCurrent, int _width);
@@ -480,44 +485,33 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 			int drawX = x + _width / 2;
 			int drawY = y + _height / 2;
 		// handles base game body part cases
-			if (part.getPartName() == "HAIR_STYLE") {
-				
+			if (part.getPartName() == "HAIR_STYLE") {	
 			    // Hair Style preview
 			    GameTexture wigTexture = GameHair.getHair(id).getWigTexture(look.getHairColor());
-			    wigTexture.initDraw().size(_height).posMiddle(drawX, drawY).draw();
-			    
-			} else if (part.getPartName() == "FACIAL_HAIR") {
-				
+			    wigTexture.initDraw().size(_height).posMiddle(drawX, drawY).draw();	    
+			} else if (part.getPartName() == "FACIAL_HAIR") {			
 			    // Facial Hair preview
 			    GameTexture wigTexture = GameHair.getFacialFeature(id).getWigTexture(look.getHairColor());
-			    wigTexture.initDraw().size(_height).posMiddle(drawX, drawY).draw();
-			    
-			} else if (part.getPartName() == "HAIR_COLOR") {
-				
+			    wigTexture.initDraw().size(_height).posMiddle(drawX, drawY).draw();	    
+			} else if (part.getPartName() == "HAIR_COLOR") {			
 			    // Hair Color preview (if bald, show paintbrush)
-			    if (look.getHair() == 0) {
-			    	
+			    if (look.getHair() == 0) {		    	
 			        Color color = (Color) GameHair.colors.getSkinColor(id).colors.get(3);
 			        Settings.UI.paintbrush_grayscale.initDraw().color(color).posMiddle(drawX, drawY).draw();
-			        Settings.UI.paintbrush_handle.initDraw().posMiddle(drawX, drawY).draw();
-			        
-			    } else {
-			    	
+			        Settings.UI.paintbrush_handle.initDraw().posMiddle(drawX, drawY).draw();	        
+			    } else {		    	
 			        // Otherwise, show the hair preview
 			        GameSprite hairSprite = new GameSprite(GameHair.getHair(look.getHair()).getWigTexture(id), button.size.height);
-			        hairSprite.initDraw().light(new GameLight(136.36363F)).posMiddle(drawX, drawY).draw();
-			        
+			        hairSprite.initDraw().light(new GameLight(136.36363F)).posMiddle(drawX, drawY).draw();    
 			    }
 			    
 			} else if (part.getPartName() == "EYE_COLOR" || part.getPartName() == "EYE_TYPE") {
-				
 			    // Eye preview (using HumanFaceDrawOptions)
 				GameTexture.overrideBlendQuality = BlendQuality.NEAREST;
 				this.getHumanFaceDrawOptions(options, button.size.height, x, y, (opt) -> {
 			        opt.sprite(0, 3).dir(3);  // Set specific sprite direction
 			    }).draw();
 			    GameTexture.overrideBlendQuality = null;
-			    
 			} 		else {
 			    // General body part preview (head, torso, etc.)
 				GameTexture.overrideBlendQuality = BlendQuality.NEAREST;
@@ -656,9 +650,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 					} else {
 						onApply.accept(colorx);
 					}
-	
 				}
-	
 				public void onSelected(Color colorx) {
 					onSelected.accept(colorx);
 				}
@@ -757,7 +749,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		});
 	}
 
-	form.setHeight(totalRows * totalButtonWidth + contentPadding * 2);
+	form.setHeight((totalRows+1) * totalButtonWidth + contentPadding * 2);
 		return form;
 	}
 
@@ -801,8 +793,12 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		d.getInv().giveStarterItems();
 		return d;
 	}
-
-	public abstract void onChanged();
+	public Runnable onChangedEvent = null;
+	public void onChanged() {
+		if(onChangedEvent != null) {
+			onChangedEvent.run();
+		}
+	}
 
 	public class Section {
 		public FormContentVarToggleButton button;
@@ -818,8 +814,8 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 			
 			this.button = new FormContentVarToggleButton(0, 0, BUTTON_SIZE.height,
 					BUTTON_SIZE, ButtonColor.BASE, () -> {
-						return isCurrent.test(this);
-					}) {
+						return isCurrent.test(this);}) {
+				
 				protected void drawContent(int x, int y, int width, int height) {
 					drawButton.draw(this, x, y, width, height);
 				}

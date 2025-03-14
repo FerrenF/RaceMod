@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.RowFilter.Entry;
-
-import core.gfx.GameParts;
 import necesse.gfx.GameEyes;
 import necesse.gfx.GameHair;
 import necesse.gfx.GameSkin;
 
-public class RaceLookParts{	
+public abstract class RaceLookParts{	
+	
+	private Map<String, BodyPart> bodyParts;
+	private Set<String> customizerHiders;
 	
 	public static Color[] DEFAULT_COLORS = new Color[]{new Color(1644825), new Color(4934475),
 			new Color(9868950), new Color(14803425), new Color(14249068), new Color(14221312), new Color(8388608),
@@ -25,23 +25,21 @@ public class RaceLookParts{
 			new Color(7107289), new Color(3033), new Color(1664), new Color(10775769), new Color(7340249),
 			new Color(4325504), new Color(14249157), new Color(14221489), new Color(8388712)};
 	
-	private Map<String, BodyPart> bodyParts;
-	private Set<String> customizerHiders;
-	
 	public RaceLookParts() {
-	  this.bodyParts = new HashMap<>();
-	  this.customizerHiders = new HashSet<>();
-	}
+		  this.bodyParts = new HashMap<>();
+		  this.customizerHiders = new HashSet<>();
+		}
 	
-    public RaceLookParts(boolean init) {
+	public RaceLookParts(boolean init) {
       this();
       if(init) this.defineRaceBodyParts();
     }
 
-    // Add a body part
+	
     public void addBodyPart(String partName, BodyPart part) {
-        this.bodyParts.put(partName, part);
-    }
+	    bodyParts.put(partName, part);
+	}
+	    
 
     
     // Retrieve body part by name
@@ -57,6 +55,7 @@ public class RaceLookParts{
         return (BodyPart)(bodyParts.get(partName));
     }
         
+
     public List<BodyPart> getBodyParts() {
     	if (bodyParts == null) return List.of();
     	return new ArrayList<>(bodyParts.values());
@@ -71,13 +70,8 @@ public class RaceLookParts{
     	if (bodyParts == null) return new ArrayList<>();
     	return new ArrayList<>(bodyParts.values()).stream().filter((part)->part.isReplacerPart()).toList();
     }
-
-    public Set<String> getHiddenParts(){
-    	return this.customizerHiders;
-    }
     
     public void defineRaceBodyParts() {
-    	// Base Game part definitions.
 	  this.addBodyPart("SKIN_COLOR", new BodyPart("SKIN_COLOR", "skincolor", GameSkin.getTotalSkins()));
       this.addBodyPart("EYE_TYPE", new BodyPart("EYE_TYPE", "eyetype", GameEyes.getTotalEyeTypes()));
       this.addBodyPart("EYE_COLOR", new BodyPart("EYE_COLOR", "eyecolor", GameEyes.getTotalColors()));
@@ -97,9 +91,12 @@ public class RaceLookParts{
 	}
 	
 	public boolean isHiddenPart(String key) {
-		return this.customizerHiders.contains(key);
+		return this.getHiddenParts().contains(key);
 	}
-
+	 public Set<String> getHiddenParts()
+	 {
+	    return customizerHiders;
+	 }
 	public boolean hasCustomPart(String key) {
 		return hasPart(key) && !this.bodyParts.get(key).isBaseGamePart();
 	}
@@ -110,7 +107,7 @@ public class RaceLookParts{
 	
 	public boolean hidePartCustomizer(String key) {
 		if(this.hasPart(key)) {
-			this.customizerHiders.add(key);
+			this.getHiddenParts().add(key);
 			return true;
 		}
 		return false;

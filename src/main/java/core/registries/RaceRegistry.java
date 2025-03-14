@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import core.race.RaceLook;
 import core.registries.RaceRegistry.RaceRegistryElement;
-import extensions.RaceLook;
 import necesse.engine.GameLoadingScreen;
 import necesse.engine.localization.Localization;
 import necesse.engine.localization.message.GameMessage;

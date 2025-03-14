@@ -20,3 +20,5 @@ head=Head Shape
 head_color=Head Color
 body=Body Shape
 body_color=Body Color
+arms=Arm Style
+arms_color=Arm Color
