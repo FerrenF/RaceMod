@@ -11,7 +11,8 @@ import necesse.engine.save.SaveData;
 import necesse.entity.mobs.PlayerMob;
 import net.bytebuddy.asm.Advice;
 
-@ModMethodPatch(target = PlayerMob.class, name = "addLoadedCharacterSaveData", arguments = {SaveData.class})
+// Same deal as addSaveData, look has already been intercepted and replaced, so the correct superclass method will trigger and we do not need to force the game to do it.
+//@ModMethodPatch(target = PlayerMob.class, name = "addLoadedCharacterSaveData", arguments = {SaveData.class})
 public class addLoadedCharacterSaveDataPatch {
 
 

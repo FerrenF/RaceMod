@@ -12,7 +12,7 @@ import net.bytebuddy.asm.Advice;
 public class PacketPlayerAppearanceConstructorPatch3 {
 	  @Advice.OnMethodEnter()
 	  static boolean onEnter() {
-		  DebugHelper.handleDebugMessage("Intercepted and bypassed PacketPlayerAppearance constructor.", 50, MESSAGE_TYPE.DEBUG);
+		DebugHelper.handleDebugMessage("Intercepted and bypassed PacketPlayerAppearance [int, int, PlayerMob] constructor.", 50, MESSAGE_TYPE.DEBUG);
         return true;  // Skips constructor execution entirely
 	  }
 }

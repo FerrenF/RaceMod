@@ -1,19 +1,16 @@
 package patches.player;
 
-import net.bytebuddy.asm.Advice.Argument;
-import net.bytebuddy.asm.Advice.This;
-import core.race.RaceLook;
 import core.race.factory.RaceDataFactory;
 import core.race.factory.RaceDataFactory.RaceData;
 import helpers.DebugHelper;
-import necesse.engine.modLoader.annotations.ModMethodPatch;
-import necesse.engine.save.LoadData;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.save.SaveData;
 import necesse.entity.mobs.PlayerMob;
 import net.bytebuddy.asm.Advice;
 
 
-@ModMethodPatch(target = PlayerMob.class, name = "addSaveData", arguments = {SaveData.class})
+// We didn't need this one because by the time the game is calling addSaveData on the look, it has already been replaced by it's evil twin furry brother.
+//@ModMethodPatch(target = PlayerMob.class, name = "addSaveData", arguments = {SaveData.class})
 public class addSaveDataPatch {
 
 
@@ -28,7 +25,7 @@ public class addSaveDataPatch {
     			DebugHelper.handleDebugMessage(String.format(
                         "addSaveData for PlayerMob %s intercepted.",
                        th.playerName
-                    ), 25);
+                    ), 50, MESSAGE_TYPE.DEBUG);
     		}	    
     	}
     }

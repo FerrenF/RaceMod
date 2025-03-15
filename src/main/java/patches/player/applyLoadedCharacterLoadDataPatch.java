@@ -1,13 +1,11 @@
 package patches.player;
-import net.bytebuddy.asm.Advice.Argument;
-import net.bytebuddy.asm.Advice.This;
 import core.race.CustomHumanLook;
 import core.race.RaceLook;
 import core.race.factory.RaceDataFactory;
 import core.race.factory.RaceDataFactory.RaceData;
 import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.modLoader.annotations.ModMethodPatch;
-import necesse.engine.network.PacketReader;
 import necesse.engine.save.LoadData;
 import necesse.entity.mobs.PlayerMob;
 import net.bytebuddy.asm.Advice;
@@ -22,6 +20,10 @@ public class applyLoadedCharacterLoadDataPatch {
     		RaceData r = RaceDataFactory.getOrRegisterRaceData(th);
     		if(r.raceDataInitialized) {
     			th.look = r.getRaceLook();
+    			DebugHelper.handleDebugMessage(String.format(
+                        "applyLoadData for PlayerMob %s intercepted with race %s.",
+                        th.playerName, r.getRaceID()
+                    ), 50, MESSAGE_TYPE.DEBUG);
     		}
     		else
     		{    			
@@ -29,9 +31,9 @@ public class applyLoadedCharacterLoadDataPatch {
 		    	r.addRaceData(ra);
 	    		th.look = ra;
 				DebugHelper.handleDebugMessage(String.format(
-		                "applyLoadedCharacterLoadData for PlayerMob %s intercepted with race %s.",
+		                "applyLoadedCharacterLoadData for PlayerMob %s intercepted and interpreted with race %s.",
 		                th.playerName, r.getRaceID()
-		            ), 25);
+		            ), 50, MESSAGE_TYPE.DEBUG);
 	    		}	    	 	
     		}	    
 		

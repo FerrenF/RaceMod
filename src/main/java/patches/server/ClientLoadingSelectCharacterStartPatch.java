@@ -5,6 +5,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import core.network.CustomPacketPlayerAppearance;
+import core.race.CustomHumanLook;
+import core.race.RaceLook;
+import core.race.factory.RaceDataFactory;
 import necesse.engine.commands.PermissionLevel;
 import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.network.client.loading.ClientLoadingSelectCharacter;
@@ -102,7 +105,10 @@ public class ClientLoadingSelectCharacterStartPatch {
 	            PlayerMob serverCharacterPlayer = (PlayerMob) serverCharacterPlayerField.get(th);
 
 	            if (serverCharacterPlayer != null) {
-	                createCharacterForm.setLook(serverCharacterPlayer.look);
+	            	RaceLook apply = RaceDataFactory.getOrRegisterRaceData(serverCharacterPlayer).raceDataInitialized 
+	            	? RaceDataFactory.getRaceLook(serverCharacterPlayer, RaceLook.fromHumanLook(serverCharacterPlayer.look, CustomHumanLook.class)) 
+	            			:  RaceLook.fromHumanLook(serverCharacterPlayer.look, CustomHumanLook.class);
+	                createCharacterForm.setLook(apply);
 	            }
 
 	            // Access and set 'lookErrorForm'

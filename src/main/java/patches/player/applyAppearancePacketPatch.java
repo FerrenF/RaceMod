@@ -1,15 +1,13 @@
 package patches.player;
 
-import core.race.RaceLook;
 import core.race.factory.RaceDataFactory;
-import core.race.factory.RaceDataFactory.RaceData;
 import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.modLoader.annotations.ModMethodPatch;
 import necesse.engine.network.packet.PacketPlayerAppearance;
 import necesse.entity.mobs.PlayerMob;
 import net.bytebuddy.asm.Advice;
 import core.network.CustomPacketPlayerAppearance;
-import core.race.CustomHumanLook;
 @ModMethodPatch(target = PlayerMob.class, name = "applyAppearancePacket", arguments = {PacketPlayerAppearance.class})
 public class applyAppearancePacketPatch {
 	
@@ -20,16 +18,15 @@ public class applyAppearancePacketPatch {
 		CustomPacketPlayerAppearance packet = (CustomPacketPlayerAppearance)_packet;
 		if(RaceDataFactory.mobUniqueID(th)!=-1) {
 			
-	    	RaceData r = RaceDataFactory.getOrRegisterRaceData(th, packet.look);	
+	    	RaceDataFactory.getOrRegisterRaceData(th, packet.look);	
 	      	th.refreshClientUpdateTime();
-	      	if(!r.raceDataInitialized) return false;
 	    	th.look = packet.look;
 	    	th.getInv().giveLookArmor(false);
 	    	th.playerName = packet.name;
 	    	DebugHelper.handleDebugMessage(String.format(
 	                "applyAppearancePacket for PlayerMob %s intercepted.",
 	                th.playerName
-	            ), 25);
+	            ), 50, MESSAGE_TYPE.DEBUG);
 	    	
 	        return true;
 			}

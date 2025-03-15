@@ -4,6 +4,7 @@ import core.race.RaceLook;
 import core.race.factory.RaceDataFactory;
 import core.race.factory.RaceDataFactory.RaceData;
 import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.modLoader.annotations.ModMethodPatch;
 import necesse.engine.network.PacketReader;
 import necesse.entity.mobs.PlayerMob;
@@ -22,12 +23,17 @@ public class applyLoadedCharacterPacketPatch {
     			DebugHelper.handleDebugMessage(String.format(
                         "applyLoadedCharacterPacket for PlayerMob %s intercepted.",
                         th.playerName
-                    ), 25);
+                    ), 50, MESSAGE_TYPE.DEBUG);
     		}
     		else {
     			RaceLook ra = RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true));
 				th.look = ra;
 				r.addRaceData(ra);
+				
+				DebugHelper.handleDebugMessage(String.format(
+                        "applyLoadedCharacterPacket for PlayerMob %s with race %s intercepted and interpreted from packet.",
+                        th.playerName, r.getRaceID()
+                    ), 50, MESSAGE_TYPE.DEBUG);
     		}
 
 		}

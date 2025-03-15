@@ -2,6 +2,8 @@ package core;
 
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.util.Optional;
 
@@ -28,15 +30,17 @@ import necesse.engine.network.networkInfo.NetworkInfo;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.ContainerRegistry;
+import necesse.engine.registries.GNDRegistry;
 import necesse.engine.registries.PacketRegistry;
 import necesse.engine.save.CharacterSave;
-import necesse.engine.state.MainMenu;
 import necesse.entity.mobs.friendly.human.humanShop.StylistHumanMob;
 import necesse.gfx.PlayerSprite;
 import necesse.gfx.forms.MainMenuFormManager;
 import necesse.gfx.res.ResourceEncoder;
+import necesse.level.maps.layers.settlement.SettlementLevelLayer;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.ByteBuddyAgent;
+import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.dynamic.loading.ClassReloadingStrategy;
 import net.bytebuddy.implementation.MethodDelegation;
@@ -45,12 +49,14 @@ import patches.MainMenuMessagePatch;
 import patches.PlayerSpriteHooks;
 import patches.characterSavesPathPatch;
 import patches.getStylistOpenShopPacketPatch;
+import patches.debug.debugGNDItemPatch;
 import patches.server.ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch;
 import patches.server.ClientLoadingSelectCharacterStartPatch;
 import patches.server.ServerAddClientPatch;
 import patches.server.ServerClientApplyAppearancePacketPatch;
 import patches.server.ServerClientApplyLoadedCharacterPacketPatch;
 import patches.server.ServerClientLoadClientLookPatch;
+import patches.settlement.SettlementLevelLayerMethodPatches;
 
 	
 @ModEntry
@@ -59,14 +65,25 @@ public class RaceMod {
 	public static int CUSTOM_STYLIST_CONTAINER;
 	public static Instrumentation byteBuddyInst;
 	public static SettingsHelper settings = new SettingsHelper();
-	public static String VERSION_STRING = "0.0.0 ALPHA";
+	public static String VERSION_STRING = "0.0.1 ALPHA";
+	public static boolean DUMP_CLASSES = false;
+	public static boolean DEBUG_HOOKS = false;
 	public void preInit() {
 		
 		byteBuddyInst = ByteBuddyAgent.install();
 		SettingsHelper.initialize();
 		DebugHelper.initialize();
 		DebugHelper.handleDebugMessage("Race mod beginning pre-initialization. Let's get some hooks into this bad boy.", 5, MESSAGE_TYPE.INFO);
- 	
+		 
+		if(DEBUG_HOOKS) {			  
+			 new AgentBuilder.Default()
+	            .type(ElementMatchers.named("necesse.engine.registries.GNDRegistry"))
+	            .transform((builder, typeDescription, classLoader, module) ->
+	                builder.visit(Advice.to(debugGNDItemPatch.class)
+	                    .on(ElementMatchers.named("readGNDItem")))
+	            )
+	            .installOn(byteBuddyInst);
+		  }
     	deployPreInitHook();   	
 
     	RaceDataFactory.initialize(byteBuddyInst);
@@ -133,6 +150,25 @@ public class RaceMod {
 	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 
 		  
 		  DebugHelper.handleDebugMessage("Deployed getStylistOpenShopPacketPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
+		  
+		  // SettlementLevelLayer
+		  
+		  new ByteBuddy()
+			  .redefine(SettlementLevelLayer.class)
+	          .method(ElementMatchers.named("updateOwnerVariables"))
+	          .intercept(MethodDelegation.to(SettlementLevelLayerMethodPatches.class)) 
+	          .method(ElementMatchers.named("readBasicSettlementData"))
+	          .intercept(MethodDelegation.to(SettlementLevelLayerMethodPatches.class))
+	          .method(ElementMatchers.named("writeBasicSettlementData"))
+	          .intercept(MethodDelegation.to(SettlementLevelLayerMethodPatches.class))
+	          .method(ElementMatchers.named("getLook"))
+	          .intercept(MethodDelegation.to(SettlementLevelLayerMethodPatches.class))
+	          .make() 
+	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 
+  
+	  DebugHelper.handleDebugMessage("Deployed SettlementLevelLayerMethodPatches. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
+	  
+	//writeBasicSettlementData
 
 	}
 
@@ -201,6 +237,19 @@ public class RaceMod {
     	DebugHelper.handleFormattedDebugMessage("%d races loaded: %s", 0, DebugHelper.MESSAGE_TYPE.INFO,
     			new Object[] {RaceRegistry.getTotalRaces(),rlist.get()});
 
+    	if(DUMP_CLASSES) {
+    		String filePath = GlobalData.appDataPath()+"classlist.txt";
+    		Class<?>[] loadedClasses = byteBuddyInst.getAllLoadedClasses();
+    	    
+	        try (FileWriter writer = new FileWriter(filePath)) {
+	            for (Class<?> clazz : loadedClasses) {
+	                writer.write(clazz.getName() + "\n");
+	            }
+	            System.out.println("Class dump saved to: " + filePath);
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+    	}
 	}
 	
 	public static void addMainMenuMessage() {

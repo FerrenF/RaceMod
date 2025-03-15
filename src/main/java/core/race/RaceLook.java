@@ -90,7 +90,9 @@ public abstract class RaceLook extends HumanLook {
 	
 	public static RaceLook fromHumanLook(HumanLook look, Class<? extends RaceLook> fallbackClass) {
 		try {
-			return look instanceof RaceLook ? (RaceLook)look : fallbackClass.getConstructor(boolean.class).newInstance(true);
+			RaceLook ra = look instanceof RaceLook ? (RaceLook)look : fallbackClass.getConstructor(boolean.class).newInstance(true);
+			ra.copyBase(look);
+			return ra;
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
 			// TODO Auto-generated catch block
@@ -386,13 +388,14 @@ public abstract class RaceLook extends HumanLook {
 		String race_id = lkd.getSafeString("race_id", null);
 		
 		if(race_id == null) {
-			DebugHelper.handleDebugMessage("Error reading race of content packet at raceFromContentPacker", 25);
+			DebugHelper.handleDebugMessage("Error reading race of load data at applyLoadData", 25);
 			return;
 		}
 		
 		 if(!race_id.equals(this.getRaceID())) {
-		    	DebugHelper.handleFormattedDebugMessage("Attempted bad load data. Race %s does not equal the race applied to, %s.", 0, MESSAGE_TYPE.ERROR, new Object[] {race_id, this.getRaceID()});
-		}
+		    DebugHelper.handleFormattedDebugMessage("Load data mismatched race. Race %s does not equal the race applied to, %s. Transforming.",
+		    		0, MESSAGE_TYPE.WARNING, new Object[] {race_id, this.getRaceID()});
+		}		 
 		
 	    // Load all byte-based appearance attributes
 	    this.appearanceByteMap.forEach((key, value) -> {
@@ -410,51 +413,27 @@ public abstract class RaceLook extends HumanLook {
 		PacketReader cpy = new PacketReader(reader);		
 		String raceString = cpy.getNextString();
 		if(raceString == null) {
-			DebugHelper.handleDebugMessage("Error reading race of content packet at raceFromContentPacker", 25);
+			DebugHelper.handleDebugMessage("Error reading race of content packet at raceFromContentPacker", 25, MESSAGE_TYPE.ERROR);
 			return fallback;
-		}
-		
-		if(RaceRegistry.getRaceID(raceString) != -1) {
-			RaceLook r;
-			try {
-				r = RaceRegistry.getRace(raceString).getClass().getConstructor(boolean.class).newInstance(true);
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				DebugHelper.handleDebugMessage(String.format("Error generating new instance of race %s in raceFromContentPacker", raceString), 25);
-				e.printStackTrace();
-				return fallback;
-			}
-			r.applyContentPacket(reader);
-		    return r;
-		}
-		DebugHelper.handleDebugMessage(String.format("Failed to load race %s in raceFromContentPacker. returning fallback racelook.", raceString), 25);
-		return fallback;
-	}
+		}	
 	
-	public static RaceLook raceFromContentPackerWithBase(PacketReader reader, RaceLook fallback) {
+		DebugHelper.handleFormattedDebugMessage("Interpreting race from packet at raceFromContentPacker. Found: %s", 25, MESSAGE_TYPE.DEBUG, new Object[] {raceString});
 		
-		String raceString = reader.getNextString();
-		if(raceString == null) {
-			DebugHelper.handleDebugMessage("Error reading race of content packet at raceFromContentPacker", 25);
-			return fallback;
-		}
-		System.out.print("Creating look for packet identified race "+raceString);
 		if(RaceRegistry.getRaceID(raceString) != -1) {
 			RaceLook r;
 			try {
 				r = RaceRegistry.getRace(raceString).getClass().getConstructor(boolean.class).newInstance(true);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				DebugHelper.handleDebugMessage(String.format("Error generating new instance of race %s in raceFromContentPacker", raceString), 25);
+				DebugHelper.handleDebugMessage(String.format("Error generating new instance of race %s in raceFromContentPacker", raceString), 25, MESSAGE_TYPE.ERROR);
 				e.printStackTrace();
-				return fallback;
+				return fallback.applyContentPacket(reader);
 			}
 			r.applyContentPacket(reader);
 		    return r;
 		}
-		
-		DebugHelper.handleDebugMessage(String.format("Failed to load race %s in raceFromContentPacker. returning fallback racelook.", raceString), 25);
-		return fallback;
+		DebugHelper.handleDebugMessage(String.format("Failed to load race %s in raceFromContentPacker. returning fallback racelook.", raceString), 25, MESSAGE_TYPE.WARNING);
+		return fallback.applyContentPacket(reader);
 	}
 	
 	public static RaceLook raceFromLoadData(LoadData save, RaceLook fallback) {	
@@ -462,11 +441,12 @@ public abstract class RaceLook extends HumanLook {
 		LoadData lkd = save.getFirstLoadDataByName("LOOK");		
 		
 		if(lkd == null) {
-			DebugHelper.handleDebugMessage("Error loading racein raceFromLoadData: null value from save section LOOK", 25);
+			DebugHelper.handleDebugMessage("Error loading racein raceFromLoadData: null value from save section LOOK", 25, MESSAGE_TYPE.ERROR);
 			return fallback;
 		}
-		String _race_id = lkd.getSafeString("race_id", null);
-		
+		String _race_id = lkd.getSafeString("race_id", null);		
+		DebugHelper.handleFormattedDebugMessage("Interpreting race from LoadData at raceFromLoadData. Found: %s", 25, MESSAGE_TYPE.DEBUG, new Object[] {_race_id});
+
 		if(_race_id != null && RaceRegistry.getRaceID(_race_id) != -1) {
 			RaceLook r;
 			
@@ -474,7 +454,7 @@ public abstract class RaceLook extends HumanLook {
 				r = RaceRegistry.getRace(_race_id).getClass().getConstructor(boolean.class).newInstance(true);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				DebugHelper.handleDebugMessage(String.format("Error generating new instance of race %s in raceFromLoadData", _race_id), 25);
+				DebugHelper.handleDebugMessage(String.format("Error generating new instance of race %s in raceFromLoadData", _race_id), 25, MESSAGE_TYPE.ERROR);
 				e.printStackTrace();
 				return fallback;
 			}
@@ -488,7 +468,7 @@ public abstract class RaceLook extends HumanLook {
 		    });	    
 		    return r;
 		}
-		DebugHelper.handleDebugMessage(String.format("Failed to load race %s in raceFromLoadData. returning fallback racelook.", _race_id), 25);
+		DebugHelper.handleDebugMessage(String.format("Failed to load race %s in raceFromLoadData. returning fallback racelook.", _race_id), 25, MESSAGE_TYPE.WARNING);
 		return fallback;
 	}
 	

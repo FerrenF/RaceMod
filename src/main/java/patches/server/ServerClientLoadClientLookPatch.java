@@ -7,9 +7,8 @@ import necesse.engine.save.LoadData;
 import necesse.gfx.HumanLook;
 
 public class ServerClientLoadClientLookPatch {
-
 	public static HumanLook loadClientLook(LoadData save) {
-		RaceLook out = new CustomHumanLook(true);
+		RaceLook out = RaceLook.raceFromLoadData(save, new CustomHumanLook(true));
 		if (save.hasLoadDataByName("MOB")) {
 			LoadData mob = save.getFirstLoadDataByName("MOB");
 			if (mob.hasLoadDataByName("LOOK")) {

@@ -15,14 +15,8 @@ import net.bytebuddy.asm.Advice;
 @ModMethodPatch(target = PlayerMob.class, name = "setupLoadedCharacterPacket", arguments = {PacketWriter.class})
 public class setupLoadedCharacterPacketPatch {
 	
-/*	@Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class)
-    static boolean onEnter(@Advice.This PlayerMob th, @Advice.Argument(0) PacketWriter writer) {	
-		
-		
-		
-        return true;
-    }*/
-	 
+// Although I am keeping this here for now, I did not actually need to patch this method, because by the time this
+	// method receives the look, it has already been intercepted and replaced by it's evil twin furry brother.
 	 @Advice.OnMethodExit
 	    static void onExitSetupLoadedCharacterPacket(@Advice.This PlayerMob th, @Advice.Argument(0) PacketWriter writer) {
 		/* try {

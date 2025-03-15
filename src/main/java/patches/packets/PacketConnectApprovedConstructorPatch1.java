@@ -10,7 +10,7 @@ import net.bytebuddy.asm.Advice;
 public class PacketConnectApprovedConstructorPatch1 {
 	  @Advice.OnMethodEnter()
 	  static boolean onEnter() {
-		  DebugHelper.handleDebugMessage("Intercepted and bypassed PacketConnectApproved constructor.", 50, MESSAGE_TYPE.DEBUG);
+		  DebugHelper.handleDebugMessage("Intercepted and bypassed PacketConnectApproved [byte[]] constructor.", 70, MESSAGE_TYPE.DEBUG);
         return true;  // Skips constructor execution entirely
 	  }
 }

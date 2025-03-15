@@ -46,7 +46,6 @@ public class CustomPacketConnectApproved extends PacketConnectApproved {
 	public CustomPacketConnectApproved(byte[] data) {
 		super(data);
 		this.data = data;
-		System.out.print("packet ping");
 		try {
 	        Field bufferField = this.getClass().getSuperclass().getSuperclass().getDeclaredField("buffer");
 	        bufferField.setAccessible(true);
@@ -101,8 +100,7 @@ public class CustomPacketConnectApproved extends PacketConnectApproved {
 		if (this.characterSelect && !this.needAppearance) {
 			this.serverCharacterUniqueID = client.getCharacterUniqueID();
 			
-			this.serverCharacterAppearance = client.playerMob.look instanceof RaceLook ? (RaceLook) client.playerMob.look :
-					RaceDataFactory.getOrRegisterRaceData(client.playerMob, new CustomHumanLook(true)).getRaceLook();
+			this.serverCharacterAppearance = RaceLook.fromHumanLook(client.playerMob.look, CustomHumanLook.class);
 			this.serverCharacterLookContent = new Packet();
 			client.playerMob.getInv().setupLookContentPacket(new PacketWriter(this.serverCharacterLookContent));
 			PlayerStats stats = client.characterStats();

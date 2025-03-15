@@ -11,7 +11,7 @@ import net.bytebuddy.asm.Advice;
 public class PacketPlayerAppearanceConstructorPatch2 {
 	  @Advice.OnMethodEnter()
 	  static boolean onEnter() {
-		  DebugHelper.handleDebugMessage("Intercepted and bypassed PacketPlayerAppearance constructor.", 50, MESSAGE_TYPE.DEBUG);
+		DebugHelper.handleDebugMessage("Intercepted and bypassed PacketPlayerAppearance [ServerClient] constructor.", 50, MESSAGE_TYPE.DEBUG);
         return true;  // Skips constructor execution entirely
 	  }
 }
