@@ -1,4 +1,4 @@
-package patches;
+package patches.server;
 
 import java.lang.reflect.Field;
 
@@ -10,6 +10,7 @@ import necesse.engine.network.NetworkClient;
 import necesse.engine.network.PacketReader;
 import necesse.engine.network.client.loading.ClientLoadingSelectCharacter;
 import core.network.CustomPacketConnectApproved;
+import core.race.factory.RaceDataFactory;
 
 
 public class ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch {
@@ -45,6 +46,7 @@ public class ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch {
             if (cp.serverCharacterAppearance != null) {
                 PlayerMob serverCharacterPlayer = new PlayerMob((long) cp.serverCharacterUniqueID, (NetworkClient) null);
                 serverCharacterPlayer.look = cp.serverCharacterAppearance;
+                RaceDataFactory.getOrRegisterRaceData(serverCharacterPlayer, cp.serverCharacterAppearance);
                 serverCharacterPlayer.getInv().applyLookContentPacket(new PacketReader(cp.serverCharacterLookContent));
                 serverCharacterPlayer.playerName = cp.serverCharacterName;
 

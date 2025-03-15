@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.Supplier;
 
+import core.network.CustomPacketPlayerAppearance;
 import core.race.CustomHumanLook;
 import core.race.RaceLook;
 import core.race.factory.RaceDataFactory;
@@ -15,7 +16,6 @@ import necesse.engine.network.NetworkClient;
 import necesse.engine.network.Packet;
 import necesse.engine.network.PacketReader;
 import necesse.engine.network.PacketWriter;
-import necesse.engine.network.packet.PacketPlayerAppearance;
 import necesse.engine.network.packet.PacketSpawnMob;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.sound.SoundEffect;
@@ -94,7 +94,7 @@ public class CustomRaceStylistContainer extends ShopContainer {
 
 						client.playerMob.look = newLook;
 						RaceDataFactory.setRaceLook(mob, newLook);
-						serverClient.getServer().network.sendToAllClients(new PacketPlayerAppearance(serverClient));
+						serverClient.getServer().network.sendToAllClients(new CustomPacketPlayerAppearance(serverClient));
 						CustomRaceStylistContainer.this.styleButtonResponse.runAndSend();
 						if (serverClient.achievementsLoaded()) {
 							serverClient.achievements().FEELING_STYLISH.markCompleted(serverClient);

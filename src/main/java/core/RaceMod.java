@@ -1,10 +1,12 @@
 package core;
 
 
+import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.util.Optional;
 
 import core.network.CustomPacketConnectApproved;
+import core.network.CustomPacketPlayerAppearance;
 import core.race.CustomHumanLook;
 import core.race.RaceLook;
 import core.race.TestFurryRaceLook;
@@ -16,6 +18,7 @@ import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
 import helpers.SettingsHelper;
 import necesse.engine.GameLoadingScreen;
+import necesse.engine.GlobalData;
 import necesse.engine.localization.Localization;
 import necesse.engine.modLoader.LoadedMod;
 import necesse.engine.modLoader.annotations.ModEntry;
@@ -23,10 +26,14 @@ import necesse.engine.network.PacketReader;
 import necesse.engine.network.client.loading.ClientLoadingSelectCharacter;
 import necesse.engine.network.networkInfo.NetworkInfo;
 import necesse.engine.network.server.Server;
+import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.ContainerRegistry;
 import necesse.engine.registries.PacketRegistry;
+import necesse.engine.save.CharacterSave;
+import necesse.engine.state.MainMenu;
 import necesse.entity.mobs.friendly.human.humanShop.StylistHumanMob;
 import necesse.gfx.PlayerSprite;
+import necesse.gfx.forms.MainMenuFormManager;
 import necesse.gfx.res.ResourceEncoder;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.ByteBuddyAgent;
@@ -34,17 +41,25 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.dynamic.loading.ClassReloadingStrategy;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
-import patches.ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch;
+import patches.MainMenuMessagePatch;
 import patches.PlayerSpriteHooks;
-import patches.ServerAddClientPatch;
+import patches.characterSavesPathPatch;
 import patches.getStylistOpenShopPacketPatch;
+import patches.server.ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch;
+import patches.server.ClientLoadingSelectCharacterStartPatch;
+import patches.server.ServerAddClientPatch;
+import patches.server.ServerClientApplyAppearancePacketPatch;
+import patches.server.ServerClientApplyLoadedCharacterPacketPatch;
+import patches.server.ServerClientLoadClientLookPatch;
 
 	
 @ModEntry
 public class RaceMod {
+	public static String characterSavePath;
 	public static int CUSTOM_STYLIST_CONTAINER;
 	public static Instrumentation byteBuddyInst;
 	public static SettingsHelper settings = new SettingsHelper();
+	public static String VERSION_STRING = "0.0.0 ALPHA";
 	public void preInit() {
 		
 		byteBuddyInst = ByteBuddyAgent.install();
@@ -52,13 +67,15 @@ public class RaceMod {
 		DebugHelper.initialize();
 		DebugHelper.handleDebugMessage("Race mod beginning pre-initialization. Let's get some hooks into this bad boy.", 5, MESSAGE_TYPE.INFO);
  	
-    	deployPreInitHook();
-    	
+    	deployPreInitHook();   	
+
     	RaceDataFactory.initialize(byteBuddyInst);
-    	LoadedMod l = LoadedMod.getRunningMod();
     	
-    	DebugHelper.handleDebugMessage("RaceMod looking for resources...");
-    	ResourceEncoder.addModResources(l);	
+    	if(!GlobalData.isServer()) {
+	    	LoadedMod l = LoadedMod.getRunningMod();
+	    	DebugHelper.handleDebugMessage("RaceMod looking for resources...");
+	    	ResourceEncoder.addModResources(l);	
+    	}
 	}
 	
 	private void deployPreInitHook() {
@@ -87,11 +104,26 @@ public class RaceMod {
 			  .redefine(ClientLoadingSelectCharacter.class)
 	          .method(ElementMatchers.named("submitConnectAccepted"))
 	          .intercept(MethodDelegation.to(ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch.class)) 
+	          .method(ElementMatchers.named("applyLoadedCharacterPacket"))
+	          .intercept(MethodDelegation.to(ClientLoadingSelectCharacterStartPatch.class))
 	          .make() 
 	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 
 		  
 		  DebugHelper.handleDebugMessage("Deployed ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
 		  
+		  new ByteBuddy()
+			  .redefine(ServerClient.class)
+	          .method(ElementMatchers.named("loadClientLook"))
+	          .intercept(MethodDelegation.to(ServerClientLoadClientLookPatch.class)) 
+	          .method(ElementMatchers.named("applyLoadedCharacterPacket"))
+	          .intercept(MethodDelegation.to(ServerClientApplyLoadedCharacterPacketPatch.class))
+	          .method(ElementMatchers.named("applyAppearancePacket"))
+	          .intercept(MethodDelegation.to(ServerClientApplyAppearancePacketPatch.class))
+	          .make() 
+	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 
+	  
+		  DebugHelper.handleDebugMessage("Deployed ServerClientLoadClientLookPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
+	
 		  
 		  new ByteBuddy()
 			  .redefine(StylistHumanMob.class)
@@ -110,12 +142,19 @@ public class RaceMod {
 	
     public void init() {    	
     	
-    	GameLoadingScreen.drawLoadingString(Localization.translate("racemodui", "loading"));   
-    	
+    	if(!GlobalData.isServer()) {
+    		GameLoadingScreen.drawLoadingString(Localization.translate("racemodui", "loading"));   
+        	
+        	characterSavePath = SettingsHelper.getSettingsString("DATA", "save_path");
+        	if(characterSavePath == null) characterSavePath = GlobalData.appDataPath().replace('\\', '/')  + "saves/characters/racemod/";
+        	interceptCharacterSavePath();
+        	addMainMenuMessage();
+    	}
     	DebugHelper.handleDebugMessage("Deploying hooks...");
 		replaceFormNewCharacterForms();
-		replacePlayerSprite();          
-        
+		replacePlayerSprite();   
+    	
+		
         DebugHelper.handleDebugMessage("Registering containers...");
         registerContainers();
         
@@ -123,21 +162,55 @@ public class RaceMod {
 		RaceRegistry.registerRace(CustomHumanLook.HUMAN_RACE_ID, new CustomHumanLook());
 		RaceRegistry.registerRace(TestFurryRaceLook.TEST_FURRY_RACE_ID, new TestFurryRaceLook());
 		
-		DebugHelper.handleDebugMessage("Registering extra textures...");
-		TestFurryRaceLook.loadRaceTextures();
-		CustomHumanLook.loadRaceTextures();  
+		if(!GlobalData.isServer()) {
+			DebugHelper.handleDebugMessage("Registering extra textures...");
+			TestFurryRaceLook.loadRaceTextures();
+			CustomHumanLook.loadRaceTextures();  
+		}
        
     	DebugHelper.handleDebugMessage("Registering network utilities...");
 		PacketRegistry.registerPacket(CustomPacketConnectApproved.class);
+		PacketRegistry.registerPacket(CustomPacketPlayerAppearance.class);
     }
     
+
+	private static void interceptCharacterSavePath() {
+		
+		File saveDirectory = new File(characterSavePath);
+		DebugHelper.handleFormattedDebugMessage("Creating custom character save location at %s.", 40, MESSAGE_TYPE.DEBUG, new Object[] {characterSavePath});    
+		saveDirectory.mkdirs();
+		
+		  try {	
+	        	new ByteBuddy()
+	            .redefine(CharacterSave.class)
+	            .method(ElementMatchers.named("getCharacterSavesPath"))
+	            .intercept(MethodDelegation.to(characterSavesPathPatch.class)) // Redirect to custom logic
+	            .make()
+	            .load(PlayerSprite.class.getClassLoader(), ClassReloadingStrategy.fromInstalledAgent());	        
+	        	DebugHelper.handleDebugMessage("Successfully patched character save path. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);    
+	            
+	        } catch (Exception e) {	
+	            e.printStackTrace();         
+	        }
+	}
 
 	public void postInit() {   		
 		
 		DebugHelper.handleDebugMessage("Race mod initialized. That was easy!", 5, MESSAGE_TYPE.INFO);
     	Optional<String> rlist = RaceRegistry.getRaces().stream().map(RaceLook::getRaceID).reduce( (r1, r2) -> {return r1+","+r2;});
-    	DebugHelper.handleFormattedDebugMessage("%d races loaded: %s", 0, DebugHelper.MESSAGE_TYPE.INFO, new Object[] {RaceRegistry.getTotalRaces(),rlist.get()});
-    }
+    	DebugHelper.handleFormattedDebugMessage("%d races loaded: %s", 0, DebugHelper.MESSAGE_TYPE.INFO,
+    			new Object[] {RaceRegistry.getTotalRaces(),rlist.get()});
+
+	}
+	
+	public static void addMainMenuMessage() {
+	
+		 new ByteBuddy()
+			 .redefine(MainMenuFormManager.class)
+	         .visit(Advice.to(MainMenuMessagePatch.class).on(ElementMatchers.named("setup")))
+	         .make() 
+	         .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 
+	}
 
     public static void replacePlayerSprite() {
     	

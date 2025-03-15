@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import core.forms.FormNewPlayerRaceCustomizer;
 import core.race.CustomHumanLook;
 import core.race.RaceLook;
+import core.race.TestFurryRaceLook;
 import core.race.factory.RaceDataFactory;
 import helpers.DebugHelper;
 import necesse.engine.localization.message.GameMessage;
@@ -46,15 +47,14 @@ public abstract class NewCharacterForm extends Form {
 
 		overrides.FormNewPlayerPreset np = new overrides.FormNewPlayerPreset(0, 0, PRESET_FORM_WIDTH, true, true);
 		
-		this.newPlayerFormPreset = this.addComponent((FormNewPlayerPreset)flow.nextY(np, 20));		
-		
+		this.newPlayerFormPreset = this.addComponent((FormNewPlayerPreset)flow.nextY(np, 20));				
 		
 		this.addComponent(new FormLocalLabel("racemodui", "playername", new FontOptions(16), -1, 5, flow.next(18)));
 		
 		this.nameInput = (FormTextInput) this.addComponent(new FormTextInput(4, flow.next(40),
 				FormInputSize.SIZE_32_TO_40, this.getWidth() - 8, GameUtils.getPlayerNameLength().height));
 		
-		this.nameInput.placeHolder = new LocalMessage("racemodui", "playername");
+		this.nameInput.placeHolder = new LocalMessage("racemodui", "playername") ;
 		this.nameInput.setRegexMatchFull(GameUtils.playerNameSymbolsPattern);
 		
 		String userName = PlatformManager.getPlatform().getUserName();
@@ -62,7 +62,6 @@ public abstract class NewCharacterForm extends Form {
 			this.nameInput.setText(userName.trim());
 		}
 
-		System.out.println("Entered modified character form...");
 		this.nameInput.onChange((e) -> {
 			this.updateCreateButton();
 		});
@@ -71,8 +70,7 @@ public abstract class NewCharacterForm extends Form {
 		this.createButton = (FormLocalTextButton) this
 				.addComponent(new FormLocalTextButton("racemodui", "charcreate", 4, buttonsY, this.getWidth() / 2 - 6));
 		
-		this.createButton.onClicked((e) -> {
-			
+		this.createButton.onClicked((e) -> {			
 			PlayerMob player = this.getPlayer();									
 			this.onCreatePressed(player);
 		});
@@ -120,12 +118,17 @@ public abstract class NewCharacterForm extends Form {
 	}
 	
 	public void setLook(HumanLook look) {
-		this.setLook(new CustomHumanLook(look));
+			this.newPlayerFormPreset.setLook(look);
 		//do NUFFIN
 	}
 	
 	public void setLook(RaceLook look) {
-		this.newPlayerFormPreset.setLook(look);
+		if(this.newPlayerFormPreset.getRaceLook()!=null) {
+			this.newPlayerFormPreset.getRaceLook().copy(look);
+		}
+		else {
+			this.newPlayerFormPreset.setLook(look);
+		}
 	}
 	
 	public RaceLook getLook() {		

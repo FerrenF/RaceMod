@@ -1,7 +1,11 @@
-package necesse.engine.network.packet;
+package core.network;
 
 import java.util.Iterator;
 import java.util.Map;
+
+import core.race.CustomHumanLook;
+import core.race.RaceLook;
+import core.race.factory.RaceDataFactory;
 import necesse.engine.Settings;
 import necesse.engine.commands.PermissionLevel;
 import necesse.engine.localization.message.GameMessage;
@@ -13,39 +17,44 @@ import necesse.engine.network.PacketWriter;
 import necesse.engine.network.client.Client;
 import necesse.engine.network.client.ClientClient;
 import necesse.engine.network.packet.PacketCharacterSelectError;
+import necesse.engine.network.packet.PacketPlayerAppearance;
+import necesse.engine.network.packet.PacketRequestPlayerData;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.util.GameUtils;
 import necesse.entity.mobs.PlayerMob;
 import necesse.gfx.HumanLook;
 
-public class PacketPlayerRaceData extends Packet {
+public class CustomPacketPlayerAppearance extends PacketPlayerAppearance {
 	public final int slot;
 	public final int characterUniqueID;
-	public final HumanLook look;
+	public final RaceLook look;
 	public final String name;
 
-	public PacketPlayerRaceData(byte[] data) {
+	public CustomPacketPlayerAppearance(byte[] data) {
 		super(data);
 		PacketReader reader = new PacketReader(this);
 		this.slot = reader.getNextByteUnsigned();
 		this.characterUniqueID = reader.getNextInt();
-		this.look = new HumanLook(reader);
+		this.look = RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true));
 		this.name = reader.getNextString();
 	}
 
-	public PacketPlayerRaceData(ServerClient client) {
+	public CustomPacketPlayerAppearance(ServerClient client) {
+		super(client);
 		this.slot = client.slot;
 		this.characterUniqueID = client.getCharacterUniqueID();
-		this.look = client.playerMob.look;
+		this.look = RaceDataFactory.getRaceLook(client.playerMob, RaceLook.fromHumanLook(client.playerMob.look, CustomHumanLook.class));
+			
 		this.name = client.getName();
 		this.putData();
 	}
 
-	public PacketPlayerRaceData(int slot, int characterUniqueID, PlayerMob player) {
+	public CustomPacketPlayerAppearance(int slot, int characterUniqueID, PlayerMob player) {
+		super(slot, characterUniqueID, player);
 		this.slot = slot;
 		this.characterUniqueID = characterUniqueID;
-		this.look = player.look;
+		this.look = RaceDataFactory.getRaceLook(player, RaceLook.fromHumanLook(player.look, CustomHumanLook.class));
 		this.name = player.getDisplayName();
 		this.putData();
 	}
@@ -81,7 +90,7 @@ public class PacketPlayerRaceData extends Packet {
 						}
 					}
 
-					//client.applyAppearancePacket(this);
+					client.applyAppearancePacket(this);
 					if (client.getName().equalsIgnoreCase(Settings.serverOwnerName)) {
 						client.setPermissionLevel(PermissionLevel.OWNER, false);
 					}
@@ -90,15 +99,15 @@ public class PacketPlayerRaceData extends Packet {
 				}
 			} else if (client.getPermissionLevel().getLevel() < PermissionLevel.ADMIN.getLevel()) {
 				System.out.println(client.getName() + " tried to change appearance, but isn't admin");
-				server.network.sendPacket(new PacketPlayerRaceData(client), client);
+				server.network.sendPacket(new PacketPlayerAppearance(client), client);
 			} else if (!client.getName().equalsIgnoreCase(this.name)) {
 				System.out.println(client.getName() + " tried to change appearance with wrong name");
-				server.network.sendPacket(new PacketPlayerRaceData(client), client);
+				server.network.sendPacket(new PacketPlayerAppearance(client), client);
 			} else if (!server.world.settings.cheatsAllowedOrHidden()) {
 				System.out.println(client.getName() + " tried to change appearance, but cheats aren't allowed");
-				server.network.sendPacket(new PacketPlayerRaceData(client), client);
+				server.network.sendPacket(new PacketPlayerAppearance(client), client);
 			} else {
-			//	client.applyAppearancePacket(this);
+				client.applyAppearancePacket(this);
 			}
 
 		}
@@ -107,11 +116,11 @@ public class PacketPlayerRaceData extends Packet {
 	public void processClient(NetworkPacket packet, Client client) {
 		ClientClient target = client.getClient(this.slot);
 		if (target == null) {
-		//	client.network.sendPacket(new PacketRequestPlayerData(this.slot));
+			client.network.sendPacket(new PacketRequestPlayerData(this.slot));
 		} else {
-		//	target.applyAppearancePacket(this);
+			target.applyAppearancePacket(this);
 		}
 
-		//client.loading.createCharPhase.submitPlayerAppearancePacket(this);
+		client.loading.createCharPhase.submitPlayerAppearancePacket(this);
 	}
 }

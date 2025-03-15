@@ -8,19 +8,22 @@ import necesse.engine.modLoader.annotations.ModMethodPatch;
 import necesse.engine.network.packet.PacketPlayerAppearance;
 import necesse.entity.mobs.PlayerMob;
 import net.bytebuddy.asm.Advice;
+import core.network.CustomPacketPlayerAppearance;
 import core.race.CustomHumanLook;
 @ModMethodPatch(target = PlayerMob.class, name = "applyAppearancePacket", arguments = {PacketPlayerAppearance.class})
 public class applyAppearancePacketPatch {
 	
 	@Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class)
-    static boolean onEnter(@Advice.This PlayerMob th, @Advice.Argument(0) PacketPlayerAppearance packet) {	      
+    static boolean onEnter(@Advice.This PlayerMob th, @Advice.Argument(0) PacketPlayerAppearance _packet) {	 
+		
+		if(!(_packet instanceof CustomPacketPlayerAppearance)) return false;
+		CustomPacketPlayerAppearance packet = (CustomPacketPlayerAppearance)_packet;
 		if(RaceDataFactory.mobUniqueID(th)!=-1) {
 			
-	    	RaceData r = RaceDataFactory.getOrRegisterRaceData(th);	
-	    	RaceLook ra = RaceLook.fromHumanLook(packet.look, r.raceDataInitialized ? r.getRaceLook().getClass() : CustomHumanLook.class);
-	    	th.refreshClientUpdateTime();
-	    	th.look = ra;
-	    	r.addRaceData(ra);
+	    	RaceData r = RaceDataFactory.getOrRegisterRaceData(th, packet.look);	
+	      	th.refreshClientUpdateTime();
+	      	if(!r.raceDataInitialized) return false;
+	    	th.look = packet.look;
 	    	th.getInv().giveLookArmor(false);
 	    	th.playerName = packet.name;
 	    	DebugHelper.handleDebugMessage(String.format(

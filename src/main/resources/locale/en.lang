@@ -1,6 +1,7 @@
 [racemodui]
 createnewcharacter=New Character
 playername=New Player
+fuzzyname=New Fuzzy
 charcreate=Make Character
 makerace=Race:
 nextrace=Next Race

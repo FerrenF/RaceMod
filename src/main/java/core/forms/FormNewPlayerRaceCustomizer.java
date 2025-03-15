@@ -129,9 +129,9 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	}
 	
 	public void setRaceLook(RaceLook raceLook) { 
-		RaceData ra = RaceDataFactory.getOrRegisterRaceData(this.getPlayerHelper());
-		ra.addRaceData(raceLook);	   
 		this.getPlayerHelper().look = raceLook;
+		RaceDataFactory.getOrRegisterRaceData(this.getPlayerHelper(), raceLook);
+		
 	}
 
 	public void setLook(HumanLook look) {
@@ -144,7 +144,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		this.updateComponents();
 	}
 
-	public void updateComponents() {
+	public void updateComponents() {		
 		this.icon.setPlayer(this.getPlayerHelper());
 		this.updateLook();
 	}
@@ -163,16 +163,16 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	public FormNewPlayerRaceCustomizer(RaceLook raceLook, int x, int y, int width, boolean allowSupernaturalChanges, boolean allowClothesChance) {		
 		super(width, 0);		
 		this.setPlayerHelper(new PlayerMob(0L, (NetworkClient) null));
-		this.setRaceLook(raceLook);
 		this.setPosition(x, y);		
 		this.drawBase = false;
 		this.allowSupernaturalChanges = allowSupernaturalChanges;
 		this.allowClothesChance = allowClothesChance;		
+		this.setRaceLook(raceLook);
 		
 		FormFlow flow = new FormFlow(0);			
 		
 		FormLocalLabel raceLabel = new FormLocalLabel("racemodui", "makerace",
-				new FontOptions(16), 0, x + (width / 2) - FormNewPlayerPreset.RACE_SWITCH_FORM_WIDTH, 0, width);
+				new FontOptions(16), 0, x + (width / 2) - FormNewPlayerPreset.RACE_SWITCH_FORM_WIDTH, 0, width*2);
 		raceLabel.addLine(this.getRaceLook().getRaceDisplayName());
 		this.addComponent((FormLocalLabel) flow.nextY(raceLabel));
 		flow.next(5);
@@ -268,13 +268,10 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	}
 	
 	public void setupRotationButtons(int x, int width, int iconY) {
-	    // Create the left rotate button
+		
 	    FormTextureButton leftRotateButton = createRotateButton(x - 64 + 15, iconY + 64 + 20, true);
-
-	    // Create the right rotate button
 	    FormTextureButton rightRotateButton = createRotateButton(x + 64 - 15, iconY + 64 + 20, false);
-
-	    // Additional button setup as needed
+	    
 	    leftRotateButton.acceptRightClicks = true;
 	    leftRotateButton.onClicked((e) -> {
 	        if (e.event.getID() == -99) {
@@ -298,7 +295,6 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	}
 	
 	protected abstract Point getDrawOffset(BodyPart part);
-
 
 	// Returns the modification cost (stub for customization)
 	protected abstract ArrayList<InventoryItem> getPartModificationCost(Color color);

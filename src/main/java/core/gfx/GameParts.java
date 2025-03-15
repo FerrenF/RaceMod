@@ -415,6 +415,7 @@ public class GameParts {
 		GameTexture _texture = new GameTexture(originalTexture);			
 		loader.submitTaskAddToList(this.fullTextures.get(realColorIndex), targetIndex, (String)null,() -> {
 			if(cid != -1) colors.replaceColors(_texture, cid);
+			_texture.runPreAntialias(false);
 			cache.set(cacheKey, hash, _texture);
 			return _texture;
 		}, makeFinal);		

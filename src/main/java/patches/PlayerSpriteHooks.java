@@ -67,6 +67,7 @@ public class PlayerSpriteHooks {
 		if(RaceDataFactory.hasRaceData(player)) {			
 			RaceData customRaceData = RaceDataFactory.getRaceData(player);	
 			custom = customRaceData.getRaceLook();
+			player.look = custom;
 		}
 		
 		InventoryItem helmet = getPlayerDisplayArmor(player, 0);

@@ -71,6 +71,7 @@ public class SettingsHelper{
 	
 	public static void init_default_settings() {		
 		setSettingsString("DEBUG", "debug_level", String.valueOf(DebugHelper.DEFAULT_DEBUG_LEVEL));
+		setSettingsString("DATA", "save_path", GlobalData.appDataPath().replace('\\', '/') + "saves/characters/");
 		save();
 	}
 	

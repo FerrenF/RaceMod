@@ -1,23 +1,16 @@
-package patches;
+package patches.server;
 
-import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Objects;
 import core.network.CustomPacketConnectApproved;
-import helpers.DebugHelper;
-import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.Settings;
-import necesse.engine.modLoader.annotations.ModMethodPatch;
 import necesse.engine.network.NetworkPacket;
 import necesse.engine.network.networkInfo.NetworkInfo;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
-import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.asm.Advice;
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.This;
-import net.bytebuddy.matcher.ElementMatchers;
 import necesse.engine.GameAuth;
 import necesse.engine.GameEvents;
 import necesse.engine.events.ServerClientConnectedEvent;

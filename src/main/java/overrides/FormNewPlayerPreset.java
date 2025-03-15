@@ -10,6 +10,7 @@ import core.forms.events.ComponentSizeChanged;
 import core.forms.events.ComponentSizeChangedListener;
 import core.race.CustomHumanLook;
 import core.race.RaceLook;
+import core.race.factory.RaceDataFactory;
 import core.registries.RaceRegistry;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
@@ -99,21 +100,7 @@ public class FormNewPlayerPreset extends Form {
 
 		//this.updateRaceButtons();
 	}
-	
-	protected void updateRaceButtons() {
 		
-		if(!allowRaceChange) return;
-		int prevRaceInd = (this.currentRaceIndex - 1) >= 0 ? this.currentRaceIndex - 1 : this.raceIDs.size()-1;
-		int nextRaceInd = (this.currentRaceIndex + 1) % this.raceIDs.size();
-		
-		RaceLook prevRace = RaceRegistry.getRace(this.raceIDs.get(prevRaceInd));
-		RaceLook nextRace = RaceRegistry.getRace(this.raceIDs.get(nextRaceInd));
-
-		
-		this.prevRaceButton.setText(prevRace.getRaceDisplayName().translate());
-		this.nextRaceButton.setText(nextRace.getRaceDisplayName().translate());
-	}
-	
 	public void onComponentSizeChanged(ComponentSizeChangedListener listener) {
 	        this.componentSizeChanged.add(listener);
 	}
@@ -124,16 +111,6 @@ public class FormNewPlayerPreset extends Form {
             listener.handleEvent(event);
         }
 	 }
-	protected void alternateRace(int direction) {
-		
-		if(!allowRaceChange) return;
-		if(currentRaceIndex + direction < 0) this.currentRaceIndex = this.raceIDs.size() - 1;
-		else this.currentRaceIndex = (currentRaceIndex + direction) % this.raceIDs.size();	
-		
-		String newRaceID = this.raceIDs.get(this.currentRaceIndex);
-		this.changeRace(newRaceID);
-		this.updateRaceButtons();
-	}
 	
 	public List<String> getLoadedRaceList(){
 		return this.raceIDs;
@@ -185,7 +162,27 @@ public class FormNewPlayerPreset extends Form {
 	}
 	
 	public void setLook(HumanLook look) {
-		this.newPlayerFormContents.setRaceLook(RaceLook.fromHumanLook(look, this.startingRaceClass));
+		
+		if(this.newPlayerFormContents.getRaceLook()!=null) {
+			RaceLook ra = this.newPlayerFormContents.getRaceLook();
+			ra.copy(look);
+			RaceDataFactory.getOrRegisterRaceData(this.newPlayerFormContents.getPlayerHelper(),ra);
+		}
+		else {				
+			Constructor<? extends RaceLook> constructor;
+			try {
+				constructor = this.startingRaceClass.getConstructor(boolean.class);
+				RaceLook newRaceLook = constructor.newInstance(true);
+				newRaceLook.copy(look);
+				this.setLook(newRaceLook);
+				return;
+			} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+			
+			this.newPlayerFormContents.setLook(look);
+		}
 	}
 	
 	public RaceLook getRaceLook() {

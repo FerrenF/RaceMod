@@ -104,8 +104,6 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 		
 	}
 
-	
-	//TODO: hey, this can be de-duplicated by moving part of it to the base new player preset form, and overridden only if needed.
 	@Override
 	protected Object getCurrentBodyPartSelection(BodyPart part, boolean colorCustomization) {
 		int DEBUG_VALUE = 80;

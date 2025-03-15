@@ -2,11 +2,11 @@ package overrides;
 
 import java.lang.reflect.Field;
 
+import core.network.CustomPacketPlayerAppearance;
 import core.race.RaceLook;
 import necesse.engine.network.client.Client;
 import necesse.engine.network.client.ClientClient;
 import necesse.engine.network.packet.PacketMobHealth;
-import necesse.engine.network.packet.PacketPlayerAppearance;
 import necesse.entity.mobs.Attacker;
 import necesse.entity.mobs.PlayerMob;
 
@@ -74,7 +74,7 @@ public class DebugPlayerForm extends Form {
 					player.playerName = clientClient.getName();
 					//setRaceLook(clientClient.playerMob, new HumanLook(player.look));
 					client.network.sendPacket(
-							new PacketPlayerAppearance(client.getSlot(), client.getCharacterUniqueID(), player));
+							new CustomPacketPlayerAppearance(client.getSlot(), client.getCharacterUniqueID(), player));
 				});
 		((FormTextButton) this
 				.addComponent(new FormTextButton("Back", this.getWidth() / 2 + 2, buttonsY, this.getWidth() / 2 - 6)))

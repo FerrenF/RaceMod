@@ -7,7 +7,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
+import necesse.engine.GlobalData;
 import necesse.gfx.GameEyes;
 import necesse.gfx.GameHair;
 import necesse.gfx.GameSkin;
@@ -74,16 +76,22 @@ public abstract class RaceLookParts{
     }
     
     public void defineRaceBodyParts() {
-	  this.addBodyPart("SKIN_COLOR", new BodyPart("SKIN_COLOR", "skincolor", GameSkin.getTotalSkins()));
-      this.addBodyPart("EYE_TYPE", new BodyPart("EYE_TYPE", "eyetype", GameEyes.getTotalEyeTypes()));
-      this.addBodyPart("EYE_COLOR", new BodyPart("EYE_COLOR", "eyecolor", GameEyes.getTotalColors()));
-      this.addBodyPart("HAIR_STYLE", new BodyPart("HAIR_STYLE", "hairstyle", GameHair.getTotalHair()));
-      this.addBodyPart("FACIAL_HAIR", new BodyPart("FACIAL_HAIR", "facialhair", GameHair.getTotalFacialFeatures()));
-      this.addBodyPart("HAIR_COLOR", new BodyPart("HAIR_COLOR", "haircolor", GameHair.getTotalHairColors()));      
+	  this.addBodyPart("SKIN_COLOR", new BodyPart("SKIN_COLOR", "skincolor", tryGetBaseGameGfx(()->GameSkin.getTotalSkins())));
+      this.addBodyPart("EYE_TYPE", new BodyPart("EYE_TYPE", "eyetype", tryGetBaseGameGfx(()->GameEyes.getTotalEyeTypes())));
+      this.addBodyPart("EYE_COLOR", new BodyPart("EYE_COLOR", "eyecolor", tryGetBaseGameGfx(()->GameEyes.getTotalColors())));
+      this.addBodyPart("HAIR_STYLE", new BodyPart("HAIR_STYLE", "hairstyle", tryGetBaseGameGfx(()->GameHair.getTotalHair())));
+      this.addBodyPart("FACIAL_HAIR", new BodyPart("FACIAL_HAIR", "facialhair", tryGetBaseGameGfx(()->GameHair.getTotalFacialFeatures())));
+      this.addBodyPart("HAIR_COLOR", new BodyPart("HAIR_COLOR", "haircolor", tryGetBaseGameGfx(()->GameHair.getTotalHairColors())));      
       this.addBodyPart("SHIRT_COLOR", new BodyPart("SHIRT_COLOR", "shirtcolor", DEFAULT_COLORS.length));
       this.addBodyPart("SHOES_COLOR", new BodyPart("SHOES_COLOR", "shoescolor", DEFAULT_COLORS.length));   
     }
 
+    public static int tryGetBaseGameGfx(Supplier<Integer> getter) {
+    	if(GlobalData.isServer()) {
+    		return 0;
+    	}
+    	return getter.get();
+    }
 	public Color defaultColors(int id) {
 		return DEFAULT_COLORS[id];
 	}
