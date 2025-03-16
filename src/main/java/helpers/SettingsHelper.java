@@ -70,8 +70,9 @@ public class SettingsHelper{
 	}
 	
 	public static void init_default_settings() {		
+		String pathSeparator = System.getProperty("file.separator");
 		setSettingsString("DEBUG", "debug_level", String.valueOf(DebugHelper.DEFAULT_DEBUG_LEVEL));
-		setSettingsString("DATA", "save_path", GlobalData.appDataPath().replace('\\', '/') + "saves/characters/");
+		setSettingsString("DATA", "save_path", GlobalData.appDataPath() + String.format("saves%scharacters%sracemod%s", pathSeparator, pathSeparator, pathSeparator));
 		save();
 	}
 	
@@ -85,7 +86,7 @@ public class SettingsHelper{
 			e.printStackTrace();
 			return false;
 		} catch (DataFormatException e) {
-			System.err.print("DataFormatException while trying to reload settings file at "+ settingsLocation);
+			System.err.print("DataFormatException while trying to reload settings fiD"+ settingsLocation);
 			e.printStackTrace();
 			return false;
 		}	
