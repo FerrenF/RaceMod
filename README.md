@@ -1,30 +1,18 @@
-# Necesse Quest Tracker Minimize Button 0.2.0
+# Necesse Race Mod
 
 ![Preview](./Preview.png)  
 
 ## Overview  
-This mod adds a minimize/maximize button to the quest tracker in **Necesse**, allowing players to reclaim valuable screen space.  
+This mod overhauls the internal systems of Necesse to support character races with custom body part customizations. 
 
-## Features  
-- **Minimize/Maximize Button** – Click to hide or show the quest tracker.  
-- **Functional & Lightweight** – Works seamlessly with existing UI elements.  
-- **Improves Screen Space** – In some cases, opens up nearly half the game screen.  
+## Warnings
+RaceMod is currently released as a very early ALPHA. Crashes may occur, so do back up your game data.
+This mod take steps to preserve your character data, such as saving in a different directory than base game characters. Even so, back up your characters and worlds.
 
-## Installation (Non-Steam)
-1. Download the mod `.jar` file.  
-2. Place it in the `mods` folder of your Necesse installation (generally at %APPDATA%/Necesse/mods.  
-3. Launch the game, and enjoy your customizable quest tracker!  
+**THIS IS NOT A CLIENT SIDE MOD** 
 
-## Planned Updates  
-- ~~**Persistence Between Loading Screens** – The tracker’s minimized/maximized state will be remembered.  ~~
+Both server and client must have this mod installed to allow clients to join with custom races. Even if you do manage to get past the server mod dependency prompt, it will at **best** not work, and at worst corrupt your character save.
+Installing this mod, creating characters that are linked to a world, and then disabling this mod will remove the custom attributes of the world-embedded characters.
 
-## Version History  
-- **0.2.1** – Enabled clientside. You should no longer need to install this on the server to have it work for clients.  
-- **0.2.0** – Maximization state now persists across loading screens.  
-- **0.1.0** – Initial release with basic minimize/maximize functionality.  
-
-## Compatibility  
-Tested on **Necesse 0.30.0**. Should work with most UI-related mods but may have conflicts with other quest tracker modifications.  
-
-## Feedback & Support  
-If you encounter any issues or have feature suggestions, feel free to reach out! @ferrenfx on Necesse's discord's #modding channel.
+## Support
+Please join the discord modding channel for Necesse and let me know if you have any suggestions or issues. 
