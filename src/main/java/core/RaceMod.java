@@ -25,6 +25,7 @@ import necesse.engine.localization.Localization;
 import necesse.engine.modLoader.LoadedMod;
 import necesse.engine.modLoader.annotations.ModEntry;
 import necesse.engine.network.PacketReader;
+import necesse.engine.network.client.Client;
 import necesse.engine.network.client.loading.ClientLoadingSelectCharacter;
 import necesse.engine.network.networkInfo.NetworkInfo;
 import necesse.engine.network.server.Server;
@@ -52,6 +53,7 @@ import patches.getStylistOpenShopPacketPatch;
 import patches.debug.debugGNDItemPatch;
 import patches.server.ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch;
 import patches.server.ClientLoadingSelectCharacterStartPatch;
+import patches.server.ClientSubmitConnectAcceptedPatch;
 import patches.server.ServerAddClientPatch;
 import patches.server.ServerClientApplyAppearancePacketPatch;
 import patches.server.ServerClientApplyLoadedCharacterPacketPatch;
@@ -65,14 +67,40 @@ public class RaceMod {
 	public static int CUSTOM_STYLIST_CONTAINER;
 	public static Instrumentation byteBuddyInst;
 	public static SettingsHelper settings = new SettingsHelper();
-	public static String VERSION_STRING = "0.0.1 ALPHA";
+	public static String VERSION_STRING = "0.0.12 ALPHA";
 	public static boolean DUMP_CLASSES = false;
 	public static boolean DEBUG_HOOKS = false;
 	public void preInit() {
 		
 		byteBuddyInst = ByteBuddyAgent.install();
 		SettingsHelper.initialize();
+		
 		DebugHelper.initialize();
+		
+		String last_version = SettingsHelper.getSettingsString("DATA", "last_version");
+		if(!last_version.equals(VERSION_STRING)) {
+			GameLoadingScreen.drawLoadingString(Localization.translate("racemodui", "versionchange"));   
+			
+			DebugHelper.handleDebugMessage("Last version used missing or changed. Erasing cache.", 5, MESSAGE_TYPE.DEBUG);
+			String cacheLocation = GlobalData.appDataPath()+System.getProperty("file.separator")+"cache";			
+			
+			File c1 = new File(cacheLocation + System.getProperty("file.separator") + "player"+ System.getProperty("file.separator") );
+			DebugHelper.handleDebugMessage("Checking for: "+c1.getAbsolutePath(), 5, MESSAGE_TYPE.DEBUG);
+	
+			if(c1.exists()) {
+				deleteDirectory(c1);
+				}
+			
+			File c2 = new File(cacheLocation + System.getProperty("file.separator") + "client"+ System.getProperty("file.separator") );
+			DebugHelper.handleDebugMessage("Checking for: "+c2.getAbsolutePath(), 5, MESSAGE_TYPE.DEBUG);
+
+			if(c2.exists()) {
+				deleteDirectory(c2);
+				}
+			
+			SettingsHelper.setSettingsString("DATA", "last_version", VERSION_STRING);			
+		}
+		
 		DebugHelper.handleDebugMessage("Race mod beginning pre-initialization. Let's get some hooks into this bad boy.", 5, MESSAGE_TYPE.INFO);
 		 
 		if(DEBUG_HOOKS) {			  
@@ -94,7 +122,17 @@ public class RaceMod {
 	    	ResourceEncoder.addModResources(l);	
     	}
 	}
-	
+	public static void deleteDirectory(File directory) {
+	    if (directory.exists()) {
+	        File[] files = directory.listFiles();
+	        if (files != null) {
+	            for (File file : files) {
+	                deleteDirectory(file); // Recursively delete files/folders
+	            }
+	        }
+	        directory.delete(); 
+	    }
+	}
 	private void deployPreInitHook() {
 		
 	
@@ -106,7 +144,7 @@ public class RaceMod {
 		  
 		  DebugHelper.handleDebugMessage("Successfully replaced NewCharacterForm. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
 		  
-		  
+		  //ClientSubmitConnectAcceptedPatch
 		  new ByteBuddy()
 	          .redefine(Server.class)
 	          .method(ElementMatchers.named("addClient")
@@ -116,6 +154,15 @@ public class RaceMod {
 	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 		  
 		  
 		  DebugHelper.handleDebugMessage("Deployed ServerAddClientPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
+		  
+		  new ByteBuddy()
+	          .redefine(Client.class)
+	          .method(ElementMatchers.named("submitConnectionPacket"))
+	          .intercept(MethodDelegation.to(ClientSubmitConnectAcceptedPatch.class)) 
+	          .make() 
+	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 		  
+	  
+		  DebugHelper.handleDebugMessage("Deployed ClientSubmitConnectAcceptedPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
 		  
 		  new ByteBuddy()
 			  .redefine(ClientLoadingSelectCharacter.class)

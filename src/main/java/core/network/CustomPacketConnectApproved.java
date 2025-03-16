@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 import core.race.CustomHumanLook;
 import core.race.RaceLook;
 import core.race.factory.RaceDataFactory;
+import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.Settings;
 import necesse.engine.commands.PermissionLevel;
 import necesse.engine.network.NetworkManager;
@@ -47,11 +49,11 @@ public class CustomPacketConnectApproved extends PacketConnectApproved {
 		super(data);
 		this.data = data;
 		try {
-	        Field bufferField = this.getClass().getSuperclass().getSuperclass().getDeclaredField("buffer");
+	        Field bufferField = Packet.class.getDeclaredField("buffer");
 	        bufferField.setAccessible(true);
 	        bufferField.set(this, ByteBuffer.wrap(data));
 	        
-	        Field sizeField = this.getClass().getSuperclass().getSuperclass().getDeclaredField("size");
+	        Field sizeField = Packet.class.getDeclaredField("size");
 			sizeField.setAccessible(true);
 		    sizeField.set(this, data.length);
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
@@ -80,6 +82,8 @@ public class CustomPacketConnectApproved extends PacketConnectApproved {
 			this.serverCharacterTimePlayed = 0L;
 			this.serverCharacterName = null;
 		}
+		
+		
 		this.permissionLevel = PermissionLevel.getLevel(reader.getNextByteUnsigned());
 		this.hasNewJournalEntry = reader.getNextBoolean();
 		this.allowClientsPower = reader.getNextBoolean();
@@ -87,6 +91,7 @@ public class CustomPacketConnectApproved extends PacketConnectApproved {
 		this.worldSettingsContent = reader.getNextContentPacket();
 		this.platformConnectApprovedData = Platform.getNetworkManager().createPlatformConnectApprovedData();
 		this.platformConnectApprovedData.readPlatformData(reader);
+		DebugHelper.handleFormattedDebugMessage("PermLevel %d", 50, MESSAGE_TYPE.DEBUG, new Object[] {this.permissionLevel.ordinal()});
 	}
 
 	public CustomPacketConnectApproved(Server server, ServerClient client) {

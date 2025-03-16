@@ -44,7 +44,7 @@ public class FormNewPlayerPreset extends Form {
 	public final List<String> raceIDs; 
 	public int currentRaceIndex = 0;
 	public boolean allowRaceChange;
-	public Class<? extends RaceLook> startingRaceClass;
+	public RaceLook startingRaceLook;
 	
 	private final List<ComponentSizeChangedListener> componentSizeChanged = new ArrayList<>();
 	
@@ -61,7 +61,7 @@ public class FormNewPlayerPreset extends Form {
 	}
 	
 	protected void setupCustomizer(int x, int y, int width, boolean allowSupernaturalChanges, boolean allowClothesChance, RaceLook startingRace) {
-		startingRaceClass = startingRace.getClass();
+		this.startingRaceLook = startingRace;
 		changeRace(startingRace.getRaceID());
 	}
 	
@@ -105,7 +105,7 @@ public class FormNewPlayerPreset extends Form {
 	        this.componentSizeChanged.add(listener);
 	}
 	
-	private void triggerComponentResized() {
+	public void triggerComponentResized() {
         ComponentSizeChanged event = new ComponentSizeChanged(this);
         for (ComponentSizeChangedListener listener : this.componentSizeChanged) {
             listener.handleEvent(event);
@@ -122,8 +122,11 @@ public class FormNewPlayerPreset extends Form {
 			newRaceID = this.raceIDs.get(0);
 		}
 		try {
-			Constructor<? extends RaceLook> constructor = RaceRegistry.getRace(newRaceID).getClass().getConstructor(boolean.class);	
+			RaceLook blank = RaceRegistry.getRace(newRaceID);
+			Constructor<? extends RaceLook> constructor = blank.getClass().getConstructor(boolean.class);	
 			RaceLook newRaceLook = constructor.newInstance(true);
+			if(startingRaceLook.getClass().isInstance(blank))
+			{	newRaceLook.copy(startingRaceLook);	}
 			if(this.newPlayerFormContents!=null)this.removeComponent(newPlayerFormContents);
 			this.newPlayerFormContents = newRaceLook.associatedCustomizerForm
 					.getConstructor(int.class, int.class, int.class, boolean.class, boolean.class)
@@ -161,22 +164,19 @@ public class FormNewPlayerPreset extends Form {
 		this.newPlayerFormContents.setRaceLook(look);
 	}
 	
-	public void setLook(HumanLook look) {
-		
+	public void setLook(HumanLook look) {	
 		if(this.newPlayerFormContents.getRaceLook()!=null) {
 			RaceLook ra = this.newPlayerFormContents.getRaceLook();
 			ra.copy(look);
 			RaceDataFactory.getOrRegisterRaceData(this.newPlayerFormContents.getPlayerHelper(),ra);
 		}
 		else {				
-			Constructor<? extends RaceLook> constructor;
-			try {
-				constructor = this.startingRaceClass.getConstructor(boolean.class);
-				RaceLook newRaceLook = constructor.newInstance(true);
-				newRaceLook.copy(look);
-				this.setLook(newRaceLook);
+			try {			
+				RaceLook ta = RaceLook.fromRaceLook(startingRaceLook);
+				ta.copyBase(look);
+				this.setLook(ta);
 				return;
-			} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			} catch (SecurityException| IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}			

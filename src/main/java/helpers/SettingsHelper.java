@@ -13,7 +13,7 @@ import necesse.engine.save.SaveData;
 public class SettingsHelper{
 	
 	public static String MOD_NAME = "RaceMod";
-	public static String settingsLocation = GlobalData.cfgPath().replace('\\', '/')+ "mods/" + MOD_NAME+"/settings.cfg";
+	public static String settingsLocation = GlobalData.cfgPath() + "mods" + System.getProperty("file.separator")+ MOD_NAME+System.getProperty("file.separator")+"settings.cfg";
 	public static SaveData loadedSettings;
 	public static boolean settingsLoaded = false;
 	
@@ -73,6 +73,7 @@ public class SettingsHelper{
 		String pathSeparator = System.getProperty("file.separator");
 		setSettingsString("DEBUG", "debug_level", String.valueOf(DebugHelper.DEFAULT_DEBUG_LEVEL));
 		setSettingsString("DATA", "save_path", GlobalData.appDataPath() + String.format("saves%scharacters%sracemod%s", pathSeparator, pathSeparator, pathSeparator));
+		setSettingsString("DATA", "last_version", "-1");
 		save();
 	}
 	
@@ -108,6 +109,7 @@ public class SettingsHelper{
 	    if(!stl.hasLoadDataByName(category)) addSettingsCategory(category);
 	    SaveData l1 = stl.getFirstLoadDataByName(category).toSaveData();	    
 	    loadedSettings.removeFirstSaveDataByName(category);
+	    l1.removeFirstSaveDataByName(setting);
 	    l1.addSafeString(setting, value);
 	    loadedSettings.addSaveData(l1);
 	    save();

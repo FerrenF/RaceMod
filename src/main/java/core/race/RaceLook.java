@@ -101,10 +101,24 @@ public abstract class RaceLook extends HumanLook {
 		}
 	}
 	
+	public static RaceLook fromRaceLook(RaceLook startingRace) {
+		try {
+			RaceLook ra = startingRace.getClass().getConstructor(boolean.class).newInstance(true);
+			ra.copy(startingRace);
+			return ra;
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			e.printStackTrace();		
+				return null;
+			
+		}
+	}
+	
 	public abstract String getRaceID();
 	
 
 	public void copyBase(HumanLook look) {
+		if(look == null) return;
 		this.setEyeColor(look.getEyeColor());
 		this.setEyeType(look.getEyeType());
 		this.setHair(look.getHair());
@@ -124,7 +138,7 @@ public abstract class RaceLook extends HumanLook {
 	
 	public void copy(RaceLook look) {
 		if (look.getRaceID()!= this.getRaceID()) {
-			throw new IllegalArgumentException(String.format("Error: When copying a race into an already existing instance, both ID's must match. Source race_id: %s, Target race id: %s", this.getRaceID(), look.getRaceID()));
+			throw new IllegalArgumentException(String.format("Error: When copying a race into an already existing instance, both race ID's must match. Source race_id: %s, Target race id: %s", this.getRaceID(), look.getRaceID()));
 		}
 		this.appearanceByteMap.clear();
 		this.appearanceColorMap.clear();
@@ -596,6 +610,8 @@ public abstract class RaceLook extends HumanLook {
 	public abstract HumanDrawOptions modifyHumanDrawOptions(HumanDrawOptions drawOptions, MaskShaderOptions mask);
 
 	public abstract Class<? extends FormNewPlayerRaceCustomizer> getAssociatedCustomizerForm();
+
+
 
 	
 

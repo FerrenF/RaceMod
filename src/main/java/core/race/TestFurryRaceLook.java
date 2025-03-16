@@ -209,6 +209,10 @@ public class TestFurryRaceLook extends RaceLook {
 	
 	public int getRandomBodyColor() 	{	return this.getRandomByteColorFeature("BODY_COLOR");	}
 	
+	public int getRandomArmsStyle() 	{	return this.getRandomByteFeature("ARMS");	}
+	
+	public int getRandomArmsColor() 	{	return this.getRandomByteColorFeature("ARMS_COLOR");	}
+	
 	// Getters
 	
 	public int getTailStyle() 			{	return this.appearanceByteGet("TAIL");	}
@@ -296,11 +300,15 @@ public class TestFurryRaceLook extends RaceLook {
 		this.setHeadStyle(this.getRandomHeadStyle());
 		this.setHeadColor(this.getRandomHeadColor());
 		
-		this.setBodyStyle(this.getRandomBodyStyle());
-		this.setBodyColor(this.getRandomBodyColor());
-		
+		if(randomSkin) {
+			this.setBodyStyle(this.getRandomBodyStyle());
+			this.setBodyColor(this.getRandomBodyColor());
+			
+			this.setArmsStyle(this.getRandomArmsStyle());
+			this.setArmsColor(this.getRandomArmsColor());
+		}
 		HumanGender gender = (HumanGender) random.getOneOf(new HumanGender[]{HumanGender.MALE, HumanGender.FEMALE, HumanGender.NEUTRAL});
-		super.randomizeLook(random, false, gender, randomSkin, changeEyeType, randomEyeColor,	randomFacialFeature);
+		super.randomizeLook(random, false, gender, false, changeEyeType, randomEyeColor,	randomFacialFeature);
 	}
 
 	
