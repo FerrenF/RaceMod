@@ -11,7 +11,7 @@ loading=Loading RaceMod
 firstsetup=Loading and caching RaceMod resources...
 [racemod.race]
 human=Human
-testfurry=Furry Person
+testfurry=Furry
 tail=Tail Style
 ears=Ears Style
 muzzle=Muzzle Style
