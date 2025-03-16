@@ -29,14 +29,14 @@ public class TestFurryRaceParts extends RaceLookParts{
 		    			 "tail",
 		    			 true,
 		    			 false,
-		    			 false,
 		    			 true,
 		    			 true,
 		    			 false,
-		    			 "player/race/testfurry/tail/tailcolors",
+		    			 true,
+		    			 "player/race/testfurry/skincolors",
 		    			 "player/race/testfurry/tail/",
 		    			 new Point(64,64),
-		    			 null,
+		    			 new Point(32,32),
 		    			 null, 5, true));
     	 
          this.addBodyPart("EARS",

@@ -14,23 +14,18 @@ public class applyAppearancePacketPatch {
 	@Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class)
     static boolean onEnter(@Advice.This PlayerMob th, @Advice.Argument(0) PacketPlayerAppearance _packet) {	 
 		
-		if(!(_packet instanceof CustomPacketPlayerAppearance)) return false;
-		CustomPacketPlayerAppearance packet = (CustomPacketPlayerAppearance)_packet;
-		if(RaceDataFactory.mobUniqueID(th)!=-1) {
-			
-	    	RaceDataFactory.getOrRegisterRaceData(th, packet.look);	
-	      	th.refreshClientUpdateTime();
-	    	th.look = packet.look;
-	    	th.getInv().giveLookArmor(false);
-	    	th.playerName = packet.name;
-	    	DebugHelper.handleDebugMessage(String.format(
-	                "applyAppearancePacket for PlayerMob %s intercepted.",
-	                th.playerName
-	            ), 50, MESSAGE_TYPE.DEBUG);
-	    	
-	        return true;
-			}
-		return false;
+		CustomPacketPlayerAppearance packet = (CustomPacketPlayerAppearance)_packet;			
+    	RaceDataFactory.getOrRegisterRaceData(th, packet.look);	
+      	th.refreshClientUpdateTime();
+    	th.look = packet.look;
+    	th.getInv().giveLookArmor(false);
+    	th.playerName = packet.name;
+    	DebugHelper.handleDebugMessage(String.format(
+                "applyAppearancePacket for PlayerMob %s intercepted with race "+packet.look.getRaceID(),
+                th.playerName
+            ), 50, MESSAGE_TYPE.DEBUG);
+    	
+        return true;
     }
 	
     @Advice.OnMethodExit

@@ -18,15 +18,15 @@ public class applyLoadedCharacterLoadDataPatch {
 		
 		if(RaceDataFactory.mobUniqueID(th)!=-1) {
     		RaceData r = RaceDataFactory.getOrRegisterRaceData(th);
-    		if(r.raceDataInitialized) {
+    /*		if(r.raceDataInitialized) {
     			th.look = r.getRaceLook();
     			DebugHelper.handleDebugMessage(String.format(
-                        "applyLoadData for PlayerMob %s intercepted with race %s.",
+                        "applyLoadedCharacterLoadData for PlayerMob %s intercepted with race %s.",
                         th.playerName, r.getRaceID()
                     ), 50, MESSAGE_TYPE.DEBUG);
     		}
     		else
-    		{    			
+    		{    */			
     			RaceLook ra = RaceLook.raceFromLoadData(save, new CustomHumanLook(true));
 		    	r.addRaceData(ra);
 	    		th.look = ra;
@@ -35,7 +35,7 @@ public class applyLoadedCharacterLoadDataPatch {
 		                th.playerName, r.getRaceID()
 		            ), 50, MESSAGE_TYPE.DEBUG);
 	    		}	    	 	
-    		}	    
+    		//}	    
 		
         return false;
     }

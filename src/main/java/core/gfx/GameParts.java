@@ -19,6 +19,8 @@ import necesse.gfx.GameSkinColors;
 import necesse.gfx.gameTexture.GameTexture;
 import necesse.gfx.res.ResourceEncoder;
 import necesse.gfx.res.ResourceFile;
+import org.lwjgl.stb.STBImage;
+import org.lwjgl.stb.STBImageResize;
 
 public class GameParts {
 	
@@ -415,7 +417,7 @@ public class GameParts {
 		GameTexture _texture = new GameTexture(originalTexture);			
 		loader.submitTaskAddToList(this.fullTextures.get(realColorIndex), targetIndex, (String)null,() -> {
 			if(cid != -1) colors.replaceColors(_texture, cid);
-			_texture.runPreAntialias(false);
+			//_texture.runPreAntialias(false);
 			cache.set(cacheKey, hash, _texture);
 			return _texture;
 		}, makeFinal);		
@@ -485,7 +487,7 @@ public class GameParts {
 				y >= 0 ? tms.y *  y : tms.y * (spriteMapSize.y + y)		
 				);
 				
-		GameTexture newTexture = new GameTexture(this.getFullTexture(textureID, colorID), spriteLocation.x, spriteLocation.y, tms.x, tms.y).resize(sx, sy);
+		GameTexture newTexture = new GameTexture(this.getFullTexture(textureID, colorID), spriteLocation.x, spriteLocation.y, tms.x, tms.y).resize(sx, sy, STBImageResize.STBIR_FILTER_BOX, STBImageResize.STBIR_FILTER_BOX );
 		textureSpriteCache.put(cacheKey, newTexture);
 		return newTexture;
 	}

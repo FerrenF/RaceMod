@@ -1,14 +1,11 @@
 package patches.debug;
 
-import necesse.engine.modLoader.annotations.ModMethodPatch;
 import necesse.engine.network.PacketReader;
 import necesse.engine.network.gameNetworkData.GNDItem;
-import necesse.engine.network.packet.PacketPlayerAppearance;
-import necesse.engine.registries.GNDRegistry;
-import necesse.entity.mobs.PlayerMob;
-import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.Advice;
 
+
+// Helps figure out where those nasty packet misalignments are.
 public class debugGNDItemPatch {
  
     @Advice.OnMethodExit

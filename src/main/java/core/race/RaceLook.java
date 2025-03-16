@@ -262,6 +262,8 @@ public abstract class RaceLook extends HumanLook {
 
 	@Override
 	public void setupContentPacket(PacketWriter writer, boolean includeColor) {
+		
+		DebugHelper.handleDebugMessage("setupContentPacket called.", 50, MESSAGE_TYPE.DEBUG);
 		writer.putNextString(this.getRaceID());
 		writer.putNextBoolean(includeColor);
 		writer.putNextByte((byte)super.getHair());
@@ -270,6 +272,7 @@ public abstract class RaceLook extends HumanLook {
 		writer.putNextByte((byte)super.getSkin());
 		writer.putNextByte((byte)super.getEyeType());
 		writer.putNextByte((byte)super.getEyeColor());
+		
 		
 		if (includeColor) {
 			writer.putNextByteUnsigned(super.getShirtColor().getRed());
@@ -309,6 +312,7 @@ public abstract class RaceLook extends HumanLook {
 
 	    if(!race_id.equals(this.getRaceID())) {
 	    	DebugHelper.handleFormattedDebugMessage("Received bad content packet. Race %s does not equal the race applied to, %s.", 0, MESSAGE_TYPE.ERROR, new Object[] {race_id, this.getRaceID()});
+	    	Thread.dumpStack();
 	    }
 	    boolean includesClothesColor = reader.getNextBoolean(); // Read first
 
@@ -412,6 +416,7 @@ public abstract class RaceLook extends HumanLook {
 		
 		PacketReader cpy = new PacketReader(reader);		
 		String raceString = cpy.getNextString();
+		
 		if(raceString == null) {
 			DebugHelper.handleDebugMessage("Error reading race of content packet at raceFromContentPacker", 25, MESSAGE_TYPE.ERROR);
 			return fallback;
@@ -432,6 +437,7 @@ public abstract class RaceLook extends HumanLook {
 			r.applyContentPacket(reader);
 		    return r;
 		}
+		Thread.dumpStack();
 		DebugHelper.handleDebugMessage(String.format("Failed to load race %s in raceFromContentPacker. returning fallback racelook.", raceString), 25, MESSAGE_TYPE.WARNING);
 		return fallback.applyContentPacket(reader);
 	}
@@ -468,6 +474,7 @@ public abstract class RaceLook extends HumanLook {
 		    });	    
 		    return r;
 		}
+		Thread.dumpStack();
 		DebugHelper.handleDebugMessage(String.format("Failed to load race %s in raceFromLoadData. returning fallback racelook.", _race_id), 25, MESSAGE_TYPE.WARNING);
 		return fallback;
 	}

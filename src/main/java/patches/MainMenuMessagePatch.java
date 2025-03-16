@@ -22,13 +22,13 @@ public class MainMenuMessagePatch {
 		FormFlow flow = new FormFlow(0);
 		
 		FormLabel row1 = new FormLabel(String.format("Race Mod %s",RaceMod.VERSION_STRING),
-				new FontOptions(16).shadow(Color.BLACK, 1, -1).color(Color.WHITE),wrapper.getWidth()/2,0,0);
+				new FontOptions(16).color(Color.WHITE),wrapper.getWidth()/2,0,0);
 		FormLabel row2 = new FormLabel(String.format("Characters loaded from %s",RaceMod.characterSavePath),
-				new FontOptions(10).shadow(Color.BLACK, 1, -1).color(Color.WHITE),wrapper.getWidth()/2,0,0);
+				new FontOptions(10).color(Color.WHITE),wrapper.getWidth()/2,0,0);
 		FormLabel row3 = new FormLabel(String.format("Settings stored at %s",SettingsHelper.settingsLocation),
-				new FontOptions(10).shadow(Color.BLACK, 1, -1).color(Color.WHITE),wrapper.getWidth()/2,0,0);
+				new FontOptions(10).color(Color.WHITE),wrapper.getWidth()/2,0,0);
 		FormLabel row4 = new FormLabel("BACK UP YOUR GAME DATA",
-				new FontOptions(12).shadow(Color.BLACK, 1, -1).color(Color.RED),wrapper.getWidth()/2,0,0);
+				new FontOptions(12).color(Color.RED),wrapper.getWidth()/2,0,0);
 		
 		wrapper.addComponent(
 				(FormLabel)flow.nextY((row1),2));
@@ -38,6 +38,7 @@ public class MainMenuMessagePatch {
 				(FormLabel)flow.nextY((row3),2));
 		wrapper.addComponent(
 				(FormLabel)flow.nextY((row4),2));
+		
 		int nw = GameMath.max(row1.getBoundingBox().width, row2.getBoundingBox().width, row3.getBoundingBox().width, row4.getBoundingBox().width);
 		wrapper.setWidth((int)Math.round(nw*1.1));
 		wrapper.setX(w.getHudWidth() - (int)Math.round(nw*1.25));

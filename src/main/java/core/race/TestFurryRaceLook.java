@@ -26,6 +26,7 @@ import necesse.gfx.drawOptions.DrawOptions;
 import necesse.gfx.drawOptions.DrawOptionsList;
 import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.gameTexture.GameTexture;
+import necesse.gfx.gameTexture.GameTexture.BlendQuality;
 import necesse.level.maps.light.GameLight;
 
 
@@ -407,6 +408,25 @@ public class TestFurryRaceLook extends RaceLook {
 			}			
 		}
 		
+		
+		drawOptions.addBehindDraw(new TestFurryDrawOptions.FurryDrawOptionsGetter() {
+			
+				@Override
+			public DrawOptions getDrawOptions(PlayerMob player, int dir, int spriteX, int spriteY, int spriteRes, int drawX, int drawY,
+					int width, int height, boolean mirrorX, boolean mirrorY, GameLight light, float alpha, MaskShaderOptions mask) {
+					
+					TestFurryRaceLook rl = (TestFurryRaceLook)RaceDataFactory.getRaceLook(player, TestFurryRaceLook.this);
+				return new TestFurryDrawOptions(player.getLevel(), rl)
+						.spriteRes(spriteRes)
+						.size(new Point(width, height))
+						.tailTexture(rl, spriteX, spriteY, true)
+						.dir(dir).mirrorX(mirrorX).mirrorY(mirrorY).allAlpha(alpha).light(light)
+						.drawOffset(mask == null ? 0 : mask.drawXOffset, mask == null ? 0 : mask.drawYOffset).pos(drawX, drawY).mask(mask)
+						.drawTail((dir == 1 || dir == 3));
+
+			}
+		});		
+		
 		drawOptions.addTopDraw(new TestFurryDrawOptions.FurryDrawOptionsGetter() {
 						
  				@Override
@@ -422,10 +442,11 @@ public class TestFurryRaceLook extends RaceLook {
 							.tailTexture(rl, spriteX, spriteY, true)
 							.dir(dir).mirrorX(mirrorX).mirrorY(mirrorY).allAlpha(alpha).light(light)
 							.drawOffset(mask == null ? 0 : mask.drawXOffset, mask == null ? 0 : mask.drawYOffset).pos(drawX, drawY).mask(mask)
-							.drawEars(true).drawMuzzle(true).drawTail(true);
+							.drawEars(true).drawMuzzle(true).drawTail(!(dir == 1 || dir == 3));
 
 				}
 			});		
+	
 		return drawOptions;
 	}
 

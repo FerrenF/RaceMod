@@ -8,12 +8,14 @@ import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.playerStats.EmptyStats.Mode;
 import necesse.engine.playerStats.PlayerStats;
+import net.bytebuddy.asm.Advice;
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.This;
 
 public class ServerClientApplyAppearancePacketPatch {
 
-	public static void applyAppearancePacket(@This ServerClient th, @AllArguments Object[] args) {
+	@Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class)
+	public static boolean applyAppearancePacket(@This ServerClient th, @AllArguments Object[] args) {
 		
 		CustomPacketPlayerAppearance packet = (CustomPacketPlayerAppearance)args[0];
 		try {
@@ -42,7 +44,7 @@ public class ServerClientApplyAppearancePacketPatch {
             e.printStackTrace();
         }
 		
-	
+		return true;
 	}
 
 	

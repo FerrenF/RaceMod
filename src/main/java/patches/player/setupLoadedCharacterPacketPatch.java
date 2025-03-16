@@ -4,9 +4,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import core.RaceMod;
+import core.race.CustomHumanLook;
+import core.race.RaceLook;
 import core.race.factory.RaceDataFactory;
 import core.race.factory.RaceDataFactory.RaceData;
+import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.modLoader.annotations.ModMethodPatch;
+import necesse.engine.network.PacketReader;
 import necesse.engine.network.PacketWriter;
 import necesse.entity.mobs.Mob;
 import necesse.entity.mobs.PlayerMob;
@@ -17,9 +22,11 @@ public class setupLoadedCharacterPacketPatch {
 	
 // Although I am keeping this here for now, I did not actually need to patch this method, because by the time this
 	// method receives the look, it has already been intercepted and replaced by it's evil twin furry brother.
-	 @Advice.OnMethodExit
-	    static void onExitSetupLoadedCharacterPacket(@Advice.This PlayerMob th, @Advice.Argument(0) PacketWriter writer) {
-		/* try {
+	
+	
+	@Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class)
+    static boolean onEnter(@Advice.This PlayerMob th, @Advice.Argument(0) PacketWriter writer) {	
+		 try {
 	            // Make the fields accessible via reflection
 	            Field loadedHealthField = Mob.class.getDeclaredField("loadedHealth");
 	            Field loadedResilienceField = Mob.class.getDeclaredField("loadedResilience");
@@ -31,8 +38,9 @@ public class setupLoadedCharacterPacketPatch {
 	            loadedHealthField.setAccessible(true);
 	            loadedResilienceField.setAccessible(true);
 	            loadedManaField.setAccessible(true);
-
-	             	            
+	            selectedSlotField.setAccessible(true);
+	            inventoryExtendedField.setAccessible(true);     
+	            
 	            writer.putNextInt(th.getMaxHealthFlat());
 	            writer.putNextInt(Math.max(th.getHealth(), (int) loadedHealthField.get(th)));
 	            writer.putNextInt(th.getMaxResilienceFlat());
@@ -40,32 +48,28 @@ public class setupLoadedCharacterPacketPatch {
 	            writer.putNextInt(th.getMaxManaFlat());
 	            writer.putNextFloat(Math.max(th.getMana(), (float) loadedManaField.get(th)));
 	            th.buffManager.setupContentPacket(writer);
-	            writer.putNextByteUnsigned((int)selectedSlotField.get(th));
-	            writer.putNextBoolean((boolean)inventoryExtendedField.getBoolean(th));
+	            writer.putNextByteUnsigned((byte)selectedSlotField.getInt(th));
+	            writer.putNextBoolean(inventoryExtendedField.getBoolean(th));
 	            writer.putNextBoolean(th.autoOpenDoors);
 	            writer.putNextBoolean(th.hotbarLocked);
 
-	            if (RaceDataFactory.mobUniqueID(th) != -1) {
-	                RaceData r = RaceDataFactory.getOrRegisterRaceData(th);
-	                if (r.raceDataInitialized) {
-	                    r.getRaceLook().setupContentPacket(writer, true);
-	                    RaceMod.handleDebugMessage(String.format(
-	                            "setupLoadedCharacterPacket for PlayerMob %s intercepted.",
-	                            th.playerName
-	                    ), 25);
-	                }
-	                else {
-	                	th.look.setupContentPacket(writer, true);
-	                }
-	            } else {
-	                th.look.setupContentPacket(writer, true);
-	            }
 	            
+	            th.look = (th.look instanceof RaceLook ? (RaceLook)th.look : RaceLook.fromHumanLook(th.look, CustomHumanLook.class));
+	            th.look.setupContentPacket(writer, true);
+	            RaceDataFactory.getOrRegisterRaceData(th, (RaceLook) th.look);
+                   
 	            th.getInv().setupContentPacket(writer);
 	            writer.putNextFloat(th.hungerLevel);
+	            
+	            DebugHelper.handleDebugMessage(String.format(
+                        "setupLoadedCharacterPacket for PlayerMob %s with race %s intercepted.",
+                        th.playerName, ((RaceLook)th.look).getRaceID()
+                ), 25);	  
 
 	        } catch (NoSuchFieldException | IllegalAccessException | IllegalArgumentException  e) {
 	            e.printStackTrace();
-	        }*/
-	    }
+	        }
+       return true;
+    }
+
 }

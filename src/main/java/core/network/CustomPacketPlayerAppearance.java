@@ -36,7 +36,8 @@ public class CustomPacketPlayerAppearance extends PacketPlayerAppearance {
 		PacketReader reader = new PacketReader(this);
 		this.slot = reader.getNextByteUnsigned();
 		this.characterUniqueID = reader.getNextInt();
-		this.look = RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true));
+		RaceLook ra = RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true));		
+		this.look = ra;
 		this.name = reader.getNextString();
 	}
 
@@ -44,8 +45,7 @@ public class CustomPacketPlayerAppearance extends PacketPlayerAppearance {
 		super(client);
 		this.slot = client.slot;
 		this.characterUniqueID = client.getCharacterUniqueID();
-		this.look = RaceDataFactory.getRaceLook(client.playerMob, RaceLook.fromHumanLook(client.playerMob.look, CustomHumanLook.class));
-			
+		this.look = RaceLook.fromHumanLook(client.playerMob.look, CustomHumanLook.class);			
 		this.name = client.getName();
 		this.putData();
 	}
@@ -54,7 +54,8 @@ public class CustomPacketPlayerAppearance extends PacketPlayerAppearance {
 		super(slot, characterUniqueID, player);
 		this.slot = slot;
 		this.characterUniqueID = characterUniqueID;
-		this.look = RaceDataFactory.getRaceLook(player, RaceLook.fromHumanLook(player.look, CustomHumanLook.class));
+		this.look = RaceLook.fromHumanLook(player.look, CustomHumanLook.class);
+		RaceDataFactory.getOrRegisterRaceData(player, look);
 		this.name = player.getDisplayName();
 		this.putData();
 	}
@@ -99,13 +100,13 @@ public class CustomPacketPlayerAppearance extends PacketPlayerAppearance {
 				}
 			} else if (client.getPermissionLevel().getLevel() < PermissionLevel.ADMIN.getLevel()) {
 				System.out.println(client.getName() + " tried to change appearance, but isn't admin");
-				server.network.sendPacket(new PacketPlayerAppearance(client), client);
+				server.network.sendPacket(new CustomPacketPlayerAppearance(client), client);
 			} else if (!client.getName().equalsIgnoreCase(this.name)) {
 				System.out.println(client.getName() + " tried to change appearance with wrong name");
-				server.network.sendPacket(new PacketPlayerAppearance(client), client);
+				server.network.sendPacket(new CustomPacketPlayerAppearance(client), client);
 			} else if (!server.world.settings.cheatsAllowedOrHidden()) {
 				System.out.println(client.getName() + " tried to change appearance, but cheats aren't allowed");
-				server.network.sendPacket(new PacketPlayerAppearance(client), client);
+				server.network.sendPacket(new CustomPacketPlayerAppearance(client), client);
 			} else {
 				client.applyAppearancePacket(this);
 			}

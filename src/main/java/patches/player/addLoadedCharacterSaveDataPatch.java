@@ -12,7 +12,7 @@ import necesse.entity.mobs.PlayerMob;
 import net.bytebuddy.asm.Advice;
 
 // Same deal as addSaveData, look has already been intercepted and replaced, so the correct superclass method will trigger and we do not need to force the game to do it.
-//@ModMethodPatch(target = PlayerMob.class, name = "addLoadedCharacterSaveData", arguments = {SaveData.class})
+@ModMethodPatch(target = PlayerMob.class, name = "addLoadedCharacterSaveData", arguments = {SaveData.class})
 public class addLoadedCharacterSaveDataPatch {
 
 
@@ -21,11 +21,11 @@ public class addLoadedCharacterSaveDataPatch {
         
     	if(RaceDataFactory.hasRaceData(th)) {    		
         	RaceData r = RaceDataFactory.getRaceData(th);
-        		if(r.raceDataInitialized) {   		
+        		if(r.raceDataInitialized) {   
+        			th.look=r.getRaceLook();
         			//r.getRaceLook().addSaveData(save);    			
-        			
         			DebugHelper.handleDebugMessage(String.format(
-                            "addLoadedCharacterSaveData for PlayerMob %s intercepted.",
+                            "addLoadedCharacterSaveData for PlayerMob %s intercepted with race "+r.getRaceID(),
                            th.playerName
                         ), 25);
         		}	    
