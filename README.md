@@ -1,6 +1,6 @@
 # Necesse Race Mod
 
-![Preview](./Preview.png)  
+![Preview](./preview.png)  
 
 ## Overview  
 This mod overhauls the internal systems of Necesse to support character races with custom body part customizations. 
