@@ -116,11 +116,27 @@ public class SettingsHelper{
 	}
 
 	
-	public static String getSettingsString(String category, String setting) {
+	public static String getSettingsString(String category, String setting) {	   
+	    return getSettingsString(category, setting, "");
+	}
+	
+	public static String getSettingsString(String category, String setting, String _default) {
+	    return getSettingsString(category, setting, _default, true);
+	}
+	
+	public static String getSettingsString(String category, String setting, String _default, boolean make_if_default) {
 	    LoadData stl = loadedSettings.toLoadData();
-	    if(!stl.hasLoadDataByName(category)) return null;
+	    if(!stl.hasLoadDataByName(category)) { 
+	    	addSettingsCategory(category);
+	    	return _default;
+	    }
 	    LoadData l1 = stl.getFirstLoadDataByName(category);
-	    return l1.getSafeString(setting, null);
+	    
+	    String result = l1.getSafeString(setting, _default);
+	    if(result.equals(_default) && make_if_default) {
+	    	setSettingsString(category, setting, _default);
+	    }
+	    return result;
 	}
 	
 	public static List<LoadData> getSettingsCategory(String category) {
