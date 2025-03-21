@@ -33,7 +33,6 @@ import necesse.gfx.gameTexture.GameTexture;
 import necesse.gfx.res.ResourceEncoder;
 import necesse.gfx.res.ResourceFile;
 import net.bytebuddy.implementation.bind.annotation.Super;
-import overrides.CustomHumanDrawOptions;
 import core.forms.FormNewPlayerRaceCustomizer;
 import core.race.factory.RaceDataFactory;
 import core.race.factory.RaceDataFactory.RaceData;
@@ -41,6 +40,7 @@ import core.race.parts.BodyPart;
 import core.race.parts.HumanRaceParts;
 import core.race.parts.RaceLookParts;
 import core.registries.RaceRegistry;
+import extensions.CustomHumanDrawOptions;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
 

@@ -18,6 +18,7 @@ import core.race.factory.RaceDataFactory;
 import core.race.parts.BodyPart;
 import core.race.parts.EyeBodyPart;
 import core.race.parts.TestFurryRaceParts;
+import extensions.CustomHumanDrawOptions;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.network.PacketReader;
@@ -34,7 +35,6 @@ import necesse.gfx.gameTexture.GameTexture;
 import necesse.gfx.gameTexture.GameTexture.BlendQuality;
 import necesse.gfx.gameTexture.MergeFunction;
 import necesse.level.maps.light.GameLight;
-import overrides.CustomHumanDrawOptions;
 
 
 

@@ -164,15 +164,6 @@ public class GameParts {
 				wigTextures.put(i, new ArrayList<GameTexture>());		
 			}			
 		
-			int cc =  this.getColorCount();
-			if (this._textureCount > 0) {
-			    for (int c = 0; c < cc; c++) {
-			        for (int i = 0; i < _textureCount * (this.hasSides() ? 2 : 1); i++) {    
-			        	this.wigTextures.get(c).add(null);
-			        	this.fullTextures.get(c).add(null);
-			        }
-			    }			
-			}
 		}
 		
 		if(!this.texturesInitialized && this._textureCount > 0)	{
@@ -466,10 +457,6 @@ public class GameParts {
 		GameTexture _texture = new GameTexture(originalTexture);			
 		loader.submitTaskAddToList(this.fullTextures.get(realColorIndex), targetIndex, (String)null,() -> {
 			
-			GameTexture oldTexture = this.fullTextures.get(realColorIndex).get(targetIndex);
-	        if (oldTexture != null) {
-	            oldTexture.delete();
-	        }
 			if(cid != -1) colors.replaceColors(_texture, cid);
 			//_texture.runPreAntialias(false);
 			cache.set(cacheKey, hash, _texture);

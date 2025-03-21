@@ -81,7 +81,7 @@ public class RaceMod {
 		
 		String last_version = SettingsHelper.getSettingsString("DATA", "last_version", "-1", true);
 		if(!last_version.equals(VERSION_STRING)) {
-			NEEDS_VERSIONING = true;
+			NEEDS_VERSIONING = !last_version.equals("-1"); // dont version if it's 'fresh'?
 			OLD_VERSION_STRING = last_version;
 			GameLoadingScreen.drawLoadingString(Localization.translate("racemodui", "versionchange"));   
 			

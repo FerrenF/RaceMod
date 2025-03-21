@@ -172,7 +172,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	
 	public abstract void reset() ;
 
-
+	protected FormSwitcher contentSwitcher;
 	protected FormCheckBox toggleClothesBox;
 	public FormNewPlayerRaceCustomizer(RaceLook raceLook, int x, int y, int width, boolean allowSupernaturalChanges, boolean allowClothesChance) {		
 		super(width, 0);		
@@ -203,11 +203,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		
 		this.initializeFormSwitcher(width, flow);
 		
-		toggleClothesBox = new FormCheckBox("Toggle Clothes", width - width/6, 10, 250, false);
-		toggleClothesBox.onClicked((event)->{
-			updateLook();
-		});
-		this.addComponent(toggleClothesBox);	
+		
 		
 		
 		
@@ -215,7 +211,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	}
 	
 	protected void initializeFormSwitcher(int width, FormFlow flow) {
-	    FormSwitcher contentSwitcher = (FormSwitcher) this.addComponent(new FormSwitcher());
+	    contentSwitcher = (FormSwitcher) this.addComponent(new FormSwitcher());
 
 	    contentSwitcher.useInactiveHitBoxes = true;
 	    ArrayList<Section> sections = this.getSections((s) -> s.selectionContent != null && contentSwitcher.isCurrent(s.selectionContent), width);
@@ -226,9 +222,17 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	    int totalRows = (int) Math.ceil((double) sections.size() / (double) buttonsPerRow);
 	    int startX = 0;
 	    int startY = flow.next();
+	    
+	    toggleClothesBox = new FormCheckBox("Toggle Clothes",
+				0,startY-25, -1, true);
+		
+		toggleClothesBox.onClicked((event)->{
+			updateLook();
+		});
+		this.addComponent(toggleClothesBox);	    
+	    
 
 	    int maxSectionHeight = 0;
-
 	    for (maxSectionHeight = 0; maxSectionHeight < sections.size(); ++maxSectionHeight) {
 	        Section section = sections.get(maxSectionHeight);
 	        int column = maxSectionHeight % buttonsPerRow;

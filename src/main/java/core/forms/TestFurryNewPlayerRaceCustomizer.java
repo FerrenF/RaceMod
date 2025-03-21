@@ -18,6 +18,7 @@ import core.race.factory.RaceDataFactory;
 import core.race.parts.BodyPart;
 import core.race.parts.EyeBodyPart;
 import core.race.parts.TestFurryRaceParts;
+import extensions.CustomHumanDrawOptions;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.localization.message.LocalMessage;
@@ -35,7 +36,6 @@ import necesse.gfx.gameTexture.GameTexture;
 import necesse.gfx.gameTexture.GameTexture.BlendQuality;
 import necesse.inventory.InventoryItem;
 import necesse.level.maps.light.GameLight;
-import overrides.CustomHumanDrawOptions;
 
 public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 			

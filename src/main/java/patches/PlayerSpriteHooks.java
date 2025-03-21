@@ -15,7 +15,6 @@ import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.inventory.InventoryItem;
 import necesse.level.maps.Level;
 import necesse.level.maps.light.GameLight;
-import overrides.CustomHumanDrawOptions;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
@@ -23,6 +22,7 @@ import org.lwjgl.opengl.GL14;
 import core.race.RaceLook;
 import core.race.factory.RaceDataFactory;
 import core.race.factory.RaceDataFactory.RaceData;
+import extensions.CustomHumanDrawOptions;
 
 public class PlayerSpriteHooks {
 	public static void drawInForms(DrawInFormsLogic drawLogic, int drawX, int drawY) {

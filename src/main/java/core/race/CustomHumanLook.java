@@ -7,6 +7,7 @@ import core.forms.HumanNewPlayerRaceCustomizer;
 import core.race.parts.HumanRaceParts;
 import core.race.parts.RaceLookParts;
 import core.race.parts.TestFurryRaceParts;
+import extensions.CustomHumanDrawOptions;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.network.PacketReader;
@@ -15,7 +16,6 @@ import necesse.entity.mobs.MaskShaderOptions;
 import necesse.gfx.HumanLook;
 import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.gameTexture.GameTexture;
-import overrides.CustomHumanDrawOptions;
 
 public class CustomHumanLook extends RaceLook {
 	
