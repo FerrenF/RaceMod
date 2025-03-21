@@ -4,9 +4,11 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import core.race.RaceLook;
 import core.race.parts.BodyPart;
 import core.race.parts.RaceLookParts;
 import helpers.DebugHelper;
@@ -17,6 +19,7 @@ import necesse.gfx.AbstractGameTextureCache;
 import necesse.gfx.GameSkinCache;
 import necesse.gfx.GameSkinColors;
 import necesse.gfx.gameTexture.GameTexture;
+import necesse.gfx.gameTexture.MergeFunction;
 import necesse.gfx.res.ResourceEncoder;
 import necesse.gfx.res.ResourceFile;
 import org.lwjgl.stb.STBImage;
@@ -24,24 +27,68 @@ import org.lwjgl.stb.STBImageResize;
 
 public class GameParts {
 	
-	private static final ArrayList<GameParts> parts = new ArrayList<GameParts>();
-	private static final String PATH_PREFIX = "";
-	private static final String TEXTURE_SUFFIX = ".png";
-	private static final String WIG_TEXTURE_NAME = "wig";
-	private static final Set<String> SIDE_SUFFIXES = Set.of(new String[]{"_L","_R"});
-	private static Point wigAccessoryLocation = new Point(0, -1);
+	protected static final ArrayList<GameParts> parts = new ArrayList<GameParts>();
+	protected static final String PATH_PREFIX = "";
+	protected static final String TEXTURE_SUFFIX = ".png";
+	protected static final String WIG_TEXTURE_NAME = "wig";
+	protected static final Set<String> SIDE_SUFFIXES = Set.of(new String[]{"_L","_R"});
+	protected static Point wigAccessoryLocation = new Point(0, -1);
 	public final BodyPart assignedPart;	
 	
 	public GameSkinColors colors;	
-	private GameTexture originalTexture;
-	private GameTexture fullWigTexture;	
-	private Map<Integer, ArrayList<GameTexture>> fullTextures;	
-	private Map<Integer, ArrayList<GameTexture>> wigTextures;	
+	protected GameTexture originalTexture;
+	protected GameTexture fullWigTexture;	
+	protected Map<Integer, ArrayList<GameTexture>> fullTextures;	
+	protected Map<Integer, ArrayList<GameTexture>> wigTextures;	
+	protected Map<String, GameTexture> textureSpriteCache = new HashMap<>();
+	protected static Map<TextureMergerInfo, GameTexture> mergedTextureCache = new HashMap<>();
+	
+	public static class TextureMergerInfo extends Object{	
+		public final Point t1_info;
+		public final Point t2_info;
+		public final MergeFunction mergeFunction;
+		public final String part1;
+		public final String part2;
+		public final String cacheKey;
+		public final GameTexture tex1;
+		public final GameTexture tex2;
+		private String src_id;
+		public TextureMergerInfo(RaceLook src, Point t1, Point t2, String p1, String p2, MergeFunction howToMerge) {
+			this.t1_info = t1;
+			this.t2_info = t2;
+			this.part1 = p1;
+			this.src_id = src.getRaceID();
+			this.part2 = p2;
+			this.tex1 = GameParts.getPart(src.getRaceParts().getClass(), p1).getFullTexture(t1.x, t1.y);
+			this.tex2 = GameParts.getPart(src.getRaceParts().getClass(), p2).getFullTexture(t2.x, t2.y);
+			this.mergeFunction = howToMerge;
+			this.cacheKey = src_id+"_" +p1 + "_" + p2 +"_"+ t1.x + "_" + t1.y + "_" + t2.x + "_" + t2.y + "_" + mergeFunction.hashCode();
+		}
 		
-	private boolean texturesInitialized = false;
+		@Override
+		public boolean equals(Object obj) {
+		    if (this == obj) return true;
+		    if (obj == null || getClass() != obj.getClass()) return false;
+		    TextureMergerInfo other = (TextureMergerInfo) obj;
+		    return Objects.equals(t1_info, other.t1_info) &&
+		           Objects.equals(t2_info, other.t2_info) &&
+		           Objects.equals(mergeFunction, other.mergeFunction) &&
+		           Objects.equals(part1, other.part1) &&
+		           Objects.equals(src_id, other.src_id) &&
+		           Objects.equals(part2, other.part2);
+		}
 		
-	private int _textureCount = 0;
-	private int _colorCount = 1;
+		@Override
+		public int hashCode() {
+			return this.cacheKey.hashCode();
+		}
+
+	}
+
+	protected boolean texturesInitialized = false;
+		
+	protected int _textureCount = 0;
+	protected int _colorCount = 1;
 	
 	public Class<? extends RaceLookParts> getRacePartsClass() 		{	return this.assignedPart.getRacePartsClass();		}	
 	
@@ -76,7 +123,7 @@ public class GameParts {
 	public boolean hasSeparateWigTexture()	{	return this.assignedPart.isHasSeperateWigTexture(); }
 	
 	// This constructor is used after the textures have been found and added into a copy of a newly initialized GameParts class. It represents an 'initialized' state.
-	private GameParts(BodyPart assignedPart) {
+	protected GameParts(BodyPart assignedPart) {
 		this.assignedPart = assignedPart;
 		this.texturesInitialized = true;
 	}
@@ -99,7 +146,6 @@ public class GameParts {
 		
 		if(this.hasColors()) {			
 			this.loadPartColors();
-			loader.waitForCurrentTasks();
 		}
 
 		if(this.hasTextures()) {
@@ -131,8 +177,7 @@ public class GameParts {
 		
 		if(!this.texturesInitialized && this._textureCount > 0)	{
 						
-			this.loadPartFullTextures(loader, cache);
-			loader.waitForCurrentTasks();
+			this.loadPartFullTextures(loader, cache);	
 			DebugHelper.handleDebugMessage( String.format("Loading full textures: part %s loaded %d full textures.",
 					this.getPartName(),
 					this.fullTextures.size()),
@@ -177,8 +222,9 @@ public class GameParts {
 			DebugHelper.handleDebugMessage( String.format("Loading wig textures: part %s does not have a wig texture but specifies that it does.", this.getPartName()), 25 , MESSAGE_TYPE.WARNING );
 		}
 		
-		cache.saveCache();
 		loader.waitForCurrentTasks();
+		cache.saveCache();
+		
 		
 		// Finally, set the values on the new part and then add it to the static array.
 		newPart._textureCount = this._textureCount;
@@ -192,7 +238,7 @@ public class GameParts {
 	}
 	
 
-	private void loadPartFullTextures(GamePartsLoader loader, GameSkinCache cache) {
+	protected void loadPartFullTextures(GamePartsLoader loader, GameSkinCache cache) {
 		if(this.hasTextures()) {			
 			int tc = this.getTextureCount();
 			for(int c=0; c < this.getColorCount(); c++) {			
@@ -213,7 +259,7 @@ public class GameParts {
 		
 	}
 
-	private void loadPartColors() {		
+	protected void loadPartColors() {		
 		String colorPath = this.getPartColorPath();
 		if(this.hasColors()) {			
 		
@@ -240,7 +286,7 @@ public class GameParts {
 	}
 	
 	
-	private void loadPartIncludedWigTextures(GamePartsLoader loader, GameSkinCache cache) {
+	protected void loadPartIncludedWigTextures(GamePartsLoader loader, GameSkinCache cache) {
 			
 		for(int t=0; t< this._textureCount; t++) {		
 			if(this.hasColors()) {				
@@ -309,7 +355,7 @@ public class GameParts {
 	}
 	
 	
-	private void loadPartWigTexture() {
+	protected void loadPartWigTexture() {
 		String wigPath = this.getWigPath();
 		if(this.hasWig()) {								
   	        GameTexture wigTexture = GameTexture.fromFile(wigPath, true);
@@ -324,7 +370,7 @@ public class GameParts {
 	}
 
 	// Calls loadCacheWigTextures to pre-load textures for each combination of style and color, and then store these textures in the current GameParts list.
-	private void loadPartWigTextures(GamePartsLoader loader, AbstractGameTextureCache cache) {
+	protected void loadPartWigTextures(GamePartsLoader loader, AbstractGameTextureCache cache) {
 		for(int t=0; t< this._textureCount; t++) {
 			if(this.hasColors()) {				
 				for(int c=0; c < this.colors.getSize(); c++) {
@@ -395,6 +441,9 @@ public class GameParts {
 		AbstractGameTextureCache.Element element = cache.get(cacheKey);
 		GameTexture texture;
 		if (element != null && element.hash == hash) {
+			if (originalTexture != null) {
+			    originalTexture.delete();
+			}
 			try {
 				texture = new GameTexture(String.format("cached%s %s", fileName, cacheKey), element.textureData);
 				if (makeFinal) {
@@ -416,6 +465,11 @@ public class GameParts {
 		
 		GameTexture _texture = new GameTexture(originalTexture);			
 		loader.submitTaskAddToList(this.fullTextures.get(realColorIndex), targetIndex, (String)null,() -> {
+			
+			GameTexture oldTexture = this.fullTextures.get(realColorIndex).get(targetIndex);
+	        if (oldTexture != null) {
+	            oldTexture.delete();
+	        }
 			if(cid != -1) colors.replaceColors(_texture, cid);
 			//_texture.runPreAntialias(false);
 			cache.set(cacheKey, hash, _texture);
@@ -424,7 +478,7 @@ public class GameParts {
 	}
 
 	
-	private int tryFindResources() {
+	protected int tryFindResources() {
 		
 		String searchPath = this.getPartPath();
 		String searchPrefix = this.getPartName().toLowerCase();
@@ -456,7 +510,16 @@ public class GameParts {
 		return this.fullTextures.get(colorID).get(textureID + (this.getTextureCount()*sideNumber));
 	}
 	
-	private Map<String, GameTexture> textureSpriteCache = new HashMap<>();
+	
+	public static GameTexture getFullTextureMerger(TextureMergerInfo mergeInfo) {
+		if(mergedTextureCache.containsKey(mergeInfo)) {
+			return mergedTextureCache.get(mergeInfo);
+		}
+		GameTexture t1 = new GameTexture(mergeInfo.tex1);
+		t1.merge(mergeInfo.tex2, 0, 0, mergeInfo.mergeFunction);
+		mergedTextureCache.put(mergeInfo, t1);
+		return t1;
+	}
 	
 	private GameTexture getNewTextureSprite(int textureID, int colorID, int x, int y, int sx, int sy) {
 		if(!this.texturesInitialized) return null;
@@ -493,7 +556,7 @@ public class GameParts {
 	}
 	
 	public GameTexture getTextureSprite(int textureID, int colorID, int x, int y, int sx, int sy) {
-
+		
 	    return getNewTextureSprite(textureID, colorID, x, y, sx, sy); 
 	}
 	

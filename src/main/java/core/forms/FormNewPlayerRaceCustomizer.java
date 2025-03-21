@@ -47,6 +47,7 @@ import necesse.gfx.fairType.FairType.TextAlign;
 import necesse.gfx.forms.Form;
 import necesse.gfx.forms.FormSwitcher;
 import necesse.gfx.forms.components.FormButton;
+import necesse.gfx.forms.components.FormCheckBox;
 import necesse.gfx.forms.components.FormColorPicker;
 import necesse.gfx.forms.components.FormContentVarToggleButton;
 import necesse.gfx.forms.components.FormFlow;
@@ -153,13 +154,26 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		return this.getRaceLook();		
 	}
 	
+	private boolean clothesStatus = false;
 	protected void updateLook() {
-		this.getPlayerHelper().getInv().giveLookArmor();	
+		if(toggleClothesBox!= null) {
+			if(toggleClothesBox.checked) {
+				clothesStatus = true;
+				this.getPlayerHelper().getInv().giveLookArmor();	
+			}
+			else {
+				if(clothesStatus == true) {
+					clothesStatus=false;
+					this.getPlayerHelper().getInv().clearInventories();
+				}		
+			}
+		}
 	}
 	
 	public abstract void reset() ;
 
 
+	protected FormCheckBox toggleClothesBox;
 	public FormNewPlayerRaceCustomizer(RaceLook raceLook, int x, int y, int width, boolean allowSupernaturalChanges, boolean allowClothesChance) {		
 		super(width, 0);		
 		this.setPlayerHelper(new PlayerMob(0L, (NetworkClient) null));
@@ -188,6 +202,15 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		this.setupRotationButtons(buttonX, width, iconY);
 		
 		this.initializeFormSwitcher(width, flow);
+		
+		toggleClothesBox = new FormCheckBox("Toggle Clothes", width - width/6, 10, 250, false);
+		toggleClothesBox.onClicked((event)->{
+			updateLook();
+		});
+		this.addComponent(toggleClothesBox);	
+		
+		
+		
 		this.updateComponents();
 	}
 	
@@ -526,7 +549,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 			}
 	}
 	
-	private static Point getFaceHairTextureOffset() {	return new Point(-16, -12);	}
+	protected static Point getFaceHairTextureOffset() {	return new Point(-16, -12);	}
 
 	public DrawOptions getHumanFaceDrawOptions(HumanDrawOptions humanDrawOptions, int size, int drawX,
 			int drawY) {

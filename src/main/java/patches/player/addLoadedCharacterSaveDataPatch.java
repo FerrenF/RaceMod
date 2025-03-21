@@ -22,8 +22,7 @@ public class addLoadedCharacterSaveDataPatch {
     	if(RaceDataFactory.hasRaceData(th)) {    		
         	RaceData r = RaceDataFactory.getRaceData(th);
         		if(r.raceDataInitialized) {   
-        			th.look=r.getRaceLook();
-        			//r.getRaceLook().addSaveData(save);    			
+        			th.look=r.getRaceLook();     			
         			DebugHelper.handleDebugMessage(String.format(
                             "addLoadedCharacterSaveData for PlayerMob %s intercepted with race "+r.getRaceID(),
                            th.playerName

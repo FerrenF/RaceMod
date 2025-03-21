@@ -53,10 +53,9 @@ public class setupLoadedCharacterPacketPatch {
 	            writer.putNextBoolean(th.autoOpenDoors);
 	            writer.putNextBoolean(th.hotbarLocked);
 
-	            
-	            th.look = (th.look instanceof RaceLook ? (RaceLook)th.look : RaceLook.fromHumanLook(th.look, CustomHumanLook.class));
+	            RaceLook ra = (th.look instanceof RaceLook ? (RaceLook)th.look : RaceLook.fromHumanLook(th.look, CustomHumanLook.class));
+	            th.look = ra;
 	            th.look.setupContentPacket(writer, true);
-	            RaceDataFactory.getOrRegisterRaceData(th, (RaceLook) th.look);
                    
 	            th.getInv().setupContentPacket(writer);
 	            writer.putNextFloat(th.hungerLevel);

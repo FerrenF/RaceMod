@@ -2,16 +2,21 @@ package core.race;
 
 import java.awt.Color;
 import java.awt.Point;
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import core.forms.FormNewPlayerRaceCustomizer;
 import core.forms.TestFurryNewPlayerRaceCustomizer;
+import core.gfx.EyeTypeGamePart;
 import core.gfx.GameParts;
+import core.gfx.GameParts.TextureMergerInfo;
 import core.gfx.GamePartsLoader;
 import core.gfx.TestFurryDrawOptions;
 import core.race.factory.RaceDataFactory;
 import core.race.parts.BodyPart;
+import core.race.parts.EyeBodyPart;
 import core.race.parts.TestFurryRaceParts;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
@@ -27,7 +32,10 @@ import necesse.gfx.drawOptions.DrawOptionsList;
 import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.gameTexture.GameTexture;
 import necesse.gfx.gameTexture.GameTexture.BlendQuality;
+import necesse.gfx.gameTexture.MergeFunction;
 import necesse.level.maps.light.GameLight;
+import overrides.CustomHumanDrawOptions;
+
 
 
 public class TestFurryRaceLook extends RaceLook {
@@ -62,7 +70,8 @@ public class TestFurryRaceLook extends RaceLook {
 	}
 			
 	public TestFurryRaceLook(int hair, int facialFeature, int hairColor, int skin, int eyeColor, int eyeType, Color shirtColor,
-			Color shoesColor, int tail, int tailColor, int ears, int earsColor, int muzzle, int muzzleColor, int headStyle, int headColor, int armsStyle, int armsColor, int bodyStyle, int bodyColor) {	
+			Color shoesColor, int tail, int tailColor, int ears, int earsColor, int muzzle, int muzzleColor, int headStyle, 
+			int headColor, int armsStyle, int armsColor, int bodyStyle, int bodyColor, int feetStyle, int feetColor, int customEyesStyle, int customEyesColor) {	
 		
 		this(true);
 		// Base
@@ -93,6 +102,13 @@ public class TestFurryRaceLook extends RaceLook {
 		
 		this.setBodyStyle(bodyStyle);
 		this.setBodyColor(bodyColor);
+		
+		this.setFeetStyle(feetStyle);
+		this.setFeetColor(feetColor);
+		
+		this.setCustomEyesStyle(customEyesStyle);
+		this.setCustomEyesColor(customEyesColor);
+		
 	}
 	
 	
@@ -115,6 +131,10 @@ public class TestFurryRaceLook extends RaceLook {
 				copy.getEyeType(),
 				copy.getShirtColor(),
 				copy.getShoesColor(),
+				0,
+				0,
+				0,
+				0,
 				0,
 				0,
 				0,
@@ -149,6 +169,12 @@ public class TestFurryRaceLook extends RaceLook {
 		
 		this.setBodyColor(0);
 		this.setBodyStyle(0);
+		
+		this.setFeetStyle(0);
+		this.setFeetColor(0);
+		
+		this.setCustomEyesStyle(0);
+		this.setCustomEyesColor(0);
 	}
 	
 	public TestFurryRaceLook(TestFurryRaceLook copy) {
@@ -178,7 +204,14 @@ public class TestFurryRaceLook extends RaceLook {
 				copy.getArmsColor(),
 				
 				copy.getBodyStyle(),
-				copy.getBodyColor());
+				copy.getBodyColor(),
+				
+				copy.getFeetStyle(),
+				copy.getFeetColor(),
+				
+				copy.getCustomEyesStyle(),
+				copy.getCustomEyesColor()
+				);
 		
 	}
 
@@ -213,6 +246,14 @@ public class TestFurryRaceLook extends RaceLook {
 	
 	public int getRandomArmsColor() 	{	return this.getRandomByteColorFeature("ARMS_COLOR");	}
 	
+	public int getRandomFeetStyle() 	{	return this.getRandomByteFeature("FEET");	}
+	
+	public int getRandomFeetColor() 	{	return this.getRandomByteColorFeature("FEET_COLOR");	}
+	
+	public int getRandomCustomEyesStyle() 	{	return this.getRandomByteFeature("CUSTOM_EYES");	}
+	
+	public int getRandomCustomEyesColor() 	{	return this.getRandomByteColorFeature("CUSTOM_EYES_COLOR");	}
+	
 	// Getters
 	
 	public int getTailStyle() 			{	return this.appearanceByteGet("TAIL");	}
@@ -238,6 +279,14 @@ public class TestFurryRaceLook extends RaceLook {
 	public int getArmsStyle() 			{	return this.appearanceByteGet("ARMS");	}
 
 	public int getArmsColor() 			{	return this.appearanceByteGet("ARMS_COLOR");	}
+	
+	public int getFeetStyle() 			{	return this.appearanceByteGet("FEET");	}
+
+	public int getFeetColor() 			{	return this.appearanceByteGet("FEET_COLOR");	}
+	
+	public int getCustomEyesStyle() 			{	return this.appearanceByteGet("CUSTOM_EYES");	}
+
+	public int getCustomEyesColor() 			{	return this.appearanceByteGet("CUSTOM_EYES_COLOR");	}
 	
 	
 	// Setters
@@ -266,12 +315,28 @@ public class TestFurryRaceLook extends RaceLook {
 	
 	public int setArmsColor(int id) 	{	return this.appearanceByteSet("ARMS_COLOR",(byte)id);	}
 	
+	public int setFeetStyle(int id) 	{	return this.appearanceByteSet("FEET",(byte)id);	}
+	
+	public int setFeetColor(int id) 	{	return this.appearanceByteSet("FEET_COLOR",(byte)id);	}
+	
+	public int setCustomEyesStyle(int id) 	{	return this.appearanceByteSet("CUSTOM_EYES",(byte)id);	}
+
+	public int setCustomEyesColor(int id) 	{	return this.appearanceByteSet("CUSTOM_EYES_COLOR", (byte)id);	}
+	
+	
 	public static void loadRaceTextures() {	
 		DebugHelper.handleDebugMessage("Loading race textures for race " + TestFurryRaceLook.TEST_FURRY_RACE_ID, 50, MESSAGE_TYPE.DEBUG);
 		for(BodyPart bp : new TestFurryRaceParts().getCustomBodyParts()) {			
 			GamePartsLoader loader = new GamePartsLoader();
 			loader.startLoaderThreads();
-			new GameParts(loader, bp);
+			if(bp instanceof EyeBodyPart) 
+			{
+				new EyeTypeGamePart(loader, (EyeBodyPart) bp);
+			}
+			else
+			{
+				new GameParts(loader, bp);
+			}
 		}
 		
 	}
@@ -300,12 +365,18 @@ public class TestFurryRaceLook extends RaceLook {
 		this.setHeadStyle(this.getRandomHeadStyle());
 		this.setHeadColor(this.getRandomHeadColor());
 		
+		this.setCustomEyesStyle(this.getRandomCustomEyesStyle());
+		this.setCustomEyesColor(this.getRandomCustomEyesColor());
+		
 		if(randomSkin) {
 			this.setBodyStyle(this.getRandomBodyStyle());
 			this.setBodyColor(this.getRandomBodyColor());
 			
 			this.setArmsStyle(this.getRandomArmsStyle());
 			this.setArmsColor(this.getRandomArmsColor());
+			
+			this.setFeetStyle(this.getRandomFeetStyle());
+			this.setFeetColor(this.getRandomFeetColor());
 		}
 		HumanGender gender = (HumanGender) random.getOneOf(new HumanGender[]{HumanGender.MALE, HumanGender.FEMALE, HumanGender.NEUTRAL});
 		super.randomizeLook(random, false, gender, false, changeEyeType, randomEyeColor,	randomFacialFeature);
@@ -313,14 +384,16 @@ public class TestFurryRaceLook extends RaceLook {
 
 	
 
-	public static <T> List<T> getClosedEyesDrawOptions(int eyeType, int eyeColor, int skinColor, boolean humanlikeOnly,
+	public static <T> List<T> getClosedEyesDrawOptions(int eyeType, int eyeColor, int skinColor, 
 			Function<GameTexture, T> mapper) {
-		return GameEyes.getEyes(eyeType).getClosedColorTextures(eyeColor, skinColor, humanlikeOnly, mapper);
+		return ((EyeTypeGamePart)GameParts.getPart(TestFurryRaceParts.class, "CUSTOM_EYES"))
+				.getClosedColorTextures(eyeType, eyeColor, skinColor, mapper);
 	}
 
-	public static <T> List<T> getOpenEyesDrawOptions(int eyeType, int eyeColor, int skinColor, boolean humanlikeOnly,
+	public static <T> List<T> getOpenEyesDrawOptions(int eyeType, int eyeColor, int skinColor,
 			Function<GameTexture, T> mapper) {
-		return GameEyes.getEyes(eyeType).getOpenColorTextures(eyeColor, skinColor, humanlikeOnly, mapper);
+		return ((EyeTypeGamePart)GameParts.getPart(TestFurryRaceParts.class, "CUSTOM_EYES"))
+				.getOpenColorTextures(eyeType, eyeColor, skinColor, mapper);
 	}
 
 	public static DrawOptions getEyesDrawOptions(int eyeType, int eyeColor, int skinColor, boolean humanlikeOnly,
@@ -331,14 +404,13 @@ public class TestFurryRaceLook extends RaceLook {
 					.mirror(mirrorX, mirrorY).addMaskShader(mask).pos(drawX, drawY);
 		};
 		return closed
-				? new DrawOptionsList(getClosedEyesDrawOptions(eyeType, eyeColor, skinColor, humanlikeOnly, mapper))
-				: new DrawOptionsList(getOpenEyesDrawOptions(eyeType, eyeColor, skinColor, humanlikeOnly, mapper));
+				? new DrawOptionsList(getClosedEyesDrawOptions(eyeType, eyeColor, skinColor, mapper))
+				: new DrawOptionsList(getOpenEyesDrawOptions(eyeType, eyeColor, skinColor, mapper));
 	}
-
 	public DrawOptions getEyesDrawOptions(boolean humanlikeOnly, boolean closed, int drawX, int drawY, int spriteX,
 			int spriteY, int width, int height, boolean mirrorX, boolean mirrorY, float alpha, GameLight light,
 			MaskShaderOptions mask) {
-		return getEyesDrawOptions(this.getEyeType(), this.getEyeColor(), this.getSkin(), humanlikeOnly, closed, drawX,
+		return getEyesDrawOptions(this.getCustomEyesStyle(), this.getCustomEyesColor(), this.getHeadColor(), humanlikeOnly, closed, drawX,
 				drawY, spriteX, spriteY, width, height, mirrorX, mirrorY, alpha, light, mask);
 	}
 
@@ -357,6 +429,10 @@ public class TestFurryRaceLook extends RaceLook {
 	public GameTexture getTailTexture(int spriteX, int spriteY, int resizeX, int resizeY) {
 		return GameParts.getPart(TestFurryRaceParts.class, "TAIL").getTextureSprite(getTailStyle(), getTailColor(), spriteX, spriteY, resizeX, resizeY);
 	}
+	
+	public GameTexture getMuzzleTexture() {
+		return GameParts.getPart(TestFurryRaceParts.class, "MUZZLE").getFullTexture(getMuzzleStyle(), getMuzzleColor());
+	}	
 	
 	public GameTexture getMuzzleTexture(int spriteX, int spriteY) {
 		return GameParts.getPart(TestFurryRaceParts.class, "MUZZLE").getTextureSprite(getMuzzleStyle(), getMuzzleColor(), spriteX, spriteY);
@@ -377,6 +453,17 @@ public class TestFurryRaceLook extends RaceLook {
 	public GameTexture getHeadTexture() {
 		return GameParts.getPart(TestFurryRaceParts.class, "HEAD").getFullTexture(getHeadStyle(), getHeadColor());
 	}
+	
+	public static Map<Point, GameTexture> headMuzzleMergedCached;
+	public GameTexture getHeadMuzzleMergedTexture() {
+		
+		TextureMergerInfo tm = new TextureMergerInfo(this,
+				new Point(this.getHeadStyle(),this.getHeadColor()),
+				new Point(this.getMuzzleStyle(),this.getMuzzleColor()),
+				"HEAD", "MUZZLE", MergeFunction.NORMAL);
+		
+		return GameParts.getFullTextureMerger(tm);
+	}
 
 	public GameTexture getBodyTexture() {
 		return GameParts.getPart(TestFurryRaceParts.class, "BODY").getFullTexture(getBodyStyle(), getBodyColor());
@@ -389,9 +476,24 @@ public class TestFurryRaceLook extends RaceLook {
 	public GameTexture getRightArmTexture() {
 		return GameParts.getPart(TestFurryRaceParts.class, "ARMS").getFullTexture(getArmsStyle(), getArmsColor(), 1);
 	}
+	
+	public GameTexture getFeetTexture() {
+		return GameParts.getPart(TestFurryRaceParts.class, "FEET").getFullTexture(getFeetStyle(), getFeetColor());
+	}
 
+	public List<GameTexture> getCustomEyesOpenTextures() {
+		return ((EyeTypeGamePart)GameParts.getPart(TestFurryRaceParts.class, "CUSTOM_EYES"))
+				.getOpenColorTextures(getCustomEyesStyle(), getCustomEyesColor(), getHeadColor() );
+	}
+	
+	public List<GameTexture> getCustomEyesClosedTexture() {
+		return ((EyeTypeGamePart)GameParts.getPart(TestFurryRaceParts.class, "CUSTOM_EYES"))
+				.getClosedColorTextures(getCustomEyesStyle(), getCustomEyesColor(), getHeadColor());
+	}
+	
+	
 	@Override
-	public HumanDrawOptions modifyHumanDrawOptions(HumanDrawOptions drawOptions, MaskShaderOptions mask) {
+	public CustomHumanDrawOptions modifyHumanDrawOptions(CustomHumanDrawOptions drawOptions, MaskShaderOptions mask) {
 		
 		for( BodyPart part : this.getRaceParts().getReplacerParts()) {
 			switch(part.getReplacer().targetPart) {
@@ -407,15 +509,30 @@ public class TestFurryRaceLook extends RaceLook {
 					drawOptions.rightArmsTexture(getRightArmTexture());
 					break;
 				case HEAD:
-					drawOptions.headTexture(getHeadTexture());
+					drawOptions.headTexture(getHeadMuzzleMergedTexture());
 					break;
 				case SHOES:
+					drawOptions.feetTexture(getFeetTexture());
+					break;
+				case EYES:	
+					
+					
+					
 					break;
 				default:
 					break;			
 			}			
-		}
-		
+		}		
+				
+		drawOptions.eyeDrawOptionsGetter = new CustomHumanDrawOptions.EyesDrawOptionsProvider() {
+			
+			@Override
+			public DrawOptions getEyesDrawOptions(int eyeType, int eyeColor, int skinColor, boolean humanlikeOnly,
+					boolean closed, int drawX, int drawY, int spriteX, int spriteY, int width, int height, boolean mirrorX,
+					boolean mirrorY, float alpha, GameLight light, MaskShaderOptions mask) {
+				return TestFurryRaceLook.this.getEyesDrawOptions(false, closed, drawX, drawY, spriteX, spriteY, width, height, mirrorX, mirrorY, alpha, light, mask);		
+			}
+		};
 		
 		drawOptions.addBehindDraw(new TestFurryDrawOptions.FurryDrawOptionsGetter() {
 			
@@ -424,17 +541,16 @@ public class TestFurryRaceLook extends RaceLook {
 					int width, int height, boolean mirrorX, boolean mirrorY, GameLight light, float alpha, MaskShaderOptions mask) {
 					
 					TestFurryRaceLook rl = (TestFurryRaceLook)RaceDataFactory.getRaceLook(player, TestFurryRaceLook.this);
-				return new TestFurryDrawOptions(player.getLevel(), rl)
+				return new TestFurryDrawOptions(player != null ? player.getLevel() : null, rl)
 						.spriteRes(spriteRes)
 						.size(new Point(width, height))
 						.tailTexture(rl, spriteX, spriteY, true)
 						.dir(dir).mirrorX(mirrorX).mirrorY(mirrorY).allAlpha(alpha).light(light)
 						.drawOffset(mask == null ? 0 : mask.drawXOffset, mask == null ? 0 : mask.drawYOffset).pos(drawX, drawY).mask(mask)
 						.drawTail((dir == 1 || dir == 3));
-
 			}
-		});		
-		
+		});	
+				
 		drawOptions.addTopDraw(new TestFurryDrawOptions.FurryDrawOptionsGetter() {
 						
  				@Override
@@ -442,15 +558,14 @@ public class TestFurryRaceLook extends RaceLook {
 						int width, int height, boolean mirrorX, boolean mirrorY, GameLight light, float alpha, MaskShaderOptions mask) {
  					
  					TestFurryRaceLook rl = (TestFurryRaceLook)RaceDataFactory.getRaceLook(player, TestFurryRaceLook.this);
-					return new TestFurryDrawOptions(player.getLevel(), rl)
+					return new TestFurryDrawOptions(player != null ? player.getLevel() : null, rl)
 							.spriteRes(spriteRes)
 							.size(new Point(width, height))
 							.earsTexture(rl, spriteX, spriteY, true)
-							.muzzleTexture(rl, spriteX, spriteY, true)
 							.tailTexture(rl, spriteX, spriteY, true)
 							.dir(dir).mirrorX(mirrorX).mirrorY(mirrorY).allAlpha(alpha).light(light)
 							.drawOffset(mask == null ? 0 : mask.drawXOffset, mask == null ? 0 : mask.drawYOffset).pos(drawX, drawY).mask(mask)
-							.drawEars(true).drawMuzzle(true).drawTail(!(dir == 1 || dir == 3));
+							.drawEars(true).drawTail(!(dir == 1 || dir == 3));
 
 				}
 			});		

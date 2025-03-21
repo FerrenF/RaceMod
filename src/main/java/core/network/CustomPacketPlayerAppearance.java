@@ -6,6 +6,7 @@ import java.util.Map;
 import core.race.CustomHumanLook;
 import core.race.RaceLook;
 import core.race.factory.RaceDataFactory;
+import necesse.engine.GlobalData;
 import necesse.engine.Settings;
 import necesse.engine.commands.PermissionLevel;
 import necesse.engine.localization.message.GameMessage;
@@ -21,6 +22,7 @@ import necesse.engine.network.packet.PacketPlayerAppearance;
 import necesse.engine.network.packet.PacketRequestPlayerData;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
+import necesse.engine.state.MainGame;
 import necesse.engine.util.GameUtils;
 import necesse.entity.mobs.PlayerMob;
 import necesse.gfx.HumanLook;
@@ -36,7 +38,15 @@ public class CustomPacketPlayerAppearance extends PacketPlayerAppearance {
 		PacketReader reader = new PacketReader(this);
 		this.slot = reader.getNextByteUnsigned();
 		this.characterUniqueID = reader.getNextInt();
-		RaceLook ra = RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true));		
+		RaceLook ra = RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true));	
+		
+		Server s = GlobalData.getCurrentState() instanceof MainGame 
+				?((MainGame)GlobalData.getCurrentState()).getClient().getLocalServer()
+				:((necesse.engine.state.MainMenu)GlobalData.getCurrentState()).getClient().getLocalServer();
+		if(s != null) {
+			PlayerMob targetPlayer = s.getPlayer(slot);
+			RaceDataFactory.getOrRegisterRaceData(targetPlayer, ra);
+		}
 		this.look = ra;
 		this.name = reader.getNextString();
 	}
@@ -55,7 +65,6 @@ public class CustomPacketPlayerAppearance extends PacketPlayerAppearance {
 		this.slot = slot;
 		this.characterUniqueID = characterUniqueID;
 		this.look = RaceLook.fromHumanLook(player.look, CustomHumanLook.class);
-		RaceDataFactory.getOrRegisterRaceData(player, look);
 		this.name = player.getDisplayName();
 		this.putData();
 	}
@@ -118,10 +127,9 @@ public class CustomPacketPlayerAppearance extends PacketPlayerAppearance {
 		ClientClient target = client.getClient(this.slot);
 		if (target == null) {
 			client.network.sendPacket(new PacketRequestPlayerData(this.slot));
-		} else {
+		} else {			
 			target.applyAppearancePacket(this);
-		}
-
+		}		
 		client.loading.createCharPhase.submitPlayerAppearancePacket(this);
 	}
 }

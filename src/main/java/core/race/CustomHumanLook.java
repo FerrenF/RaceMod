@@ -15,6 +15,7 @@ import necesse.entity.mobs.MaskShaderOptions;
 import necesse.gfx.HumanLook;
 import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.gameTexture.GameTexture;
+import overrides.CustomHumanDrawOptions;
 
 public class CustomHumanLook extends RaceLook {
 	
@@ -108,7 +109,7 @@ public class CustomHumanLook extends RaceLook {
 	}
 
 	@Override
-	public HumanDrawOptions modifyHumanDrawOptions(HumanDrawOptions drawOptions, MaskShaderOptions mask) {
+	public CustomHumanDrawOptions modifyHumanDrawOptions(CustomHumanDrawOptions drawOptions, MaskShaderOptions mask) {
 		
 		return drawOptions;
 	}

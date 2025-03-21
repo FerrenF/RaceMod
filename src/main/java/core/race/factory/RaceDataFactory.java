@@ -187,8 +187,9 @@ public class RaceDataFactory {
 	 	@Override
 	    public RaceData put(Integer key, RaceData value) {
 	 		 RaceData data = super.put(key, value);
-	         if (data != null) {
-	        	 DebugHelper.handleFormattedDebugMessage("PUT requested for mob ID %d with race %s", 60, MESSAGE_TYPE.DEBUG, new Object[] {key, value.getRaceLook()});
+	 		DebugHelper.handleFormattedDebugMessage("PUT requested for mob ID %d with race %s", 60, 
+       			 MESSAGE_TYPE.DEBUG, new Object[] {key, value.getRaceLook()});
+	         if (data != null) {	        	 
 	             data.updateLastAccessTime();
 	         }
 	         return data;

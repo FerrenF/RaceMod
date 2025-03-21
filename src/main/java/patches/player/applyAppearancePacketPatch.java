@@ -15,11 +15,11 @@ public class applyAppearancePacketPatch {
     static boolean onEnter(@Advice.This PlayerMob th, @Advice.Argument(0) PacketPlayerAppearance _packet) {	 
 		
 		CustomPacketPlayerAppearance packet = (CustomPacketPlayerAppearance)_packet;			
-    	RaceDataFactory.getOrRegisterRaceData(th, packet.look);	
       	th.refreshClientUpdateTime();
     	th.look = packet.look;
     	th.getInv().giveLookArmor(false);
     	th.playerName = packet.name;
+    	RaceDataFactory.getOrRegisterRaceData(th, packet.look);
     	DebugHelper.handleDebugMessage(String.format(
                 "applyAppearancePacket for PlayerMob %s intercepted with race "+packet.look.getRaceID(),
                 th.playerName
@@ -28,12 +28,6 @@ public class applyAppearancePacketPatch {
         return true;
     }
 	
-    @Advice.OnMethodExit
-    static void onExitApplyAppearancePacketPatch(@Advice.This PlayerMob th, @Advice.Argument(0) PacketPlayerAppearance packet) {
-    	
-    	
-     
-    }
 }
 /*
 this.refreshClientUpdateTime();

@@ -33,6 +33,7 @@ import necesse.gfx.gameTexture.GameTexture;
 import necesse.gfx.res.ResourceEncoder;
 import necesse.gfx.res.ResourceFile;
 import net.bytebuddy.implementation.bind.annotation.Super;
+import overrides.CustomHumanDrawOptions;
 import core.forms.FormNewPlayerRaceCustomizer;
 import core.race.factory.RaceDataFactory;
 import core.race.factory.RaceDataFactory.RaceData;
@@ -607,7 +608,7 @@ public abstract class RaceLook extends HumanLook {
 		return new LocalMessage("racemod.race", this.getRaceID());
 	}
 
-	public abstract HumanDrawOptions modifyHumanDrawOptions(HumanDrawOptions drawOptions, MaskShaderOptions mask);
+	public abstract CustomHumanDrawOptions modifyHumanDrawOptions(CustomHumanDrawOptions drawOptions, MaskShaderOptions mask);
 
 	public abstract Class<? extends FormNewPlayerRaceCustomizer> getAssociatedCustomizerForm();
 

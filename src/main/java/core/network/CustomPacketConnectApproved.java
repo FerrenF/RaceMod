@@ -8,6 +8,7 @@ import core.race.RaceLook;
 import core.race.factory.RaceDataFactory;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
+import necesse.engine.GlobalData;
 import necesse.engine.Settings;
 import necesse.engine.commands.PermissionLevel;
 import necesse.engine.network.NetworkManager;
@@ -22,7 +23,9 @@ import necesse.engine.network.server.ServerClient;
 import necesse.engine.platforms.Platform;
 import necesse.engine.playerStats.PlayerStats;
 import necesse.engine.seasons.GameSeasons;
+import necesse.engine.state.MainGame;
 import necesse.engine.world.WorldSettings;
+import necesse.entity.mobs.PlayerMob;
 import necesse.gfx.HumanLook;
 
 public class CustomPacketConnectApproved extends PacketConnectApproved {
@@ -71,10 +74,20 @@ public class CustomPacketConnectApproved extends PacketConnectApproved {
 			this.serverCharacterUniqueID = reader.getNextInt();
 			//HumanLook holder = new HumanLook(reader);
 			
-			this.serverCharacterAppearance = RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true));					
+			RaceLook ra = RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true));			
+			this.serverCharacterAppearance = ra;	
 			this.serverCharacterLookContent = reader.getNextContentPacket();
 			this.serverCharacterTimePlayed = reader.getNextLong();
 			this.serverCharacterName = reader.getNextString();
+			
+			Server s = GlobalData.getCurrentState() instanceof MainGame 
+					?((MainGame)GlobalData.getCurrentState()).getClient().getLocalServer()
+					:((necesse.engine.state.MainMenu)GlobalData.getCurrentState()).getClient().getLocalServer();
+			if(s != null) {
+				PlayerMob targetPlayer = s.getPlayer(slot);
+				RaceDataFactory.getOrRegisterRaceData(targetPlayer, ra);
+			}
+
 		} else {
 			this.serverCharacterUniqueID = 0;
 			this.serverCharacterAppearance = null;

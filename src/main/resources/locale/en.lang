@@ -7,6 +7,7 @@ makerace=Race:
 nextrace=Next Race
 prevrace=Previous Race
 loading=Loading RaceMod
+versioning=Running version upgrade scripts...
 versionchange=RaceMod updated. Deleting cache...
 [racemod.loading]
 firstsetup=Loading and caching RaceMod resources...
@@ -25,3 +26,7 @@ body=Body Shape
 body_color=Body Color
 arms=Arm Style
 arms_color=Arm Color
+feet=Feet Style
+feet_color=Feet Color
+custom_eyes=Eye Style
+custom_eyes_color=Eye Color

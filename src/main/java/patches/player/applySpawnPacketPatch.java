@@ -80,7 +80,7 @@ public class applySpawnPacketPatch {
 	
 	    		RaceLook ra = RaceLook.raceFromContentPacker(reader, RaceDataFactory.getRaceLook(th, new CustomHumanLook(true)));
 		        th.look = ra;
-		        
+		        RaceDataFactory.getOrRegisterRaceData(th, ra);
 	    		th.getInv().applyContentPacket(reader);
 	    		th.hungerLevel = reader.getNextFloat();
 	    		 

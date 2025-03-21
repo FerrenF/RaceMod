@@ -15,6 +15,8 @@ import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.inventory.InventoryItem;
 import necesse.level.maps.Level;
 import necesse.level.maps.light.GameLight;
+import overrides.CustomHumanDrawOptions;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 
@@ -73,7 +75,7 @@ public class PlayerSpriteHooks {
 		InventoryItem helmet = getPlayerDisplayArmor(player, 0);
 		InventoryItem chestplate = getPlayerDisplayArmor(player, 1);
 		InventoryItem boots = getPlayerDisplayArmor(player, 2);
-		HumanDrawOptions humanDrawOptions = (new HumanDrawOptions(player.getLevel(),  player.look, false)).player(player)
+		CustomHumanDrawOptions humanDrawOptions = (new CustomHumanDrawOptions(player.getLevel(),  player.look, false)).player(player)
 				.blinking(player.isBlinking()).helmet(helmet).chestplate(chestplate).boots(boots).size(width, height)
 				.invis((Boolean) player.buffManager.getModifier(BuffModifiers.INVISIBILITY)).sprite(spriteX, dir)
 				.dir(dir).light(light);
@@ -157,7 +159,7 @@ public class PlayerSpriteHooks {
 			}
 
 			float alpha = player.getInvincibilityFrameAlpha();
-			HumanDrawOptions options = (new HumanDrawOptions(level, player.look, false)).player(player).helmet(helmet)
+			CustomHumanDrawOptions options = (new CustomHumanDrawOptions(level, player.look, false)).player(player).helmet(helmet)
 					.chestplate(chestplate).boots(boots).dir(dir).allAlpha(alpha)
 					.invis((Boolean) player.buffManager.getModifier(BuffModifiers.INVISIBILITY))
 					.blinking(player.isBlinking()).sprite(sprite).armSprite(armSpriteX).light(light);

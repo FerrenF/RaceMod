@@ -106,13 +106,13 @@ public class setupSpawnPacketPatch {
 	            RaceLook ra = RaceLook.fromHumanLook(th.look, CustomHumanLook.class);
 	            th.look = ra;
 	            th.look.setupContentPacket(writer, true);
-
+	            
 	            // Call getInv().setupContentPacket(writer);
 	            th.getInv().setupContentPacket(writer);
 	              
 	            // Write hunger level
 	            writer.putNextFloat(th.hungerLevel);
-
+	           
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }	

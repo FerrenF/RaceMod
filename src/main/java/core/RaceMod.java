@@ -5,6 +5,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import core.network.CustomPacketConnectApproved;
@@ -25,17 +29,14 @@ import necesse.engine.localization.Localization;
 import necesse.engine.modLoader.LoadedMod;
 import necesse.engine.modLoader.annotations.ModEntry;
 import necesse.engine.network.PacketReader;
-import necesse.engine.network.client.Client;
 import necesse.engine.network.client.loading.ClientLoadingSelectCharacter;
-import necesse.engine.network.networkInfo.NetworkInfo;
-import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.ContainerRegistry;
-import necesse.engine.registries.GNDRegistry;
 import necesse.engine.registries.PacketRegistry;
 import necesse.engine.save.CharacterSave;
 import necesse.entity.mobs.friendly.human.humanShop.StylistHumanMob;
 import necesse.gfx.PlayerSprite;
+import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.forms.MainMenuFormManager;
 import necesse.gfx.res.ResourceEncoder;
 import necesse.level.maps.layers.settlement.SettlementLevelLayer;
@@ -53,13 +54,11 @@ import patches.getStylistOpenShopPacketPatch;
 import patches.debug.debugGNDItemPatch;
 import patches.server.ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch;
 import patches.server.ClientLoadingSelectCharacterStartPatch;
-import patches.server.ClientSubmitConnectAcceptedPatch;
-import patches.server.ServerAddClientPatch;
 import patches.server.ServerClientApplyAppearancePacketPatch;
 import patches.server.ServerClientApplyLoadedCharacterPacketPatch;
 import patches.server.ServerClientLoadClientLookPatch;
 import patches.settlement.SettlementLevelLayerMethodPatches;
-
+import versioning.*;
 	
 @ModEntry
 public class RaceMod {
@@ -67,18 +66,23 @@ public class RaceMod {
 	public static int CUSTOM_STYLIST_CONTAINER;
 	public static Instrumentation byteBuddyInst;
 	public static SettingsHelper settings = new SettingsHelper();
-	public static String VERSION_STRING = "0.0.12 ALPHA";
+	public static String VERSION_STRING = "0.0.16 ALPHA";
 	public static boolean DUMP_CLASSES = false;
 	public static boolean DEBUG_HOOKS = false;
+	public static boolean NEEDS_VERSIONING = false;
+	public static String OLD_VERSION_STRING;
 	public void preInit() {
 		
 		byteBuddyInst = ByteBuddyAgent.install();
+			  
 		SettingsHelper.initialize();
 		
 		DebugHelper.initialize();
 		
 		String last_version = SettingsHelper.getSettingsString("DATA", "last_version", "-1", true);
 		if(!last_version.equals(VERSION_STRING)) {
+			NEEDS_VERSIONING = true;
+			OLD_VERSION_STRING = last_version;
 			GameLoadingScreen.drawLoadingString(Localization.translate("racemodui", "versionchange"));   
 			
 			DebugHelper.handleDebugMessage("Last version used missing or changed. Erasing cache.", 5, MESSAGE_TYPE.DEBUG);
@@ -101,6 +105,8 @@ public class RaceMod {
 			SettingsHelper.setSettingsString("DATA", "last_version", VERSION_STRING);			
 		}
 		
+		
+		
 		DebugHelper.handleDebugMessage("Race mod beginning pre-initialization. Let's get some hooks into this bad boy.", 5, MESSAGE_TYPE.INFO);
 		 
 		if(DEBUG_HOOKS) {			  
@@ -122,6 +128,7 @@ public class RaceMod {
 	    	ResourceEncoder.addModResources(l);	
     	}
 	}
+	
 	public static void deleteDirectory(File directory) {
 	    if (directory.exists()) {
 	        File[] files = directory.listFiles();
@@ -133,9 +140,10 @@ public class RaceMod {
 	        directory.delete(); 
 	    }
 	}
-	private void deployPreInitHook() {
-		
 	
+	
+	private void deployPreInitHook() {	
+		
 		  new ByteBuddy()
 		      .redefine(overrides.NewCharacterForm.class) 
 		      .name("necesse.gfx.forms.presets.NewCharacterForm") 
@@ -143,27 +151,7 @@ public class RaceMod {
 		      .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent());		  
 		  
 		  DebugHelper.handleDebugMessage("Successfully replaced NewCharacterForm. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
-		  
-		  //ClientSubmitConnectAcceptedPatch
-		  new ByteBuddy()
-	          .redefine(Server.class)
-	          .method(ElementMatchers.named("addClient")
-	          .and(ElementMatchers.takesArguments(NetworkInfo.class, long.class, String.class, boolean.class, boolean.class))
-	          ).intercept(MethodDelegation.to(ServerAddClientPatch.class)) 
-	          .make() 
-	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 		  
-		  
-		  DebugHelper.handleDebugMessage("Deployed ServerAddClientPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
-		  
-		  new ByteBuddy()
-	          .redefine(Client.class)
-	          .method(ElementMatchers.named("submitConnectionPacket"))
-	          .intercept(MethodDelegation.to(ClientSubmitConnectAcceptedPatch.class)) 
-	          .make() 
-	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 		  
-	  
-		  DebugHelper.handleDebugMessage("Deployed ClientSubmitConnectAcceptedPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
-		  
+		  		  		 
 		  new ByteBuddy()
 			  .redefine(ClientLoadingSelectCharacter.class)
 	          .method(ElementMatchers.named("submitConnectAccepted"))
@@ -187,8 +175,7 @@ public class RaceMod {
 	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 
 	  
 		  DebugHelper.handleDebugMessage("Deployed ServerClientLoadClientLookPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
-	
-		  
+			 		  
 		  new ByteBuddy()
 			  .redefine(StylistHumanMob.class)
 	          .method(ElementMatchers.named("getOpenShopPacket"))
@@ -198,11 +185,16 @@ public class RaceMod {
 		  
 		  DebugHelper.handleDebugMessage("Deployed getStylistOpenShopPacketPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
 		  
+		
+		  //HumanDrawOptionsArmorDrawOptionsAccessPatch
+		  
 		  // SettlementLevelLayer
 		  
 		  new ByteBuddy()
 			  .redefine(SettlementLevelLayer.class)
-	          .method(ElementMatchers.named("updateOwnerVariables"))
+	          .method(ElementMatchers.named("updateOwnerVariables") .and(ElementMatchers.takesArguments(ServerClient.class)))  
+	          .intercept(MethodDelegation.to(SettlementLevelLayerMethodPatches.class)) 
+	          .method(ElementMatchers.named("updateOwnerVariables") .and(ElementMatchers.takesNoArguments()))  
 	          .intercept(MethodDelegation.to(SettlementLevelLayerMethodPatches.class)) 
 	          .method(ElementMatchers.named("readBasicSettlementData"))
 	          .intercept(MethodDelegation.to(SettlementLevelLayerMethodPatches.class))
@@ -225,14 +217,18 @@ public class RaceMod {
 	
     public void init() {    	
     	
-    	if(!GlobalData.isServer()) {
-    		GameLoadingScreen.drawLoadingString(Localization.translate("racemodui", "loading"));   
-        	
+    	if(!GlobalData.isServer()) {        	
         	characterSavePath = SettingsHelper.getSettingsString("DATA", "save_path");
-        	if(characterSavePath == null) characterSavePath = GlobalData.appDataPath().replace('\\', '/')  + "saves/characters/racemod/";
+        	if(characterSavePath == null) characterSavePath = GlobalData.appDataPath()  + "saves"+System.getProperty("file.separator")+"characters"+System.getProperty("file.separator")+"racemod"+System.getProperty("file.separator");
         	interceptCharacterSavePath();
         	addMainMenuMessage();
     	}
+    	if(NEEDS_VERSIONING) {
+    		GameLoadingScreen.drawLoadingString(Localization.translate("racemodui", "versioning")); 
+    		VersionUpgradeRunner.runUpgradeScripts(OLD_VERSION_STRING, VERSION_STRING);
+    	}
+    	GameLoadingScreen.drawLoadingString(Localization.translate("racemodui", "loading"));   
+    	
     	DebugHelper.handleDebugMessage("Deploying hooks...");
 		replaceFormNewCharacterForms();
 		replacePlayerSprite();   
@@ -336,8 +332,7 @@ public class RaceMod {
     					(StylistHumanMob) mob, new PacketReader(content)));
     		}, (client, uniqueSeed, mob, content, serverObject) -> {
     			return new CustomRaceStylistContainer(client, uniqueSeed, (StylistHumanMob) mob, new PacketReader(content));
-    		});
-        	          	
+    		});        	          	
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -346,10 +341,8 @@ public class RaceMod {
     
 	
     public static void replaceFormNewCharacterForms() {
-        try {        	
+        try {       	
         	
-        	
-          
         	 new ByteBuddy()
              .redefine(overrides.FormCharacterSaveComponent.class) // Your modified version
              .name("necesse.gfx.forms.components.FormCharacterSaveComponent") // Force rename

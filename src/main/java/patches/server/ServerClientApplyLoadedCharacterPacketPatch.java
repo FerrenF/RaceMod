@@ -3,6 +3,8 @@ package patches.server;
 import java.lang.reflect.Field;
 
 import core.network.CustomPacketPlayerAppearance;
+import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.network.packet.PacketSelectedCharacter;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
@@ -58,6 +60,7 @@ public class ServerClientApplyLoadedCharacterPacketPatch {
     		}
     		needAppearanceField.set(th, false);
     		submittedCharacterField.set(th,true);
+    		    	    		
         } catch (NoSuchFieldException | IllegalAccessException | IllegalArgumentException  e) {
             e.printStackTrace();
         }

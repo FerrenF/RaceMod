@@ -26,6 +26,7 @@ public class applyLoadDataPatch {
     
 			RaceLook toApply = RaceLook.raceFromLoadData(save, new CustomHumanLook(true));
 			th.look = toApply;
+			
 			r.addRaceData(toApply);
 			DebugHelper.handleDebugMessage(String.format(
                     "applyLoadData for PlayerMob %s with race %s intercepted and interpreted from save.",

@@ -1,9 +1,12 @@
 package patches.settlement;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import core.race.CustomHumanLook;
 import core.race.RaceLook;
+import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.localization.message.GameMessage;
 import necesse.engine.network.PacketReader;
 import necesse.engine.network.PacketWriter;
@@ -18,7 +21,9 @@ import net.bytebuddy.implementation.bind.annotation.This;
 
 public class SettlementLevelLayerMethodPatches {
 	
-	private static void updateOwnerVariables(@This SettlementLevelLayer th, @Argument(0) ServerClient client) {		
+	
+	public static void updateOwnerVariables(@This SettlementLevelLayer th, @Argument(0) ServerClient client) {		
+		
 		try
 		{
 			Field ownerAuthField = th.getClass().getDeclaredField("ownerAuth");
@@ -38,6 +43,10 @@ public class SettlementLevelLayerMethodPatches {
 			teamIDField.set(th,client.getTeamID());
 			lookField.set(th, RaceLook.fromHumanLook( client.playerMob.look, CustomHumanLook.class));
 			statsField.set(th,client.characterStats());
+			
+			DebugHelper.handleFormattedDebugMessage("Settlement owner variables: auth %s, name %s, team %s ",
+					50, MESSAGE_TYPE.DEBUG, new Object[] {ownerAuthField.get(th).toString(),
+							ownerNameField.get(th).toString(), teamIDField.get(th).toString()});
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -75,7 +84,9 @@ public class SettlementLevelLayerMethodPatches {
 	
 			teamIDField.set(th, reader.getNextInt());
 			if (reader.getNextBoolean()) {
-				lookField.set(th, RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true)));
+				
+				RaceLook ra = RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true));		
+				lookField.set(th, ra);
 			} else {
 				lookField.set(th, null);
 			}
@@ -118,7 +129,15 @@ public class SettlementLevelLayerMethodPatches {
 			writer.putNextInt((int) teamIDField.get(th));
 			writer.putNextBoolean(lookField.get(th) != null);
 			if (lookField.get(th) != null) {
-				RaceLook.fromHumanLook((HumanLook)lookField.get(th), CustomHumanLook.class).setupContentPacket(writer, true);
+				
+				
+				if (lookField.get(th) instanceof RaceLook) {
+					((RaceLook)lookField.get(th)).setupContentPacket(writer, true);
+				}
+				else {
+					RaceLook.fromHumanLook((HumanLook)lookField.get(th), CustomHumanLook.class).setupContentPacket(writer, true);
+				}
+				
 			}
 	
 			writer.putNextBoolean(isPrivateField.getBoolean(th));
@@ -169,17 +188,23 @@ public class SettlementLevelLayerMethodPatches {
 			statsField.setAccessible(true);
 			
 			if (th.level.isServer()) {
-				if ((long)ownerAuthField.get(th) != -1L) {
-					ServerClient client = th.level.getServer().getClientByAuth((long)ownerAuthField.get(th));
+				if (ownerAuthField.getLong(th) != -1L) {
+					ServerClient client = th.level.getServer().getClientByAuth(ownerAuthField.getLong(th));
 					if (client != null) {
-						invokePrivateMethod(th,"updateOwnerVariables",client);
+						Method m = SettlementLevelLayer.class.getMethod("updateOwnerVariables", ServerClient.class);
+						m.setAccessible(true);
+						m.invoke(th, client);
 					} else {
-						LoadData clientSave = th.level.getServer().world.loadClientScript((long)ownerAuthField.get(th));
+						LoadData clientSave = th.level.getServer().world.loadClientScript(ownerAuthField.getLong(th));
 						if (clientSave != null) {
 							ownerNameField.set(th, ServerClient.loadClientName(clientSave));
-							teamIDField.set(th, th.level.getServer().world.getTeams().getPlayerTeamID((long)ownerAuthField.get(th)));
+							teamIDField.set(th, th.level.getServer().world.getTeams().getPlayerTeamID(ownerAuthField.getLong(th)));
 							lookField.set(th, ServerClient.loadClientLook(clientSave));
 							statsField.set(th, ServerClient.loadClientStats(clientSave));
+						
+							DebugHelper.handleFormattedDebugMessage("Settlement owner variables: auth %s, name %s, team %s ",
+									50, MESSAGE_TYPE.DEBUG, new Object[] {ownerAuthField.get(th).toString(),
+											ownerNameField.get(th).toString(), teamIDField.get(th).toString()});
 						} else {
 							ownerAuthField.set(th,-1L);
 							ownerNameField.set(th,null);
@@ -190,6 +215,7 @@ public class SettlementLevelLayerMethodPatches {
 						}
 					}
 				} else {
+		
 					ownerNameField.set(th,null);
 					teamIDField.set(th,-1);
 					lookField.set(th,null);
@@ -198,15 +224,16 @@ public class SettlementLevelLayerMethodPatches {
 	
 				invokePrivateMethod(th,"updateLevelCache");
 			}
-		
+			
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 		}
+		
 	}
 	
 	 // Helper method to invoke private methods using reflection
-    private static void invokePrivateMethod(Object instance, String methodName, Object... args) {
+    public static void invokePrivateMethod(Object instance, String methodName, Object... args) {
         try {
             java.lang.reflect.Method method = instance.getClass().getDeclaredMethod(methodName);
             method.setAccessible(true);

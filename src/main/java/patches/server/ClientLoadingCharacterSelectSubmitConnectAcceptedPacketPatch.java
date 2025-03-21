@@ -47,10 +47,10 @@ public class ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch {
             // Handle serverCharacterPlayer initialization if needed
             if (cp.serverCharacterAppearance != null) {
                 PlayerMob serverCharacterPlayer = new PlayerMob((long) cp.serverCharacterUniqueID, (NetworkClient) null);
-                serverCharacterPlayer.look = cp.serverCharacterAppearance;
-                
+                serverCharacterPlayer.look = cp.serverCharacterAppearance;                
                 serverCharacterPlayer.getInv().applyLookContentPacket(new PacketReader(cp.serverCharacterLookContent));
                 serverCharacterPlayer.playerName = cp.serverCharacterName;
+                RaceDataFactory.getOrRegisterRaceData(serverCharacterPlayer, cp.serverCharacterAppearance);
 
                 // Set serverCharacterPlayer using reflection
                 serverCharacterPlayerField.set(th, serverCharacterPlayer);

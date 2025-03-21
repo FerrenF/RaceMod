@@ -67,10 +67,10 @@ public class applyLoadedCharacterPacketPatch {
 	            		rd.raceDataInitialized 
 	            		? rd.getRaceLook() 
 	            		: RaceLook.fromHumanLook(th.look, CustomHumanLook.class));*/
-	            
-	            th.look = RaceLook.raceFromContentPacker(reader,
-	            		th.look instanceof RaceLook ? (RaceLook)th.look : RaceLook.fromHumanLook(th.look, CustomHumanLook.class)); //th.look instanceof RaceLook ? (RaceLook)th.look : RaceLook.fromHumanLook(th.look, CustomHumanLook.class);
-	           // th.look.applyContentPacket(reader);
+	            RaceLook ra = RaceLook.raceFromContentPacker(reader,
+	            		th.look instanceof RaceLook ? (RaceLook)th.look : RaceLook.fromHumanLook(th.look, CustomHumanLook.class));
+	            th.look = ra;
+	            RaceDataFactory.getOrRegisterRaceData(th, ra);
 	          
 	            th.getInv().applyContentPacket(reader);
 	       
@@ -81,7 +81,10 @@ public class applyLoadedCharacterPacketPatch {
 	            th.buffManager.forceUpdateBuffs();	         
 
 	            handleLoadedValues.invoke(th);
-
+	            DebugHelper.handleDebugMessage(String.format(
+                        "applyLoadedCharacterPacket for PlayerMob %s with race %s intercepted.",
+                        th.playerName, ((RaceLook)th.look).getRaceID()
+                ), 25);		
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }

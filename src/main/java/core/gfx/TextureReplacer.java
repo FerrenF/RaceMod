@@ -11,7 +11,8 @@ public class TextureReplacer {
     		BACK,
     		SHOES,
     		BODY,
-    		ARMS
+    		ARMS,
+    		EYES
     	}
     	public TextureReplacer(TARGET s){
     		this.targetPart = s;
