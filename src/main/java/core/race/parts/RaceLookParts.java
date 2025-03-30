@@ -53,7 +53,7 @@ public abstract class RaceLookParts{
     	if(partName==null) return null;
     	// test reduction to base name
     	if(partName.contains("_")) {
-	    	BodyPart try1 = (BodyPart)(bodyParts.getOrDefault(partName.subSequence(0, partName.indexOf('_')), null));    	
+	    	BodyPart try1 = (BodyPart)(bodyParts.getOrDefault(partName.subSequence(0, partName.lastIndexOf('_')), null));    	
 	    	if(try1 != null) return try1;    	
     	}
         return (BodyPart)(bodyParts.get(partName));
@@ -103,10 +103,11 @@ public abstract class RaceLookParts{
 	public boolean isHiddenPart(String key) {
 		return this.getHiddenParts().contains(key);
 	}
-	 public Set<String> getHiddenParts()
-	 {
-	    return customizerHiders;
-	 }
+	
+	public Set<String> getHiddenParts()	{
+	   return customizerHiders;
+	}
+	
 	public boolean hasCustomPart(String key) {
 		return hasPart(key) && !this.bodyParts.get(key).isBaseGamePart();
 	}

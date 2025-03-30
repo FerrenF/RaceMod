@@ -99,7 +99,10 @@ public class CustomHumanDrawOptions extends HumanDrawOptions {
 	private MaskShaderOptions mask;
 	private boolean forcedBufferDraw;
 	private InventoryItem holdItem;
-
+	
+	public EyesDrawOptionsProvider eyeDrawOptionsGetter;
+	public OnFaceDrawOptionsProvider onFaceOptionsGetter;
+	
 	public CustomHumanDrawOptions(Level level) {
 		super(level);
 		this.drawEyes = true;
@@ -493,8 +496,6 @@ public class CustomHumanDrawOptions extends HumanDrawOptions {
 	public float getAttackProgress() {
 		return this.attackProgress;
 	}
-
-	public EyesDrawOptionsProvider eyeDrawOptionsGetter;
 	
 	public DrawOptions pos(int drawX, int drawY) {
 		if (this.mask != null) {
@@ -513,6 +514,7 @@ public class CustomHumanDrawOptions extends HumanDrawOptions {
 		EdgeMaskSpriteOptions maskOptions;
 		if (this.hatTexture != null) {
 			if (this.hairMode != HairDrawMode.NO_HEAD) {
+				
 				hairMaskOptions = this.mask;
 				if (this.hairMaskTexture != null) {
 					maskOptions = new EdgeMaskSpriteOptions(new GameSprite(this.hairMaskTexture, this.spriteX,
@@ -525,6 +527,7 @@ public class CustomHumanDrawOptions extends HumanDrawOptions {
 				}
 
 				if (this.facialFeatureMode == FacialFeatureDrawMode.OVER_FACIAL_FEATURE) {
+					
 					if (this.facialFeatureTexture != null && !this.invis) {
 						headArmorOptions.add(this.facialFeatureTexture.initDraw()
 								.sprite(this.spriteX, this.spriteY, this.spriteRes).size(this.width, this.height)
@@ -538,6 +541,7 @@ public class CustomHumanDrawOptions extends HumanDrawOptions {
 								.mirror(this.mirrorX, this.mirrorY).light(this.light).alpha(this.alpha)
 								.addMaskShader(this.mask).pos(drawX, drawY));
 					}
+					
 				}
 
 				if (this.hairMode == HairDrawMode.OVER_HAIR) {
@@ -556,37 +560,60 @@ public class CustomHumanDrawOptions extends HumanDrawOptions {
 				}
 
 				if (this.headTexture != null && !this.invis) {
+					
 					headOptions.add(this.headTexture.initDraw().sprite(this.spriteX, this.spriteY, this.spriteRes)
 							.size(this.width, this.height).mirror(this.mirrorX, this.mirrorY).light(this.light)
 							.alpha(this.alpha).addMaskShader(this.mask).pos(drawX, drawY));
+					
+					
 				}
-
+				
+				
+				
 				if (this.eyelidsTexture != null && this.blinking && !this.invis) {
 					
 					
 					eyelidsOptions.add(this.eyelidsTexture.initDraw().sprite(this.spriteX, this.spriteY, this.spriteRes)
 							.size(this.width, this.height).mirror(this.mirrorX, this.mirrorY).light(this.light)
 							.alpha(this.alpha).addMaskShader(this.mask).pos(drawX, drawY));
-					
+	
 				} else if (this.look != null && !this.invis && this.drawEyes) {
 					
 					if(this.eyeDrawOptionsGetter!=null) {
+						
+						// CUSTOM EYES MARKER 1
+						
 						headOptions.add(this.eyeDrawOptionsGetter.getEyesDrawOptions(this.eyeTypeOverride == -1 ? this.look.getEyeType() : this.eyeTypeOverride,
 								this.look.getEyeColor(), this.look.getSkin(), this.onlyHumanLike, this.blinking, drawX,
 								drawY, this.spriteX, this.spriteY, this.width, this.height, this.mirrorX, this.mirrorY,
 								this.alpha, this.light, this.mask));
 					}
-					else {
-						
+					else {						
 					
-					headOptions.add(HumanLook.getEyesDrawOptions(
+						headOptions.add(HumanLook.getEyesDrawOptions(
 							this.eyeTypeOverride == -1 ? this.look.getEyeType() : this.eyeTypeOverride,
 							this.look.getEyeColor(), this.look.getSkin(), this.onlyHumanLike, this.blinking, drawX,
 							drawY, this.spriteX, this.spriteY, this.width, this.height, this.mirrorX, this.mirrorY,
 							this.alpha, this.light, this.mask));
 					}
 				}
-
+				
+				// ON FACE MARKER 1
+				if(this.onFaceOptionsGetter != null) {
+					headOptions.add(
+							this.onFaceOptionsGetter.getOnFaceDrawOptionsProvider(
+									player,
+									dir,
+									spriteRes,
+									drawX, drawY,
+									spriteX, spriteY,
+									width, height,
+									mirrorX, mirrorY,
+									alpha,
+									light,
+									mask));
+				}
+				
 				headArmorOptions.add(this.hatTexture.getDrawOptions(this.player, this.dir, this.spriteX, this.spriteY,
 						this.spriteRes, drawX + this.hatXOffset, drawY + this.hatYOffset, this.width, this.height,
 						this.mirrorX, this.mirrorY, this.light, this.alpha, this.mask));
@@ -622,7 +649,7 @@ public class CustomHumanDrawOptions extends HumanDrawOptions {
 				}
 			}
 		} else if (this.helmet != null && this.helmet.item.isArmorItem()) {
-			//SuperUnsafeDrawOptionsHelper.invokeExtraDrawOptions(((ArmorItem) this.helmet.item), this, this.helmet);
+
 			((ArmorItem) this.helmet.item).addExtraDrawOptions(this, this.helmet);
 			ArmorItem.HairDrawMode headDrawOptions = ((ArmorItem) this.helmet.item).hairDrawOptions;
 			ArmorItem.FacialFeatureDrawMode facialFeatureDrawOptions = ((ArmorItem) this.helmet.item).facialFeatureDrawOptions;
@@ -677,15 +704,18 @@ public class CustomHumanDrawOptions extends HumanDrawOptions {
 				if (this.headTexture != null && !this.invis) {
 					headOptions.add(this.headTexture.initDraw().sprite(this.spriteX, this.spriteY, this.spriteRes)
 							.size(this.width, this.height).mirror(this.mirrorX, this.mirrorY).light(this.light)
-							.alpha(this.alpha).addMaskShader(this.mask).pos(drawX, drawY));
+							.alpha(this.alpha).addMaskShader(this.mask).pos(drawX, drawY));	
 				}
-
+				
+				
+				
 				if (this.eyelidsTexture != null && this.blinking && !this.invis) {
 					eyelidsOptions.add(this.eyelidsTexture.initDraw().sprite(this.spriteX, this.spriteY, this.spriteRes)
 							.size(this.width, this.height).mirror(this.mirrorX, this.mirrorY).light(this.light)
 							.alpha(this.alpha).addMaskShader(this.mask).pos(drawX, drawY));
 				} else if (this.look != null && !this.invis && this.drawEyes) {
 					
+					// CUSTOM EYES MARKER 2
 					if(this.eyeDrawOptionsGetter!=null) {
 						headOptions.add(this.eyeDrawOptionsGetter.getEyesDrawOptions(this.eyeTypeOverride == -1 ? this.look.getEyeType() : this.eyeTypeOverride,
 								this.look.getEyeColor(), this.look.getSkin(), this.onlyHumanLike, this.blinking, drawX,
@@ -701,7 +731,21 @@ public class CustomHumanDrawOptions extends HumanDrawOptions {
 					}
 					
 				}
-
+				// ON FACE MARKER 2
+				if(this.onFaceOptionsGetter != null) {
+					headOptions.add(
+							this.onFaceOptionsGetter.getOnFaceDrawOptionsProvider(
+									player,
+									dir,
+									spriteRes,
+									drawX, drawY,
+									spriteX, spriteY,
+									width, height,
+									mirrorX, mirrorY,
+									alpha,
+									light,
+									mask));
+				}
 				headArmorOptions.add(((ArmorItem) this.helmet.item).getArmorDrawOptions(this.helmet, this.level,
 						this.player, this.helmet, this.chestplate, this.boots, this.spriteX, this.spriteY,
 						this.spriteRes, drawX, drawY, this.width, this.height, this.mirrorX, this.mirrorY, this.light,
@@ -785,13 +829,16 @@ public class CustomHumanDrawOptions extends HumanDrawOptions {
 						.size(this.width, this.height).mirror(this.mirrorX, this.mirrorY).light(this.light)
 						.alpha(this.alpha).addMaskShader(this.mask).pos(drawX, drawY));
 			}
-
+			
+		
+			
 			if (this.eyelidsTexture != null && this.blinking && !this.invis) {
 				eyelidsOptions.add(this.eyelidsTexture.initDraw().sprite(this.spriteX, this.spriteY, this.spriteRes)
 						.size(this.width, this.height).mirror(this.mirrorX, this.mirrorY).light(this.light)
 						.alpha(this.alpha).addMaskShader(this.mask).pos(drawX, drawY));
 			} else if (this.look != null && !this.invis && this.drawEyes) {
 				
+				// CUSTOM EYES MARKER 3
 				if(this.eyeDrawOptionsGetter!=null) {
 					headOptions.add(eyeDrawOptionsGetter.getEyesDrawOptions(this.eyeTypeOverride == -1 ? this.look.getEyeType() : this.eyeTypeOverride,
 							this.look.getEyeColor(), this.look.getSkin(), this.onlyHumanLike, this.blinking, drawX, drawY,
@@ -807,7 +854,21 @@ public class CustomHumanDrawOptions extends HumanDrawOptions {
 				}
 				
 			}
-
+			// ON FACE MARKER 3
+			if(this.onFaceOptionsGetter != null) {
+				headOptions.add(
+						this.onFaceOptionsGetter.getOnFaceDrawOptionsProvider(
+								player,
+								dir,
+								spriteRes,
+								drawX, drawY,
+								spriteX, spriteY,
+								width, height,
+								mirrorX, mirrorY,
+								alpha,
+								light,
+								mask));
+			}
 			if (this.facialFeatureTexture != null && !this.invis) {
 				headArmorOptions
 						.add(this.facialFeatureTexture.initDraw().sprite(this.spriteX, this.spriteY, this.spriteRes)
@@ -1542,7 +1603,7 @@ public class CustomHumanDrawOptions extends HumanDrawOptions {
 	}
 	
 	public interface EyesDrawOptionsProvider {
-	    DrawOptions getEyesDrawOptions(
+	   public DrawOptions getEyesDrawOptions(
 	        int eyeType, 
 	        int eyeColor, 
 	        int skinColor, 
@@ -1561,10 +1622,24 @@ public class CustomHumanDrawOptions extends HumanDrawOptions {
 	        MaskShaderOptions mask
 	    );
 	}
-	/*public static class SuperUnsafeDrawOptionsHelper {
-	    public static void invokeExtraDrawOptions(Object srcArmorItem, Object owner, Object targetArmorItem) {
-	        ((ArmorItem) srcArmorItem).addExtraDrawOptions((HumanDrawOptions)owner, (InventoryItem) targetArmorItem);
-	    }
-	}*/
+	
+	public interface OnFaceDrawOptionsProvider {
+		   public DrawOptions getOnFaceDrawOptionsProvider(
+				PlayerMob player,
+				int dir,
+				int spriteRes,
+		        int drawX, 
+		        int drawY, 
+		        int spriteX, 
+		        int spriteY, 
+		        int width, 
+		        int height, 
+		        boolean mirrorX, 
+		        boolean mirrorY, 
+		        float alpha, 
+		        GameLight light, 
+		        MaskShaderOptions mask
+		    );
+		}
 	
 }

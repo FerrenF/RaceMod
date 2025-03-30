@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import core.gfx.GamePartsLoader;
 import core.network.CustomPacketConnectApproved;
 import core.network.CustomPacketPlayerAppearance;
 import core.race.CustomHumanLook;
@@ -66,7 +67,7 @@ public class RaceMod {
 	public static int CUSTOM_STYLIST_CONTAINER;
 	public static Instrumentation byteBuddyInst;
 	public static SettingsHelper settings = new SettingsHelper();
-	public static String VERSION_STRING = "0.0.16 ALPHA";
+	public static String VERSION_STRING = "0.0.17 ALPHA";
 	public static boolean DUMP_CLASSES = false;
 	public static boolean DEBUG_HOOKS = false;
 	public static boolean NEEDS_VERSIONING = false;
@@ -293,6 +294,10 @@ public class RaceMod {
 	            e.printStackTrace();
 	        }
     	}
+	}
+	
+	public void dispost() {
+		GamePartsLoader.killThreads();
 	}
 	
 	public static void addMainMenuMessage() {

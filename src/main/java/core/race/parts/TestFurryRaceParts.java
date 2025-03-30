@@ -147,7 +147,8 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "player/race/testfurry/eyes/eyecolors",
         				 "player/race/testfurry/eyes/",
         				 new Point(64,64),
-        				 null, null, 5, true	));
+        				 null, null, 5, true)       		 		
+        		 );
           
          this.hidePartCustomizer("SKIN_COLOR");
          this.hidePartCustomizer("EYE_COLOR");

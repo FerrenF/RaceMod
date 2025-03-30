@@ -22,8 +22,10 @@ public class EyeBodyPart extends BodyPart {
 		super(belongsToClass, name, labelCategory, labelKey, true, false, true, false,
 				false, false, colorPath, texturePath, spriteMapSize,
 				accessoryTextureMapSize, replacer, stylistCost, costIsShards);
+		
 		this.skinColorPath = skinColorPath;
 	}
+
 	
 	public String getSkinColorPath() 				{	return skinColorPath;				}	
 	

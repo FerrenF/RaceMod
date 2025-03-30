@@ -75,6 +75,7 @@ public class PlayerSpriteHooks {
 		InventoryItem helmet = getPlayerDisplayArmor(player, 0);
 		InventoryItem chestplate = getPlayerDisplayArmor(player, 1);
 		InventoryItem boots = getPlayerDisplayArmor(player, 2);
+		
 		CustomHumanDrawOptions humanDrawOptions = (new CustomHumanDrawOptions(player.getLevel(),  player.look, false)).player(player)
 				.blinking(player.isBlinking()).helmet(helmet).chestplate(chestplate).boots(boots).size(width, height)
 				.invis((Boolean) player.buffManager.getModifier(BuffModifiers.INVISIBILITY)).sprite(spriteX, dir)
@@ -163,6 +164,7 @@ public class PlayerSpriteHooks {
 					.chestplate(chestplate).boots(boots).dir(dir).allAlpha(alpha)
 					.invis((Boolean) player.buffManager.getModifier(BuffModifiers.INVISIBILITY))
 					.blinking(player.isBlinking()).sprite(sprite).armSprite(armSpriteX).light(light);
+			
 			InventoryItem selectedItem = player.getSelectedItem();
 			if (selectedItem != null && selectedItem.item.holdsItem(selectedItem, player)) {
 				options.holdItem(selectedItem);
@@ -184,7 +186,7 @@ public class PlayerSpriteHooks {
 				RaceData customRaceData = RaceDataFactory.getRaceData(player);	
 				custom = customRaceData.getRaceLook();
 				if(custom!=null) {
-				custom.modifyHumanDrawOptions(options, mask);
+					custom.modifyHumanDrawOptions(options, mask);
 				}
 			}
 

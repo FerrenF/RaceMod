@@ -205,6 +205,7 @@ public class TestFurryDrawOptions implements DrawOptions {
 
 	@Override
 	public void draw() {
+		
 	    if (this.drawEars) {
 	        this.earsTexture.initDraw()
 	            .pos(drawX + drawOffsetX, drawY + drawOffsetY)

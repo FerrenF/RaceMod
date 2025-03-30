@@ -54,7 +54,7 @@ public class EyeTypeGamePart extends GameParts {
 		EyeTypeGamePart newPart = new EyeTypeGamePart((EyeBodyPart)this.assignedPart);
 		GameSkinCache cache = new GameSkinCache(this.getPartPath());		
 		cache.loadCache();
-		
+			
 		skinColors = new GameSkinColors();
 		eyeColors = new GameSkinColors();
 				
@@ -94,14 +94,16 @@ public class EyeTypeGamePart extends GameParts {
 		newPart.colors = this.colors;
 		newPart._eyeColorCount = this._eyeColorCount;
 		newPart.eyeSets = this.eyeSets;
-		newPart.fullTextures = this.fullTextures;		
+		newPart.fullTextures = this.fullTextures;	
 		parts.add(newPart);
 	}
 	
 	public int getSkinColorCount() 			{	return  _skinColorCount;	}			
 	public int getEyeColorCount() 			{	return  _eyeColorCount;	}			
 	
-	
+	public boolean hasColors() {
+		return true;
+	}
 	private void loadClosedColorTextures(GamePartsLoader loader, AbstractGameTextureCache cache,
 			boolean makeFinal, int eyeIndex, GameTexture originalTexture, ArrayList<GameTexture> eyeColorTextures,
 			ArrayList<GameTexture> skinColorTextures) {

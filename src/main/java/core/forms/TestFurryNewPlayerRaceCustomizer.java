@@ -417,10 +417,12 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 		float sizeChange = 32.0F / (float) size;
 		int offsetX = (int) ((float) offset.x / sizeChange);
 		int offsetY = (int) ((float) offset.y / sizeChange);
+		
 		humanDrawOptions = humanDrawOptions.sprite(0, 2).dir(2).bodyTexture((GameTexture) null)
 				.feetTexture((GameTexture) null).size(size * 2, size * 2).leftArmsTexture((GameTexture) null)
 				.rightArmsTexture((GameTexture) null).chestplate((InventoryItem) null).boots((InventoryItem) null)
 				.holdItem((InventoryItem) null);
+		
 		look.modifyHumanDrawOptions(humanDrawOptions, null);
 		if (additionalModifiers != null) {
 			additionalModifiers.accept(humanDrawOptions);

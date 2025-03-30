@@ -18,7 +18,7 @@ import necesse.gfx.gameTexture.GameTexture;
 public class GamePartsLoader {
 	private static final Object LOCK = new Object();
 	private static final int LOADING_THREADS = 10;
-	private ThreadPoolExecutor loadingExecutor;
+	private static ThreadPoolExecutor loadingExecutor;
 	private LinkedList<Task<?>> tasks = new LinkedList();
 	private boolean triggerFirstTimeSetup;
 	private boolean firstTimeSetupTriggered;
@@ -31,8 +31,8 @@ public class GamePartsLoader {
 	}
 
 	public synchronized void startLoaderThreads() {
-		if (this.loadingExecutor == null) {
-			this.loadingExecutor = new ThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque(),
+		if (loadingExecutor == null) {
+			loadingExecutor = new ThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque(),
 					defaultThreadFactory());
 		}
 	}
@@ -52,7 +52,7 @@ public class GamePartsLoader {
 
 	public synchronized void endLoaderThreads() {
 		this.waitForCurrentTasks();
-		this.loadingExecutor.shutdown();
+		loadingExecutor.shutdown();
 
 		try {
 			boolean terminated = this.loadingExecutor.awaitTermination(10L, TimeUnit.MINUTES);
@@ -63,7 +63,7 @@ public class GamePartsLoader {
 			throw new RuntimeException(var2);
 		}
 
-		this.loadingExecutor = null;
+		loadingExecutor = null;
 	}
 
 	public void triggerFirstTimeSetup() {
@@ -72,7 +72,7 @@ public class GamePartsLoader {
 
 	public synchronized TextureTask submitTask(String loadingName, Callable<GameTexture> task, boolean makeFinal,
 			Consumer<GameTexture> onDone) {
-		Future<GameTexture> future = this.loadingExecutor.submit(task);
+		Future<GameTexture> future = loadingExecutor.submit(task);
 		TextureTask textureTask = new TextureTask(loadingName, future, makeFinal, onDone);
 		this.tasks.addLast(textureTask);
 		return textureTask;
@@ -96,7 +96,7 @@ public class GamePartsLoader {
 	}
 
 	public synchronized void submitTask(String loadingName, Runnable task) {
-		Future<Object> future = this.loadingExecutor.submit(task, (Object) null);
+		Future<Object> future = loadingExecutor.submit(task, (Object) null);
 		EmptyTask emptyTask = new EmptyTask(loadingName, future);
 		this.tasks.addLast(emptyTask);
 	}
@@ -181,5 +181,9 @@ public class GamePartsLoader {
 				}
 			}
 		}
+	}
+
+	public static void killThreads() {
+		loadingExecutor.shutdownNow();
 	}
 }

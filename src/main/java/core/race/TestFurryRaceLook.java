@@ -40,6 +40,8 @@ import necesse.level.maps.light.GameLight;
 
 public class TestFurryRaceLook extends RaceLook {
 	
+	public static GameTexture TEX_MASK_LEFT;
+	public static GameTexture TEX_MASK_RIGHT;
 	public static final String TEST_FURRY_RACE_ID = "testfurry";
 	public static GameTexture raceCustomizerIcon;
 	public static TestFurryRaceLook getCustomRaceLook(RaceLook _look) {	
@@ -326,6 +328,9 @@ public class TestFurryRaceLook extends RaceLook {
 	
 	public static void loadRaceTextures() {	
 		DebugHelper.handleDebugMessage("Loading race textures for race " + TestFurryRaceLook.TEST_FURRY_RACE_ID, 50, MESSAGE_TYPE.DEBUG);
+		
+		TEX_MASK_LEFT = GameTexture.fromFile("player/mask_left");
+		TEX_MASK_RIGHT = GameTexture.fromFile("player/mask_right");
 		for(BodyPart bp : new TestFurryRaceParts().getCustomBodyParts()) {			
 			GamePartsLoader loader = new GamePartsLoader();
 			loader.startLoaderThreads();
@@ -454,7 +459,10 @@ public class TestFurryRaceLook extends RaceLook {
 		return GameParts.getPart(TestFurryRaceParts.class, "HEAD").getFullTexture(getHeadStyle(), getHeadColor());
 	}
 	
+	@Deprecated
 	public static Map<Point, GameTexture> headMuzzleMergedCached;
+	
+	@Deprecated
 	public GameTexture getHeadMuzzleMergedTexture() {
 		
 		TextureMergerInfo tm = new TextureMergerInfo(this,
@@ -491,6 +499,16 @@ public class TestFurryRaceLook extends RaceLook {
 				.getClosedColorTextures(getCustomEyesStyle(), getCustomEyesColor(), getHeadColor());
 	}
 	
+	protected DrawOptions getMuzzleDrawOptions(int skinColor, boolean humanlikeOnly, int drawX, int drawY, int spriteX,
+			int spriteY, int width, int height, boolean mirrorX, boolean mirrorY, float alpha, GameLight light,
+			MaskShaderOptions mask) {		
+		
+		return this.getMuzzleTexture(spriteX, spriteY)				
+				.initDraw()
+				.light(light)
+				.alpha(alpha).size(width, height)
+				.mirror(mirrorX, mirrorY).addMaskShader(mask).pos(drawX, drawY);
+	}
 	
 	@Override
 	public CustomHumanDrawOptions modifyHumanDrawOptions(CustomHumanDrawOptions drawOptions, MaskShaderOptions mask) {
@@ -509,14 +527,12 @@ public class TestFurryRaceLook extends RaceLook {
 					drawOptions.rightArmsTexture(getRightArmTexture());
 					break;
 				case HEAD:
-					drawOptions.headTexture(getHeadMuzzleMergedTexture());
+					drawOptions.headTexture(getHeadTexture());
 					break;
 				case SHOES:
 					drawOptions.feetTexture(getFeetTexture());
 					break;
 				case EYES:	
-					
-					
 					
 					break;
 				default:
@@ -525,7 +541,7 @@ public class TestFurryRaceLook extends RaceLook {
 		}		
 				
 		drawOptions.eyeDrawOptionsGetter = new CustomHumanDrawOptions.EyesDrawOptionsProvider() {
-			
+						
 			@Override
 			public DrawOptions getEyesDrawOptions(int eyeType, int eyeColor, int skinColor, boolean humanlikeOnly,
 					boolean closed, int drawX, int drawY, int spriteX, int spriteY, int width, int height, boolean mirrorX,
@@ -534,6 +550,35 @@ public class TestFurryRaceLook extends RaceLook {
 			}
 		};
 		
+		drawOptions.onFaceOptionsGetter = new CustomHumanDrawOptions.OnFaceDrawOptionsProvider() {
+			
+			@Override
+			public DrawOptions getOnFaceDrawOptionsProvider(PlayerMob player, int dir, int spriteRes, int drawX, int drawY,
+					int spriteX, int spriteY, int width, int height, boolean mirrorX, boolean mirrorY, float alpha,
+					GameLight light, MaskShaderOptions mask) {
+				
+				TestFurryRaceLook rl = (TestFurryRaceLook)RaceDataFactory.getRaceLook(player, TestFurryRaceLook.this);
+				return new TestFurryDrawOptions(
+						player != null ? player.getLevel() : null, rl)
+						.spriteRes(spriteRes)
+						.size(new Point(width, height))						
+						.muzzleTexture(rl, spriteX, spriteY, true)
+						.dir(dir)
+						.mirrorX(mirrorX)
+						.mirrorY(mirrorY)
+						.allAlpha(alpha).light(light)
+						.drawOffset(
+								mask == null 
+								? 0 
+								: mask.drawXOffset,
+								mask == null 
+								? 0 
+								: mask.drawYOffset)
+						.pos(drawX, drawY).mask(mask)
+						.drawMuzzle(true);
+			}
+		};
+				
 		drawOptions.addBehindDraw(new TestFurryDrawOptions.FurryDrawOptionsGetter() {
 			
 				@Override
@@ -550,6 +595,43 @@ public class TestFurryRaceLook extends RaceLook {
 						.drawTail((dir == 1 || dir == 3));
 			}
 		});	
+		
+		drawOptions.addBehindDraw(new TestFurryDrawOptions.FurryDrawOptionsGetter() {
+			
+			@Override
+			public DrawOptions getDrawOptions(PlayerMob player, int dir, int spriteX, int spriteY, int spriteRes, int drawX, int drawY,
+					int width, int height, boolean mirrorX, boolean mirrorY, GameLight light, float alpha, MaskShaderOptions mask) {
+					
+				TestFurryRaceLook rl = (TestFurryRaceLook)RaceDataFactory.getRaceLook(player, TestFurryRaceLook.this);
+				MaskShaderOptions m = null;
+				if(mask == null) {
+					if(dir == 1) {
+						m = new MaskShaderOptions(TEX_MASK_RIGHT, 0, 0, 0, 0); 
+					}
+					else if(dir == 3) {
+						m = new MaskShaderOptions(TEX_MASK_LEFT, 0, 0, 0, 0); 
+					}
+				}
+				else {
+					if(dir == 1) {
+						m = mask.copyAndAddMask(TEX_MASK_RIGHT, width, height); 
+					}
+					else if(dir == 3) {
+						m = mask.copyAndAddMask(TEX_MASK_LEFT, width, height); 
+					}
+				}
+					
+				return new TestFurryDrawOptions(player != null ? player.getLevel() : null, rl)
+						.spriteRes(spriteRes)
+						.size(new Point(width, height))
+						.earsTexture(rl, spriteX, spriteY, true)
+						.dir(dir).mirrorX(mirrorX).mirrorY(mirrorY).allAlpha(alpha).light(light)
+						.drawOffset(mask == null ? 0 : mask.drawXOffset, mask == null ? 0 : mask.drawYOffset)
+						.pos(drawX, drawY)
+						.mask(m)
+						.drawEars(dir == 2 || dir == 3 || dir == 1);
+			}
+		});	
 				
 		drawOptions.addTopDraw(new TestFurryDrawOptions.FurryDrawOptionsGetter() {
 						
@@ -561,17 +643,66 @@ public class TestFurryRaceLook extends RaceLook {
 					return new TestFurryDrawOptions(player != null ? player.getLevel() : null, rl)
 							.spriteRes(spriteRes)
 							.size(new Point(width, height))
-							.earsTexture(rl, spriteX, spriteY, true)
 							.tailTexture(rl, spriteX, spriteY, true)
-							.dir(dir).mirrorX(mirrorX).mirrorY(mirrorY).allAlpha(alpha).light(light)
-							.drawOffset(mask == null ? 0 : mask.drawXOffset, mask == null ? 0 : mask.drawYOffset).pos(drawX, drawY).mask(mask)
-							.drawEars(true).drawTail(!(dir == 1 || dir == 3));
+							.dir(dir).mirrorX(mirrorX)
+							.mirrorY(mirrorY)
+							.allAlpha(alpha)
+							.light(light)
+							.drawOffset(mask == null ? 0 : mask.drawXOffset, mask == null ? 0 : mask.drawYOffset)
+							.pos(drawX, drawY)
+							.mask(mask)
+							.drawTail(!(dir == 1 || dir == 3));
 
 				}
 			});		
 	
+		drawOptions.addTopDraw(new TestFurryDrawOptions.FurryDrawOptionsGetter() {
+			
+				@Override
+			public DrawOptions getDrawOptions(PlayerMob player, int dir, int spriteX, int spriteY, int spriteRes, int drawX, int drawY,
+					int width, int height, boolean mirrorX, boolean mirrorY, GameLight light, float alpha, MaskShaderOptions mask) {
+					
+					TestFurryRaceLook rl = (TestFurryRaceLook)RaceDataFactory.getRaceLook(player, TestFurryRaceLook.this);
+					
+				MaskShaderOptions m = null;
+				if(mask == null) {
+					if(dir == 3) {
+						m = new MaskShaderOptions(TEX_MASK_RIGHT, 0, 0, 0, 0); 
+					}
+					else if(dir == 1) {
+						m = new MaskShaderOptions(TEX_MASK_LEFT, 0, 0, 0, 0); 
+					}
+				}
+				else {
+					if(dir == 3) {
+						m = mask.copyAndAddMask(TEX_MASK_RIGHT, width, height); 
+					}
+					else if(dir == 1) {
+						m = mask.copyAndAddMask(TEX_MASK_LEFT, width, height); 
+					}
+				}
+		
+				return new TestFurryDrawOptions(player != null ? player.getLevel() : null, rl)
+						.spriteRes(spriteRes)
+						.size(new Point(width, height))
+						.earsTexture(rl, spriteX, spriteY, true)
+						.dir(dir)
+						.mirrorX(mirrorX)
+						.mirrorY(mirrorY)
+						.allAlpha(alpha)
+						.light(light)
+						.drawOffset(mask == null ? 0 : mask.drawXOffset, mask == null ? 0 : mask.drawYOffset)
+						.pos(drawX, drawY)
+						.mask(m)
+						.drawEars(dir == 0 || dir == 3 || dir == 1);
+
+			}
+		});		
+		
 		return drawOptions;
 	}
+
+	
 
 	@Override
 	public Class<? extends FormNewPlayerRaceCustomizer> getAssociatedCustomizerForm() {

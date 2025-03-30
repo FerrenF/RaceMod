@@ -157,6 +157,9 @@ public abstract class RaceLook extends HumanLook {
 	public byte getRandomByteColorFeature(String key) {		
 		   if(!this.getRaceParts().hasPart(key)) return 0;
 		   BodyPart part =  this.getRaceParts().getBodyPart(key);
+		   if(part == null) {
+			   DebugHelper.handleDebugMessage("Part returned null trying to find " + key + " for race " + this.getRaceID() + " with body parts: " + this.getRaceParts().getCustomBodyParts().toString(), 25, MESSAGE_TYPE.ERROR);
+		   }
 		   if(!part.isHasColor()) return 0; // has no hardcoded color
 		   int totalOptions = part.getTotalColorOptions(); 
 		   if (totalOptions == 0) return 0;
