@@ -51,3 +51,4 @@ tmp/
 # Local environment settings
 *.env
 *.local.properties
+*.aseprite

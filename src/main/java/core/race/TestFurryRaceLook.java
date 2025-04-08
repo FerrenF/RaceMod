@@ -507,7 +507,9 @@ public class TestFurryRaceLook extends RaceLook {
 				.initDraw()
 				.light(light)
 				.alpha(alpha).size(width, height)
-				.mirror(mirrorX, mirrorY).addMaskShader(mask).pos(drawX, drawY);
+				.mirror(mirrorX, mirrorY)
+				.addMaskShader(mask)
+				.pos(drawX, drawY);
 	}
 	
 	@Override
@@ -566,7 +568,8 @@ public class TestFurryRaceLook extends RaceLook {
 						.dir(dir)
 						.mirrorX(mirrorX)
 						.mirrorY(mirrorY)
-						.allAlpha(alpha).light(light)
+						.allAlpha(alpha)
+						.light(light)
 						.drawOffset(
 								mask == null 
 								? 0 
@@ -574,7 +577,8 @@ public class TestFurryRaceLook extends RaceLook {
 								mask == null 
 								? 0 
 								: mask.drawYOffset)
-						.pos(drawX, drawY).mask(mask)
+						.pos(drawX, drawY)
+						.mask(mask)
 						.drawMuzzle(true);
 			}
 		};
@@ -590,8 +594,14 @@ public class TestFurryRaceLook extends RaceLook {
 						.spriteRes(spriteRes)
 						.size(new Point(width, height))
 						.tailTexture(rl, spriteX, spriteY, true)
-						.dir(dir).mirrorX(mirrorX).mirrorY(mirrorY).allAlpha(alpha).light(light)
-						.drawOffset(mask == null ? 0 : mask.drawXOffset, mask == null ? 0 : mask.drawYOffset).pos(drawX, drawY).mask(mask)
+						.dir(dir)
+						.mirrorX(mirrorX)
+						.mirrorY(mirrorY)
+						.allAlpha(alpha)
+						.light(light)
+						.drawOffset(mask == null ? 0 : mask.drawXOffset, mask == null ? 0 : mask.drawYOffset)
+						.pos(drawX, drawY)
+						.mask(mask)
 						.drawTail((dir == 1 || dir == 3));
 			}
 		});	
@@ -603,21 +613,21 @@ public class TestFurryRaceLook extends RaceLook {
 					int width, int height, boolean mirrorX, boolean mirrorY, GameLight light, float alpha, MaskShaderOptions mask) {
 					
 				TestFurryRaceLook rl = (TestFurryRaceLook)RaceDataFactory.getRaceLook(player, TestFurryRaceLook.this);
-				MaskShaderOptions m = null;
+				MaskShaderOptions m = mask;
 				if(mask == null) {
-					if(dir == 1) {
-						m = new MaskShaderOptions(TEX_MASK_RIGHT, 0, 0, 0, 0); 
+					if(dir == 3) {
+					//	m = new MaskShaderOptions(TEX_MASK_RIGHT, 0, 0, 0, 0); 
 					}
-					else if(dir == 3) {
-						m = new MaskShaderOptions(TEX_MASK_LEFT, 0, 0, 0, 0); 
+					else if(dir == 1) {
+					//	m = new MaskShaderOptions(TEX_MASK_LEFT, 0, 0, 0, 0); 
 					}
 				}
 				else {
-					if(dir == 1) {
-						m = mask.copyAndAddMask(TEX_MASK_RIGHT, width, height); 
+					if(dir == 3) {
+					//	m = mask.copyAndAddMask(TEX_MASK_RIGHT, width, height); 
 					}
-					else if(dir == 3) {
-						m = mask.copyAndAddMask(TEX_MASK_LEFT, width, height); 
+					else if(dir == 1) {
+					//	m = mask.copyAndAddMask(TEX_MASK_LEFT, width, height); 
 					}
 				}
 					
@@ -625,8 +635,12 @@ public class TestFurryRaceLook extends RaceLook {
 						.spriteRes(spriteRes)
 						.size(new Point(width, height))
 						.earsTexture(rl, spriteX, spriteY, true)
-						.dir(dir).mirrorX(mirrorX).mirrorY(mirrorY).allAlpha(alpha).light(light)
-						.drawOffset(mask == null ? 0 : mask.drawXOffset, mask == null ? 0 : mask.drawYOffset)
+						.dir(dir)
+						.mirrorX(mirrorX)
+						.mirrorY(mirrorY)
+						.allAlpha(alpha)
+						.light(light)
+						.drawOffset(m == null ? 0 : m.drawXOffset, m == null ? 0 : m.drawYOffset)
 						.pos(drawX, drawY)
 						.mask(m)
 						.drawEars(dir == 2 || dir == 3 || dir == 1);
@@ -664,7 +678,7 @@ public class TestFurryRaceLook extends RaceLook {
 					
 					TestFurryRaceLook rl = (TestFurryRaceLook)RaceDataFactory.getRaceLook(player, TestFurryRaceLook.this);
 					
-				MaskShaderOptions m = null;
+				MaskShaderOptions m = mask;
 				if(mask == null) {
 					if(dir == 3) {
 						m = new MaskShaderOptions(TEX_MASK_RIGHT, 0, 0, 0, 0); 
@@ -675,10 +689,10 @@ public class TestFurryRaceLook extends RaceLook {
 				}
 				else {
 					if(dir == 3) {
-						m = mask.copyAndAddMask(TEX_MASK_RIGHT, width, height); 
+						m = mask.copyAndAddMask(TEX_MASK_RIGHT, 0, 0); 
 					}
 					else if(dir == 1) {
-						m = mask.copyAndAddMask(TEX_MASK_LEFT, width, height); 
+						m = mask.copyAndAddMask(TEX_MASK_LEFT, 0, 0); 
 					}
 				}
 		
@@ -691,7 +705,7 @@ public class TestFurryRaceLook extends RaceLook {
 						.mirrorY(mirrorY)
 						.allAlpha(alpha)
 						.light(light)
-						.drawOffset(mask == null ? 0 : mask.drawXOffset, mask == null ? 0 : mask.drawYOffset)
+						.drawOffset(m == null ? 0 : m.drawXOffset, m == null ? 0 : m.drawYOffset)
 						.pos(drawX, drawY)
 						.mask(m)
 						.drawEars(dir == 0 || dir == 3 || dir == 1);
