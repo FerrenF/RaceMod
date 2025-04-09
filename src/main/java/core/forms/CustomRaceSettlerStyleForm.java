@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
-import extensions.CustomRaceStylistContainer;
+import core.containers.CustomRaceStylistContainer;
 import necesse.engine.Settings;
 import necesse.engine.gameLoop.tickManager.TickManager;
 import necesse.engine.localization.Language;

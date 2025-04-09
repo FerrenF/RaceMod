@@ -49,7 +49,7 @@ public class DebugPlayerForm extends Form {
 	        }
 	  }
 	public DebugPlayerForm(String name, DebugForm parent) {
-		super(name, 400, 10);
+		super(name, 500, 10);
 		this.parent = parent;
 		Client client = parent.client;
 		PlayerMob clientPlayer = client.getPlayer();

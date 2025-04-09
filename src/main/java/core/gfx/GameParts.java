@@ -226,6 +226,7 @@ public class GameParts {
 		newPart.fullWigTexture = this.fullWigTexture;
 		newPart.fullTextures = this.fullTextures;		
 		parts.add(newPart);
+		loader.endLoaderThreads();
 	}
 	
 

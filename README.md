@@ -16,3 +16,7 @@ Installing this mod, creating characters that are linked to a world, and then di
 
 ## Support
 Please join the discord modding channel for Necesse and let me know if you have any suggestions or issues. 
+
+
+## Patch Notes
+0.0.19 - Stylist form fix, Debug form fix, Stylist cost fix, Reposition toggle clothes button on customization form.

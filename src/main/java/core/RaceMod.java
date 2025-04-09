@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import core.containers.CustomRaceStylistContainer;
+import core.forms.container.CustomRaceStylistContainerForm;
 import core.gfx.GamePartsLoader;
 import core.network.CustomPacketConnectApproved;
 import core.network.CustomPacketPlayerAppearance;
@@ -19,8 +21,6 @@ import core.race.RaceLook;
 import core.race.TestFurryRaceLook;
 import core.race.factory.RaceDataFactory;
 import core.registries.RaceRegistry;
-import extensions.CustomRaceStylistContainer;
-import extensions.CustomRaceStylistContainerForm;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
 import helpers.SettingsHelper;
@@ -67,7 +67,7 @@ public class RaceMod {
 	public static int CUSTOM_STYLIST_CONTAINER;
 	public static Instrumentation byteBuddyInst;
 	public static SettingsHelper settings = new SettingsHelper();
-	public static String VERSION_STRING = "0.0.18 ALPHA";
+	public static String VERSION_STRING = "0.0.19 ALPHA";
 	public static boolean DUMP_CLASSES = false;
 	public static boolean DEBUG_HOOKS = false;
 	public static boolean NEEDS_VERSIONING = false;

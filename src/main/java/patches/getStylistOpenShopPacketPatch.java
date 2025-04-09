@@ -3,7 +3,7 @@ package patches;
 import java.lang.instrument.Instrumentation;
 
 import core.RaceMod;
-import extensions.CustomRaceStylistContainer;
+import core.containers.CustomRaceStylistContainer;
 import necesse.engine.network.packet.PacketOpenContainer;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
