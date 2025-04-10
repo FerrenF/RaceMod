@@ -3,6 +3,8 @@ package patches.server;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Objects;
+
+import core.RaceMod;
 import core.network.CustomPacketConnectApproved;
 import necesse.engine.Settings;
 import necesse.engine.network.NetworkPacket;
@@ -65,7 +67,7 @@ public class ServerAddClientPatch {
 		}
 
 		consoleName = hasClient ? "\"" + clientName + "\"" : "\"" + authentication + "\"";
-		if (!version.equals("0.31.1")) {
+		if (!version.equals(RaceMod.NECESSE_VERSION_STRING)) {
 			System.out.println("Client " + consoleName + " had wrong version (" + version + ").");
 			th.network.sendPacket(new NetworkPacket(new PacketDisconnect(-1, Code.WRONG_VERSION), networkInfo));
 			result = false;

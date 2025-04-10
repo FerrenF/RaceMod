@@ -26,6 +26,7 @@ import necesse.engine.util.GameRandom;
 import necesse.entity.mobs.Mob;
 import necesse.entity.mobs.friendly.human.HumanMob;
 import necesse.entity.mobs.friendly.human.humanShop.HumanShop;
+import necesse.entity.mobs.friendly.human.humanShop.ShopContainerData;
 import necesse.entity.mobs.friendly.human.humanShop.StylistHumanMob;
 import necesse.gfx.GameResources;
 import necesse.gfx.HumanLook;
@@ -59,8 +60,8 @@ public class CustomRaceStylistContainer extends ShopContainer {
 	public ArrayList<HumanMob> availableSettlers;
 
 	public CustomRaceStylistContainer(final NetworkClient client, int uniqueSeed, StylistHumanMob mob,
-			PacketReader contentReader) {
-		super(client, uniqueSeed, mob, contentReader.getNextContentPacket());
+			PacketReader contentReader, ShopContainerData containerData) {
+		super(client, uniqueSeed, mob, contentReader.getNextContentPacket(), containerData);
 
 		this.stylistMob = mob;
 		this.styleCostSeed = this.priceSeed * (long) GameRandom.prime(42);
@@ -383,10 +384,19 @@ public class CustomRaceStylistContainer extends ShopContainer {
 		}
 	}
 
-	public static Packet getStylistContainerContent(StylistHumanMob mob, ServerClient client) {
+	/*
+	 * ShopContainerData baseData = mob.getShopContainerData(client);
 		Packet packet = new Packet();
 		PacketWriter writer = new PacketWriter(packet);
-		writer.putNextContentPacket(mob.getShopItemsContentPacket(client));
+		writer.putNextContentPacket(baseData.content);
+		(new StylistSettlersUpdateContainerEvent(mob, client)).write(writer);
+		return new ShopContainerData(packet, baseData.shopManager);
+	 */
+	public static Packet getStylistContainerContent(StylistHumanMob mob, ServerClient client) {
+		ShopContainerData baseData = mob.getShopContainerData(client);
+		Packet packet = new Packet();
+		PacketWriter writer = new PacketWriter(packet);	
+		writer.putNextContentPacket(baseData.content);
 		(new StylistSettlersUpdateContainerEvent(mob, client)).write(writer);
 		return packet;
 	}
