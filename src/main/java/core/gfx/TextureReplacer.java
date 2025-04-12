@@ -12,7 +12,9 @@ public class TextureReplacer {
     		SHOES,
     		BODY,
     		ARMS,
-    		EYES
+    		EYES,
+    		HAIR,
+    		FACE_HAIR
     	}
     	public TextureReplacer(TARGET s){
     		this.targetPart = s;
