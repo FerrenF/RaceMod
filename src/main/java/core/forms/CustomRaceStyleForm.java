@@ -8,10 +8,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
+import core.containers.CustomRaceStylistContainer;
 import core.race.CustomHumanLook;
 import core.race.RaceLook;
 import core.race.factory.RaceDataFactory;
-import extensions.CustomRaceStylistContainer;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.Settings;
@@ -40,13 +40,13 @@ import necesse.gfx.ui.ButtonIcon;
 import necesse.inventory.InventoryItem;
 
 public abstract class CustomRaceStyleForm extends Form {
-	public final extensions.CustomRaceStylistContainer container;
+	public final core.containers.CustomRaceStylistContainer container;
 	public FormNewPlayerPreset newPlayerPreset;
 	public FormFairTypeLabel costText;
 	public FormLocalTextButton styleButton;
 
-	public CustomRaceStyleForm(final extensions.CustomRaceStylistContainer container) {
-      super("playerStyle", 408, 10);
+	public CustomRaceStyleForm(final core.containers.CustomRaceStylistContainer container) {
+      super("playerStyle", 500, 10);
       this.container = container;
       FormFlow flow = new FormFlow(5);
 
@@ -55,7 +55,7 @@ public abstract class CustomRaceStyleForm extends Form {
       this.addComponent(new FormLocalLabel("ui", "stylistchange", new FontOptions(20), 0, this.getWidth() / 2, flow.next(25)));
       
       this.newPlayerPreset = (overrides.FormNewPlayerPreset)this.addComponent(    		  
-    		(overrides.FormNewPlayerPreset)flow.nextY(new StylistCustomNewPlayerForm(0, 0, this.getWidth() - 5, true, true, ra), 20)
+    		(overrides.FormNewPlayerPreset)flow.nextY(new StylistCustomNewPlayerForm(5, 0, this.getWidth() - 10, true, true, RaceLook.fromRaceLook(ra)), 20)
     		  );
       
       int labelY = flow.next(28);
@@ -152,8 +152,6 @@ public abstract class CustomRaceStyleForm extends Form {
 		@Override
 		protected void setupCustomizer(int x, int y, int width, boolean allowSupernaturalChanges, boolean allowClothesChance, RaceLook startingRace) {
 			
-		 
-
 			Class<? extends FormNewPlayerRaceCustomizer> customizerType = startingRace.associatedCustomizerForm;
 			
 			boolean formSuccess = false;

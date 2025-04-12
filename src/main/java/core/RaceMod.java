@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import core.containers.CustomRaceStylistContainer;
+import core.forms.container.CustomRaceStylistContainerForm;
 import core.gfx.GamePartsLoader;
 import core.network.CustomPacketConnectApproved;
 import core.network.CustomPacketPlayerAppearance;
@@ -19,8 +21,6 @@ import core.race.RaceLook;
 import core.race.TestFurryRaceLook;
 import core.race.factory.RaceDataFactory;
 import core.registries.RaceRegistry;
-import extensions.CustomRaceStylistContainer;
-import extensions.CustomRaceStylistContainerForm;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
 import helpers.SettingsHelper;
@@ -35,6 +35,7 @@ import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.ContainerRegistry;
 import necesse.engine.registries.PacketRegistry;
 import necesse.engine.save.CharacterSave;
+import necesse.entity.mobs.friendly.human.humanShop.ShopContainerData;
 import necesse.entity.mobs.friendly.human.humanShop.StylistHumanMob;
 import necesse.gfx.PlayerSprite;
 import necesse.gfx.drawOptions.human.HumanDrawOptions;
@@ -63,11 +64,12 @@ import versioning.*;
 	
 @ModEntry
 public class RaceMod {
+	public static final String NECESSE_VERSION_STRING = "0.32.0";
 	public static String characterSavePath;
 	public static int CUSTOM_STYLIST_CONTAINER;
 	public static Instrumentation byteBuddyInst;
 	public static SettingsHelper settings = new SettingsHelper();
-	public static String VERSION_STRING = "0.0.18 ALPHA";
+	public static String VERSION_STRING = "0.0.20 ALPHA";
 	public static boolean DUMP_CLASSES = false;
 	public static boolean DEBUG_HOOKS = false;
 	public static boolean NEEDS_VERSIONING = false;
@@ -334,9 +336,9 @@ public class RaceMod {
         	        	  
         	  CUSTOM_STYLIST_CONTAINER =  ContainerRegistry.registerMobContainer((client, uniqueSeed, mob, content) -> {
       			return new CustomRaceStylistContainerForm<CustomRaceStylistContainer>(client, new CustomRaceStylistContainer(client.getClient(), uniqueSeed,
-    					(StylistHumanMob) mob, new PacketReader(content)));
+    					(StylistHumanMob) mob, new PacketReader(content), (ShopContainerData) null));
     		}, (client, uniqueSeed, mob, content, serverObject) -> {
-    			return new CustomRaceStylistContainer(client, uniqueSeed, (StylistHumanMob) mob, new PacketReader(content));
+    			return new CustomRaceStylistContainer(client, uniqueSeed, (StylistHumanMob) mob, new PacketReader(content), (ShopContainerData) serverObject);
     		});        	          	
             
         } catch (Exception e) {

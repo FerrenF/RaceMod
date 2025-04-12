@@ -134,10 +134,7 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "player/race/testfurry/feet/",
         				 new Point(64,64),
         				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.SHOES), 5, true	));
-         /*(Class<? extends RaceLookParts> belongsToClass, String name, String labelCategory,
-			String labelKey, String skinColorPath, String colorPath, String texturePath,
-			Point spriteMapSize, Point accessoryTextureMapSize, TextureReplacer replacer, int stylistCost,
-			boolean costIsShards)*/
+   
          this.addBodyPart("CUSTOM_EYES",
         		 new EyeBodyPart(TestFurryRaceParts.class,
         				 "CUSTOM_EYES",

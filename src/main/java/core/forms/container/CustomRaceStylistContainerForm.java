@@ -1,5 +1,6 @@
-package extensions;
+package core.forms.container;
 
+import core.containers.CustomRaceStylistContainer;
 import core.forms.CustomRaceSettlerStyleForm;
 import core.forms.CustomRaceStyleForm;
 import necesse.engine.localization.message.LocalMessage;

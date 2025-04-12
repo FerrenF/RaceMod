@@ -1,4 +1,4 @@
-package extensions;
+package core.containers;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -12,6 +12,8 @@ import core.race.RaceLook;
 import core.race.factory.RaceDataFactory;
 import core.race.parts.BodyPart;
 import core.race.parts.RaceLookParts;
+import helpers.DebugHelper;
+import helpers.DebugHelper.MESSAGE_TYPE;
 import necesse.engine.network.NetworkClient;
 import necesse.engine.network.Packet;
 import necesse.engine.network.PacketReader;
@@ -24,6 +26,7 @@ import necesse.engine.util.GameRandom;
 import necesse.entity.mobs.Mob;
 import necesse.entity.mobs.friendly.human.HumanMob;
 import necesse.entity.mobs.friendly.human.humanShop.HumanShop;
+import necesse.entity.mobs.friendly.human.humanShop.ShopContainerData;
 import necesse.entity.mobs.friendly.human.humanShop.StylistHumanMob;
 import necesse.gfx.GameResources;
 import necesse.gfx.HumanLook;
@@ -57,8 +60,8 @@ public class CustomRaceStylistContainer extends ShopContainer {
 	public ArrayList<HumanMob> availableSettlers;
 
 	public CustomRaceStylistContainer(final NetworkClient client, int uniqueSeed, StylistHumanMob mob,
-			PacketReader contentReader) {
-		super(client, uniqueSeed, mob, contentReader.getNextContentPacket());
+			PacketReader contentReader, ShopContainerData containerData) {
+		super(client, uniqueSeed, mob, contentReader.getNextContentPacket(), containerData);
 
 		this.stylistMob = mob;
 		this.styleCostSeed = this.priceSeed * (long) GameRandom.prime(42);
@@ -216,10 +219,12 @@ public class CustomRaceStylistContainer extends ShopContainer {
 		ArrayList<InventoryItem> items = new ArrayList<InventoryItem>();
 		
 		boolean changed = false;
-		for(BodyPart p : previousLook.getRaceParts().getBodyParts()) {
-			
-			changed = this.addToList(items,
-					this.getBodyPartCost(p, previousLook.appearanceByteGet(p.getPartName()), newLook.appearanceByteGet(p.getPartName()))) || changed;
+		for(BodyPart p : previousLook.getRaceParts().getBodyParts()) {	
+			boolean changedPart = this.addToList(items,
+			this.getBodyPartCost(p, previousLook.appearanceByteGet(p.getPartName()), newLook.appearanceByteGet(p.getPartName())));
+			boolean changedPartColor = this.addToList(items,
+					this.getBodyPartCost(p, previousLook.appearanceByteGet(p.getPartColorName()), newLook.appearanceByteGet(p.getPartColorName())));
+			changed = changedPart || changedPartColor || changed;
 		}	
 		return !changed ? null : items;
 	}
@@ -260,10 +265,7 @@ public class CustomRaceStylistContainer extends ShopContainer {
 
 	public ArrayList<InventoryItem> getBodyPartCost(BodyPart b, Object oldID, Object newID){
 		
-		
 		Supplier<ArrayList<InventoryItem>> getter = ()->{
-			
-			
 			if(b.isBaseGamePart()) {
 				if(oldID instanceof Integer) {
 					int oldVal = (int)oldID;
@@ -281,8 +283,7 @@ public class CustomRaceStylistContainer extends ShopContainer {
 									BodyPart.STYLIST_COST_DEFAULT))));
 					}
 				}
-				else if(oldID instanceof Color) {
-					
+				else if(oldID instanceof Color) {				
 					Color oldVal = (Color)oldID;
 					Color newVal = (Color)newID;
 					switch(b.getPartName()) {
@@ -293,15 +294,18 @@ public class CustomRaceStylistContainer extends ShopContainer {
 			
 			}
 			
-			if(b.isCostShards()) {
+			else if(b.isCostShards()) {
 				return new ArrayList<InventoryItem>(Collections.singletonList(new InventoryItem("voidshard", b.getStylistCost())));
 			}
+			System.out.println(b.getPartName()+ ", " + (b.isCostShards() ? " shards: " : " coins:") + String.valueOf(b.getStylistCost()));
 			
-			return new ArrayList<InventoryItem>(Collections.singletonList(new InventoryItem("coin", this.getRandomPrice(
+			int amt = this.getRandomPrice(
 					this.styleCostSeed * (long) GameRandom.prime(24) + (int)newID * (long) GameRandom.prime(82),
-					b.getStylistCost()))));		
+					b.getStylistCost());
+			
+			return new ArrayList<InventoryItem>(Collections.singletonList(new InventoryItem("coin", amt)));		
 		};
-		return oldID == newID ? null : getter.get();
+		return oldID.equals(newID) ? null : getter.get();
 		
 		
 	}
@@ -380,10 +384,19 @@ public class CustomRaceStylistContainer extends ShopContainer {
 		}
 	}
 
-	public static Packet getStylistContainerContent(StylistHumanMob mob, ServerClient client) {
+	/*
+	 * ShopContainerData baseData = mob.getShopContainerData(client);
 		Packet packet = new Packet();
 		PacketWriter writer = new PacketWriter(packet);
-		writer.putNextContentPacket(mob.getShopItemsContentPacket(client));
+		writer.putNextContentPacket(baseData.content);
+		(new StylistSettlersUpdateContainerEvent(mob, client)).write(writer);
+		return new ShopContainerData(packet, baseData.shopManager);
+	 */
+	public static Packet getStylistContainerContent(StylistHumanMob mob, ServerClient client) {
+		ShopContainerData baseData = mob.getShopContainerData(client);
+		Packet packet = new Packet();
+		PacketWriter writer = new PacketWriter(packet);	
+		writer.putNextContentPacket(baseData.content);
 		(new StylistSettlersUpdateContainerEvent(mob, client)).write(writer);
 		return packet;
 	}

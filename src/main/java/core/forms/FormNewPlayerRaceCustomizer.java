@@ -223,13 +223,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	    int startX = 0;
 	    int startY = flow.next();
 	    
-	    toggleClothesBox = new FormCheckBox("Toggle Clothes",
-				0,startY-25, -1, true);
-		
-		toggleClothesBox.onClicked((event)->{
-			updateLook();
-		});
-		this.addComponent(toggleClothesBox);	    
+	       
 	    
 
 	    int maxSectionHeight = 0;
@@ -276,9 +270,19 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	    }
 
 	    flow.next(maxSectionHeight);
-	    flow.next(10);
-	    this.setHeight(flow.next());
-	
+	   
+	    toggleClothesBox = new FormCheckBox("Toggle Clothes",
+				(contentSwitcher.getBoundingBox().width / 2) - 50, flow.next() - 50, -1, true);
+		
+		toggleClothesBox.onClicked((event)->{
+			updateLook();
+		});
+		
+		
+		this.addComponent(toggleClothesBox);	
+		flow.next(10);
+		this.setHeight(flow.next());
+		
 	}
 	
 	protected abstract void initializeIcon(int x, int iconY, int width);
