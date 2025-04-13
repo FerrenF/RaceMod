@@ -1,11 +1,6 @@
 package core.race.parts;
 
 import java.awt.Point;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import core.gfx.TextureReplacer;
 
 public class OrcRaceParts extends RaceLookParts{	
@@ -61,7 +56,7 @@ public class OrcRaceParts extends RaceLookParts{
         				 "facialfeatures",
         				 true,
         				 false,
-        				 false,
+        				 true,
         				 true,
         				 false,
         				 true,
@@ -77,7 +72,7 @@ public class OrcRaceParts extends RaceLookParts{
         				 "head",
         				 true,
         				 false,
-        				 false,
+        				 true,
         				 true,
         				 false,
         				 true,
@@ -109,7 +104,7 @@ public class OrcRaceParts extends RaceLookParts{
         				 "arms",
         				 true,
         				 true,
-        				 false,
+        				 true,
         				 true,
         				 false,
         				 true,
@@ -125,7 +120,7 @@ public class OrcRaceParts extends RaceLookParts{
         				 "feet",
         				 true,
         				 false,
-        				 false,
+        				 true,
         				 true,
         				 false,
         				 true,
@@ -149,11 +144,13 @@ public class OrcRaceParts extends RaceLookParts{
          this.hidePartCustomizer("SKIN_COLOR");
          this.hidePartCustomizer("EYE_COLOR");
          this.hidePartCustomizer("EYE_TYPE");
-         this.hidePartCustomizer("HAIR");
+         this.hidePartCustomizer("HAIR_STYLE");
          this.hidePartCustomizer("HAIR_COLOR");
          this.hidePartCustomizer("HEAD_COLOR");
          this.hidePartCustomizer("ARMS_COLOR");
          this.hidePartCustomizer("FEET_COLOR");
+         this.hidePartCustomizer("FACIALFEATURES_COLOR");
+         this.hidePartCustomizer("FACIAL_HAIR");
     }
 
 

@@ -27,7 +27,7 @@ import org.lwjgl.stb.STBImageResize;
 
 public class GamePart {
 	
-	
+	/*
 	protected static final ArrayList<GamePart> parts = new ArrayList<GamePart>();
 	protected static final String PATH_PREFIX = "";
 	protected static final String TEXTURE_SUFFIX = ".png";
@@ -587,5 +587,5 @@ public class GamePart {
 		}
 	}
 
-
+*/
 }

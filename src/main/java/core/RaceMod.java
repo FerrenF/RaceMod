@@ -17,6 +17,7 @@ import core.gfx.GamePartsLoader;
 import core.network.CustomPacketConnectApproved;
 import core.network.CustomPacketPlayerAppearance;
 import core.race.CustomHumanLook;
+import core.race.OrcRaceLook;
 import core.race.RaceLook;
 import core.race.TestFurryRaceLook;
 import core.race.factory.RaceDataFactory;
@@ -243,10 +244,12 @@ public class RaceMod {
     	DebugHelper.handleDebugMessage("Registering races...");
 		RaceRegistry.registerRace(CustomHumanLook.HUMAN_RACE_ID, new CustomHumanLook());
 		RaceRegistry.registerRace(TestFurryRaceLook.TEST_FURRY_RACE_ID, new TestFurryRaceLook());
+		RaceRegistry.registerRace(OrcRaceLook.ORC_RACE_ID, new OrcRaceLook());
 		
 		if(!GlobalData.isServer()) {
 			DebugHelper.handleDebugMessage("Registering extra textures...");
 			TestFurryRaceLook.loadRaceTextures();
+			OrcRaceLook.loadRaceTextures();
 			CustomHumanLook.loadRaceTextures();  
 		}
        

@@ -461,7 +461,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	    for (BodyPart part : parts.getBodyParts()) {	    	
 	    	if(!parts.isHiddenPart(part.getPartName())) {
 		        sections.add(createBodyPartSection(part, isCurrent, width));
-		        if(part.isHasColor() && !part.isBaseGamePart()) {
+		        if(part.isHasColor() && !part.isBaseGamePart() && !parts.isHiddenPart(part.getPartColorName())) {
 		        	 sections.add(createBodyPartCustomColorSection(part, isCurrent, width));
 		        }
 	    	}

@@ -32,8 +32,8 @@ public class AsyncTextureLoader {
  public void flushUploads(SpriteManager spriteManager) {
      while (!uploadQueue.isEmpty()) {
          PendingTexture pending = uploadQueue.poll();
-         int texId = spriteManager.uploadTexture(pending.key(), pending.buffer(), pending.width(), pending.height());
-         spriteManager.insert(pending.key(), texId);
+     //    int texId = spriteManager.uploadTexture(pending.key(), pending.buffer(), pending.width(), pending.height());
+     //    spriteManager.insert(pending.key(), texId);
      }
  }
 

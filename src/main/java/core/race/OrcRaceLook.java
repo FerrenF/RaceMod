@@ -2,19 +2,15 @@ package core.race;
 
 import java.awt.Color;
 import java.awt.Point;
-import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 import core.forms.FormNewPlayerRaceCustomizer;
 import core.forms.OrcNewPlayerRaceCustomizer;
 import core.gfx.EyeTypeGamePart;
 import core.gfx.GameParts;
-import core.gfx.GameParts.TextureMergerInfo;
 import core.gfx.GamePartsLoader;
 import core.gfx.OrcDrawOptions;
-import core.gfx.TestFurryDrawOptions;
 import core.race.factory.RaceDataFactory;
 import core.race.parts.BodyPart;
 import core.race.parts.EyeBodyPart;
@@ -26,15 +22,11 @@ import necesse.engine.network.PacketReader;
 import necesse.engine.util.GameRandom;
 import necesse.entity.mobs.MaskShaderOptions;
 import necesse.entity.mobs.PlayerMob;
-import necesse.gfx.GameEyes;
 import necesse.gfx.HumanGender;
 import necesse.gfx.HumanLook;
 import necesse.gfx.drawOptions.DrawOptions;
 import necesse.gfx.drawOptions.DrawOptionsList;
-import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.gameTexture.GameTexture;
-import necesse.gfx.gameTexture.GameTexture.BlendQuality;
-import necesse.gfx.gameTexture.MergeFunction;
 import necesse.level.maps.light.GameLight;
 
 
@@ -265,10 +257,16 @@ public class OrcRaceLook extends RaceLook {
 	// Setters
 		
 	public int setHeadStyle(int id) 	{	return this.appearanceByteSet("HEAD",(byte)id);	}
-	
+		
 	public int setBodyStyle(int id) 	{	return this.appearanceByteSet("BODY",(byte)id);	}
 	
-	public int setBodyColor(int id) 	{	return this.appearanceByteSet("BODY_COLOR",(byte)id);	}
+	public int setBodyColor(int id) 	{	
+		this.appearanceByteSet("FACIALFEATURES_COLOR",(byte)id);
+		this.appearanceByteSet("ARMS_COLOR",(byte)id);
+		this.appearanceByteSet("HEAD_COLOR",(byte)id);
+		this.appearanceByteSet("FEET_COLOR",(byte)id);
+		return this.appearanceByteSet("BODY_COLOR",(byte)id);
+		}
 	
 	public int setArmsStyle(int id) 	{	return this.appearanceByteSet("ARMS",(byte)id);	}
 		
@@ -287,8 +285,7 @@ public class OrcRaceLook extends RaceLook {
 	public int setFaceHairStyle(int id)				{	return this.appearanceByteSet("FACEHAIR", (byte)id);	}
 	
 	public int setFaceHairColor(int id)				{	return this.appearanceByteSet("FACEHAIR_COLOR", (byte)id);	}
-	
-	
+		
 	public static void loadRaceTextures() {	
 		DebugHelper.handleDebugMessage("Loading race textures for race " + OrcRaceLook.ORC_RACE_ID, 50, MESSAGE_TYPE.DEBUG);
 		
@@ -416,15 +413,15 @@ public class OrcRaceLook extends RaceLook {
 	}
 	
 	public GameTexture getFacialFeaturesTexture()	{
-		return GameParts.getPart(OrcRaceParts.class, "FACIALFEATURES").getFullTexture(getFacialFeaturesStyle(), getFaceHairColor());
+		return GameParts.getPart(OrcRaceParts.class, "FACIALFEATURES").getFullTexture(getFacialFeaturesStyle(), getBodyColor());
 	}
 	
 	public GameTexture getFacialFeaturesTexture(int spriteX, int spriteY) {
-		return GameParts.getPart(OrcRaceParts.class, "FACIALFEATURES").getTextureSprite(getFacialFeaturesStyle(), getFaceHairColor(), spriteX, spriteY);
+		return GameParts.getPart(OrcRaceParts.class, "FACIALFEATURES").getTextureSprite(getFacialFeaturesStyle(), getBodyColor(), spriteX, spriteY);
 	}
 	
 	public GameTexture getFacialFeaturesTexture(int spriteX, int spriteY, int width, int height) {
-		return GameParts.getPart(OrcRaceParts.class, "FACIALFEATURES").getTextureSprite(getFacialFeaturesStyle(), getFaceHairColor(), spriteX, spriteY, width, height);
+		return GameParts.getPart(OrcRaceParts.class, "FACIALFEATURES").getTextureSprite(getFacialFeaturesStyle(), getBodyColor(), spriteX, spriteY, width, height);
 	}
 	
 	public List<GameTexture> getCustomEyesOpenTextures() {
@@ -462,9 +459,11 @@ public class OrcRaceLook extends RaceLook {
 				case EYES:
 					break;
 				case HAIR:
-					drawOptions.hairTexture(getHairTexture());
+					drawOptions.hairTexture(this.getHairTexture());
+					break;
 				case FACE_HAIR:
-					drawOptions.facialFeatureTexture(getFaceHairTexture());
+					drawOptions.facialFeatureTexture(this.getFaceHairTexture());
+					break;
 				default:
 					break;			
 			}			

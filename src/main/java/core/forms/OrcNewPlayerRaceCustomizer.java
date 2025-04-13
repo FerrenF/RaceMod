@@ -13,11 +13,9 @@ import core.gfx.EyeTypeGamePart;
 import core.gfx.GameParts;
 import core.race.OrcRaceLook;
 import core.race.RaceLook;
-import core.race.TestFurryRaceLook;
 import core.race.factory.RaceDataFactory;
 import core.race.parts.BodyPart;
 import core.race.parts.OrcRaceParts;
-import core.race.parts.TestFurryRaceParts;
 import extensions.CustomHumanDrawOptions;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
@@ -39,7 +37,7 @@ import necesse.level.maps.light.GameLight;
 public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 			
 	public OrcNewPlayerRaceCustomizer(int x, int y, int width, boolean allowSupernaturalChanges, boolean allowClothesChance) {
-		super(new TestFurryRaceLook(true), x, y, width, allowClothesChance, allowClothesChance);		
+		super(new OrcRaceLook(true), x, y, width, allowClothesChance, allowClothesChance);		
 	}	
 	
 	@SuppressWarnings("unchecked")
@@ -97,6 +95,12 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	public Point getDrawOffset(BodyPart part) {
 	    switch (part.getPartName()) {
 	        case "HAIR_COLOR": 	return new Point(0, 0);	     
+	        case "CUSTOM_HAIR": 	return new Point(0, 0);	 
+	        case "CUSTOM_HAIR_COLOR": 	return new Point(0, 0);	  
+	        case "FACEHAIR": 	return new Point(-12, -52);	 
+	        case "FACEHAIR_COLOR": 	return new Point(-12, -52);	  
+	        case "FACIALFEATURES": 	return new Point(-12, -40);	 
+	        case "FACIALFEATURES_COLOR": 	return new Point(-12, -40);	  
 	        case "HEAD": 		return getHeadTypeDrawOffset();
 	        case "CUSTOM_EYES": return getEyeTypeFaceDrawOffset();
 	        case "CUSTOM_EYES_COLOR": return getEyeColorFaceDrawOffset();
@@ -204,7 +208,7 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 
 	// Draws the icon for each body part section
 	protected void drawBodyPartIcon(FormContentVarToggleButton button, BodyPart part, int x, int y, int _width, int _height) {
-		TestFurryRaceLook look = new TestFurryRaceLook(this.getCustomRaceLook());
+		OrcRaceLook look = new OrcRaceLook(this.getCustomRaceLook());
 		applyLookModifiers(look, part);
 		CustomHumanDrawOptions options = new CustomHumanDrawOptions(null, look, false);
 		Point offset = getDrawOffset(part);
@@ -236,17 +240,18 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 			              .posMiddle(drawX + offset.x, drawY + offset.y)
 			              .draw();
 			}
-			else {
-				
-				if(part.getPartName().equals("CUSTOM_EYES") || part.getPartName().equals("CUSTOM_EYES_COLOR")) {					
-					GameTexture.overrideBlendQuality = BlendQuality.NEAREST;
-					getOrcFaceDrawOptions(look, options, button.size.height * 2, x+offset.x, y+offset.y, (opt) -> {
-							opt.sprite(0, 3).dir(3);
-						}).draw();
-					 GameTexture.overrideBlendQuality = null;
-				}
-				
+			
+			if(part.getPartName().equals("CUSTOM_EYES") || part.getPartName().equals("CUSTOM_EYES_COLOR")
+					|| part.getPartName().equals("FACEHAIR")|| part.getPartName().equals("FACEHAIR_COLOR")
+					|| part.getPartName().equals("FACIALFEATURES")|| part.getPartName().equals("FACIALFEATURES_COLOR")) {					
+				GameTexture.overrideBlendQuality = BlendQuality.NEAREST;
+				getOrcFaceDrawOptions(look, options, button.size.height * 2, x+offset.x, y+offset.y, (opt) -> {
+						opt.sprite(0, 3).dir(3);
+					}).draw();
+				 GameTexture.overrideBlendQuality = null;
 			}
+				
+			
 		}  else {
 			
 			super.baseDrawBodyPartIcon(button, look, part, options, x, y, _width, _height, offset);
@@ -258,7 +263,7 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	// Draws the preview for each body part selection
 	protected void drawBodyPartPreview(FormContentVarToggleButton button, BodyPart part, boolean colorCustomization, int id, int x, int y, int _width, int _height) {
 		
-		OrcRaceLook look = new OrcRaceLook(this.getRaceLook());
+		OrcRaceLook look = new OrcRaceLook(this.getCustomRaceLook());
 		applyLookModifiers(look, part);
 		
 		setLookAttribute(look, part, id, colorCustomization);
@@ -269,7 +274,7 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 		// Center position for the preview
 		int drawX = x + _width / 2;
 		int drawY = y + _height / 2;
-		Point offset = this.getDrawOffset(part);
+		Point offset = new Point(0,0);//this.getDrawOffset(part);
 		
 		
 		// Drawing based on body part type
@@ -281,7 +286,7 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 			if(part.isHasWigTexture()) {
 				
 				//(int side, int textureID, int colorID, int xID)
-				GameParts partParts = GameParts.getPart(TestFurryRaceParts.class, part.getPartName());			
+				GameParts partParts = GameParts.getPart(OrcRaceParts.class, part.getPartName());			
 				//GameTexture styleTexture = partParts.getTexture(2, styleIndex, colorIndex, PREVIEW_TEXTURE_X_POSITION);
 				
 				GameTexture wigTexture = partParts.getWigTexture(styleIndex, colorIndex);	
@@ -364,13 +369,13 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 
 	public static <T> List<T> getClosedCustomEyesDrawOptions(int eyeType, int eyeColor, int skinColor, boolean humanlikeOnly,
 			Function<GameTexture, T> mapper) {
-		return ((EyeTypeGamePart)GameParts.getPart(TestFurryRaceParts.class,"CUSTOM_EYES"))
+		return ((EyeTypeGamePart)GameParts.getPart(OrcRaceParts.class,"CUSTOM_EYES"))
 				.getClosedColorTextures(eyeType, eyeColor, skinColor, mapper);
 	}
 
 	public static <T> List<T> getOpenCustomEyesDrawOptions(int eyeType, int eyeColor, int skinColor, boolean humanlikeOnly,
 			Function<GameTexture, T> mapper) {
-		return ((EyeTypeGamePart)GameParts.getPart(TestFurryRaceParts.class,"CUSTOM_EYES"))
+		return ((EyeTypeGamePart)GameParts.getPart(OrcRaceParts.class,"CUSTOM_EYES"))
 				.getOpenColorTextures(eyeType, eyeColor, skinColor, mapper);
 		
 	}

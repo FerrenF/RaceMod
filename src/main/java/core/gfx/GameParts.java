@@ -2,17 +2,20 @@ package core.gfx;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.regex.Pattern;
-
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import core.race.RaceLook;
 import core.race.parts.BodyPart;
 import core.race.parts.RaceLookParts;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
+import necesse.engine.modLoader.LoadedMod;
 import necesse.engine.util.GameRandom;
 import necesse.engine.util.TicketSystemList;
 import necesse.gfx.AbstractGameTextureCache;
@@ -20,9 +23,6 @@ import necesse.gfx.GameSkinCache;
 import necesse.gfx.GameSkinColors;
 import necesse.gfx.gameTexture.GameTexture;
 import necesse.gfx.gameTexture.MergeFunction;
-import necesse.gfx.res.ResourceEncoder;
-import necesse.gfx.res.ResourceFile;
-import org.lwjgl.stb.STBImage;
 import org.lwjgl.stb.STBImageResize;
 
 public class GameParts {
@@ -466,31 +466,82 @@ public class GameParts {
 	}
 
 	
-	protected int tryFindResources() {
-		
+	private static final Set<String> cachedPlayerResourcePaths = new HashSet<>();
+	
+	/*protected int tryFindResources() {		
 		String searchPath = this.getPartPath();
 		String searchPrefix = this.getPartName().toLowerCase();
 		String searchRegexValue =  searchPrefix +(this.hasSides() ? "_[lr]":"")+ "\\d+\\.png$";
 	    Pattern pattern = Pattern.compile("^.*" + searchPath + searchRegexValue);
 	        
-		Set<Map.Entry<String, ResourceFile>> allResources = ResourceEncoder.getAllFiles();
+	    if (cachedPlayerResourcePaths.isEmpty()) {
+	        JarFile jar = LoadedMod.getRunningMod().jarFile;
+			Enumeration<JarEntry> entries = jar.entries();
+
+			while (entries.hasMoreElements()) {
+			    JarEntry entry = entries.nextElement();
+			    String name = entry.getName();
+
+			    if (!entry.isDirectory() && name.startsWith("resources/player/") && name.endsWith(".png")) {
+			        cachedPlayerResourcePaths.add(name);
+			    }
+			}
+	    }
 		
-		long matchCount = allResources.parallelStream().filter((entry)->{			
-			return pattern.matcher(entry.getValue().path).matches();
-			}).count();
+		 // Count matches against the regex
+	    long matchCount = cachedPlayerResourcePaths.parallelStream()
+	            .filter(path -> pattern.matcher(path).matches())
+	            .count();
 		
 		DebugHelper.handleDebugMessage("Found " + matchCount + " " + searchPrefix+" textures in JAR path: " + searchPath, 40, MESSAGE_TYPE.DEBUG);
 		return (int)matchCount; 
 		
+	}*/
+	protected int tryFindResources() {
+	    String searchPath = "resources/"+this.getPartPath(); // e.g., "resources/player/armor/helmet"
+	    String searchPrefix = this.getPartName().toLowerCase(); // e.g., "helmet"
+	    boolean hasSides = this.hasSides();
+
+	    if (cachedPlayerResourcePaths.isEmpty()) {
+	        JarFile jar = LoadedMod.getRunningMod().jarFile;
+			Enumeration<JarEntry> entries = jar.entries();
+
+			while (entries.hasMoreElements()) {
+			    JarEntry entry = entries.nextElement();
+			    String name = entry.getName();
+			    if (!entry.isDirectory() && name.startsWith("resources/player/") && name.endsWith(".png")) {
+			        cachedPlayerResourcePaths.add(name);
+			    }
+			}
+	    }
+
+	    long matchCount = cachedPlayerResourcePaths.parallelStream()
+	            .filter(path -> {	            
+	                if (!path.startsWith(searchPath) || !path.endsWith(".png")) return false;	               
+	                String filename = path.substring(path.lastIndexOf('/') + 1).toLowerCase(); // e.g., helmet_l0.png
+	                if (!filename.startsWith(searchPrefix)) return false;
+	                String suffix = filename.substring(searchPrefix.length()); // e.g., _l0.png or 0.png	                
+	                	               
+	                if (hasSides) {
+	                    return suffix.matches("_[lr]\\d+\\.png");
+	                } else {
+	                    return suffix.matches("\\d+\\.png");
+	                }
+	            })
+	            .count();
+
+	    DebugHelper.handleDebugMessage("Found " + matchCount + " " + searchPrefix + " textures in JAR path: " + searchPath, 40, MESSAGE_TYPE.DEBUG);
+	    return (int) matchCount;
 	}
-	
+
 	public Point getFullTextureSize() {
 		if(!this.texturesInitialized || this.hasTextures()) return new Point(0,0);
 		return new Point(this.fullTextures.get(0).get(0).getWidth(), this.fullTextures.get(0).get(0).getHeight());
 	}
 	
 	public GameTexture getFullTexture(int textureID, int colorID) {
-		return this.fullTextures.get(colorID).get(textureID);
+		GameTexture t = this.fullTextures.get(colorID).get(textureID);
+		return t;
 	}
 	
 	public GameTexture getFullTexture(int textureID, int colorID, int sideNumber) {
