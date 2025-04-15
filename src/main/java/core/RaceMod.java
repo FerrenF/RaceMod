@@ -64,12 +64,12 @@ import versioning.*;
 	
 @ModEntry
 public class RaceMod {
-	public static final String NECESSE_VERSION_STRING = "0.32.0";
+	public static final String NECESSE_VERSION_STRING = "0.32.1";
 	public static String characterSavePath;
 	public static int CUSTOM_STYLIST_CONTAINER;
 	public static Instrumentation byteBuddyInst;
 	public static SettingsHelper settings = new SettingsHelper();
-	public static String VERSION_STRING = "0.0.20 ALPHA";
+	public static String VERSION_STRING = "0.0.21 ALPHA";
 	public static boolean DUMP_CLASSES = false;
 	public static boolean DEBUG_HOOKS = false;
 	public static boolean NEEDS_VERSIONING = false;
