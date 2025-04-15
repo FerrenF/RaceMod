@@ -294,14 +294,14 @@ public class CustomRaceStylistContainer extends ShopContainer {
 			
 			}
 			
-			else if(b.isCostShards()) {
-				return new ArrayList<InventoryItem>(Collections.singletonList(new InventoryItem("voidshard", b.getStylistCost())));
+			else if(b.stylistCostIsShards()) {
+				return new ArrayList<InventoryItem>(Collections.singletonList(new InventoryItem("voidshard", b.stylistCost())));
 			}
-			System.out.println(b.getPartName()+ ", " + (b.isCostShards() ? " shards: " : " coins:") + String.valueOf(b.getStylistCost()));
+			System.out.println(b.getPartName()+ ", " + (b.stylistCostIsShards() ? " shards: " : " coins:") + String.valueOf(b.stylistCost()));
 			
 			int amt = this.getRandomPrice(
 					this.styleCostSeed * (long) GameRandom.prime(24) + (int)newID * (long) GameRandom.prime(82),
-					b.getStylistCost());
+					b.stylistCost());
 			
 			return new ArrayList<InventoryItem>(Collections.singletonList(new InventoryItem("coin", amt)));		
 		};

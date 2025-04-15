@@ -160,7 +160,7 @@ public abstract class RaceLook extends HumanLook {
 		   if(part == null) {
 			   DebugHelper.handleDebugMessage("Part returned null trying to find " + key + " for race " + this.getRaceID() + " with body parts: " + this.getRaceParts().getCustomBodyParts().toString(), 25, MESSAGE_TYPE.ERROR);
 		   }
-		   if(!part.isHasColor()) return 0; // has no hardcoded color
+		   if(!part.numColors()) return 0; // has no hardcoded color
 		   int totalOptions = part.getTotalColorOptions(); 
 		   if (totalOptions == 0) return 0;
 		   return (byte) GameRandom.globalRandom.getIntBetween(0, totalOptions-1); 	    

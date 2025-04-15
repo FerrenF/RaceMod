@@ -10,141 +10,108 @@ public class BodyPart {
 	public static int STYLIST_COST_DEFAULT = 100;
 	public static String COLOR_LABEL_SUFFIX = "_color";
 	public static String PART_COLOR_NAME_SUFFIX = "_COLOR";
+	
 	private Class<? extends RaceLookParts> belongsToClass;
 	
-	private int stylistCost = STYLIST_COST_DEFAULT;
-	private boolean costIsShards = false;
+	protected int _stylistCost = STYLIST_COST_DEFAULT;
+	protected boolean _stylistCostIsShards = false;
 
-	private int totalOptions = 0;
-	
-    private String name;
-    private String labelKey;
-    private String labelCategory;
+	protected String name;
+    protected String labelKey;
+    protected String labelCategory;
     
-    private boolean hasTexture;
-    private boolean isBaseGamePart;
-    private boolean hasColor;
-    private boolean hasWigTexture;
-    private boolean hasSeparateWigTexture;
-    private boolean hasSides;
-    private boolean hasLastRowAccessoryMap;
+    protected boolean isBaseGamePart;
     
-	private String colorPath;
-    private String texturePath;
+    protected int _numTextures;
+    protected int _numColors;
+    protected int _numSides;
+    protected boolean hasWigTexture;
     
-    private Point textureSpriteMapSize;  
-    private Point accessoryTextureMapSize;
+	protected String palettePath;
+	protected String texturePath;
     
- 
-    private TextureReplacer partReplacer;
+	protected Point textureSpriteMapSize;  
+	protected Point accessoryTextureMapSize;
     
-    public boolean isHasSeperateWigTexture() 	{	return hasSeparateWigTexture;	}
-
-	public boolean isHasLastRowAccessoryMap() 	{	return hasLastRowAccessoryMap;	}
-
+	protected TextureReplacer partReplacer;
+    
 	public Point getAccessoryTextureMapSize() 	{	return accessoryTextureMapSize;	}
 
 	public boolean isBaseGamePart() 			{	return isBaseGamePart;			}
     
-	public boolean isHasTexture() 				{	return hasTexture;				}
+	public int numTextures() 					{	return _numTextures;				}
+	public int numColors() 						{	return _numColors;				}
+	public int numSides() 						{	return _numSides;				}
 	
 	public boolean isReplacerPart()				{	return partReplacer != null; 	}
-	
-	public boolean isHasColor() 				{	return hasColor;				}
-	
-	public String getTexturePath() 				{	return texturePath;				}	
+    public boolean hasWigTexture() 				{	return hasWigTexture;			}	
 
-    public boolean isHasWigTexture() 			{	return hasWigTexture;			}
-    
+	public String getTexturePath() 				{	return texturePath;				}	
+	public String getColorPath() 				{	return this.palettePath;			}	
+	
 	public Point getTextureSpriteMapSize() 		{	return textureSpriteMapSize;	}
 	
-    public String getPartName() 				{  	return name;   					}
-    
+    public String getPartName() 				{  	return name;   					}   
     public String getPartColorName() 			{ 	return name + PART_COLOR_NAME_SUFFIX;  }
     
     public String getLabelKey() 				{  	return this.labelKey;    		}
-    
 	public String getLabelCategory() 			{	return this.labelCategory;		}
 	
-	public String getColorPath() 				{	return this.colorPath;			}	
-	
-	public boolean isHasSides() 				{	return hasSides;				}
-	
-	public int getStylistCost() 				{	return stylistCost;				}
-
-	public boolean isCostShards() 				{	return costIsShards;			}
+	public int stylistCost() 					{	return _stylistCost;				}
+	public boolean stylistCostIsShards() 		{	return _stylistCostIsShards;			}
     
 	public Class<? extends RaceLookParts> getOwnerClass() { return this.belongsToClass;}
 	public String getLabelColorKey() 			{		return getLabelKey() + COLOR_LABEL_SUFFIX;	}
 	
+	// Constructor for base game parts
 	public BodyPart(String name,
 			String labelKey,
-			int totalOptions) {
-		
-    	// used for base game parts
+			int numTextureOptions,
+			int numColorOptions) {
+			
         this.name = name;
-        this.totalOptions = totalOptions;
         this.labelKey = labelKey;
         this.labelCategory = "ui";
         this.isBaseGamePart = true;
-        this.hasColor = false;
-        this.hasTexture = false;
+        this._numColors = numColorOptions;
+        this._numTextures = numTextureOptions;
         this.texturePath = null;
-        this.colorPath = null;
+        this.palettePath = null;
         this.belongsToClass = HumanRaceParts.class;
         this.partReplacer=null;
     }
-    
-    public BodyPart(Class<? extends RaceLookParts> belongsToClass,
-    		String name,
-    		String labelCategory,
-    		String labelKey) {
-    	
-    	this.belongsToClass = belongsToClass;
-    	this.labelCategory = labelCategory;
-        this.name = name;
-        this.labelKey = labelKey;
-    }
-    
+        
     public BodyPart(Class<? extends RaceLookParts> belongsToClass,
     		String name,
     		String labelCategory,
     		String labelKey,
-    		boolean hasTexture,
-    		boolean hasSides,
-    		boolean hasColor,
+    		int numTextures,
+    		int numSides,
+    		int numColors,
     		boolean hasWigTexture,
-    		boolean hasSeparateWigTexture,
-    		boolean hasLastRowAccessoryMap,
     		String colorPath,
     		String texturePath,    		
     		Point spriteMapSize,
     		Point accessoryTextureMapSize,
     		TextureReplacer replacer,
     		int stylistCost,
-    		boolean costIsShards) {
+    		boolean stylistCostIsShards) {
     	
-    	this(belongsToClass, name, labelCategory, labelKey);
-        
-    	this.hasSides = hasSides;
+    	this.belongsToClass = belongsToClass;
+    	this.labelCategory = labelCategory;
+        this.name = name;
+        this.labelKey = labelKey;       
+    	this._numSides = numSides;
     	this.hasWigTexture = hasWigTexture;
-        this.hasTexture = hasTexture;
-        this.hasColor = hasColor;
-        this.colorPath = colorPath;
+        this._numColors = numColors;
+        this.palettePath = colorPath;
         this.texturePath = texturePath;
         this.textureSpriteMapSize = spriteMapSize;
-        this.hasLastRowAccessoryMap = hasLastRowAccessoryMap;
-        this.hasSeparateWigTexture = hasSeparateWigTexture;
         this.accessoryTextureMapSize = accessoryTextureMapSize;
         this.partReplacer = replacer;
-        this.stylistCost = stylistCost;
-        this.costIsShards = costIsShards;
+        this._stylistCost = stylistCost;
+        this._stylistCostIsShards = stylistCostIsShards;
     }
-
-
-    public int getTotalTextureOptions() {  	return this.isBaseGamePart() ? this.totalOptions : GameParts.getPartTextureOptionsCount(this);    }
-    public int getTotalColorOptions() 	{  	return this.isBaseGamePart() ? this.totalOptions : GameParts.getPartColorOptionsCount(this);    }
-    
 
 	public Class<? extends RaceLookParts> getRacePartsClass() {
 		return this.belongsToClass;

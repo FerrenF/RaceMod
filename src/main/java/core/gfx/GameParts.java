@@ -94,17 +94,17 @@ public class GameParts {
 	
 	public String getPartName() 									{	return this.assignedPart.getPartName();		}
 	
-	public boolean hasSides()			{	return this.assignedPart.isHasSides();						}
+	public boolean hasSides()			{	return this.assignedPart.numSides();						}
 	
 	public Point accessoryMapSize()		{	return this.assignedPart.getAccessoryTextureMapSize();		}
 	
 	public Point textureMapSize()		{	return this.assignedPart.getTextureSpriteMapSize();			}
 	
-	public boolean hasTextures() 		{	return this.assignedPart.isHasTexture();					}
+	public boolean hasTextures() 		{	return this.assignedPart.numTextures();					}
 	
-	public boolean hasWig() 			{	return this.assignedPart.isHasWigTexture();					}
+	public boolean hasWig() 			{	return this.assignedPart.hasWigTexture();					}
 	
-	public boolean hasColors() 			{	return this.assignedPart.isHasColor();						}
+	public boolean hasColors() 			{	return this.assignedPart.numColors();						}
 	
 	public boolean isBaseGamePart() 	{	return this.assignedPart.isBaseGamePart();					}
 	

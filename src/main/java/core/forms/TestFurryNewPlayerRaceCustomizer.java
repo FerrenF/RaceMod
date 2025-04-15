@@ -236,7 +236,7 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 			
 			//(int side, int textureID, int colorID, int xID)
 			GameParts partParts = GameParts.getPart(TestFurryRaceParts.class, part.getPartName());	
-			if(part.isHasWigTexture()) {
+			if(part.hasWigTexture()) {
 			   // GameTexture styleTexture = partParts.getTexture(2, styleIndex, colorIndex, PREVIEW_TEXTURE_X_POSITION);	
 			    GameTexture wigTexture = partParts.getWigTexture(styleIndex, colorIndex);	
 			    if(wigTexture == null) {
@@ -291,7 +291,7 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 			int styleIndex = look.appearanceByteGet(part.getPartName());
 			int colorIndex = look.appearanceByteGet(part.getPartColorName());
 	
-			if(part.isHasWigTexture()) {
+			if(part.hasWigTexture()) {
 				
 				//(int side, int textureID, int colorID, int xID)
 				GameParts partParts = GameParts.getPart(TestFurryRaceParts.class, part.getPartName());			
