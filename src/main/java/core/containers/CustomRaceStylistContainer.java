@@ -79,7 +79,7 @@ public class CustomRaceStylistContainer extends ShopContainer {
 				if (client.isServer()) {
 					
 					RaceLook oldLook = RaceDataFactory.getRaceLook(client.playerMob, RaceLook.fromHumanLook(client.playerMob.look, CustomHumanLook.class));
-					RaceLook newLook = RaceLook.raceFromContentPacker(new PacketReader(content), RaceLook.fromHumanLook(client.playerMob.look, CustomHumanLook.class));
+					RaceLook newLook = RaceLook.raceFromContentPacket(new PacketReader(content), RaceLook.fromHumanLook(client.playerMob.look, CustomHumanLook.class));
 					ArrayList<InventoryItem> cost = CustomRaceStylistContainer.this.getTotalStyleCost(oldLook, newLook);
 					
 					if (CustomRaceStylistContainer.this.canStyle(cost)) {
@@ -113,7 +113,7 @@ public class CustomRaceStylistContainer extends ShopContainer {
 				if (client.isServer()) {
 					PacketReader reader = new PacketReader(content);
 					int mobUniqueID = reader.getNextInt();
-					RaceLook newLook = RaceLook.raceFromContentPacker(contentReader, new CustomHumanLook(true));
+					RaceLook newLook = RaceLook.raceFromContentPacket(contentReader, new CustomHumanLook(true));
 					Level level = client.playerMob.getLevel();
 					ServerClient serverClient = client.getServerClient();
 					if (!level.settlementLayer.doesClientHaveAccess(serverClient)) {

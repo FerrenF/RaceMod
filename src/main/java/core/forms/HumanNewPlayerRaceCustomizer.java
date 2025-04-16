@@ -117,19 +117,12 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	protected void setLookAttribute(RaceLook look, BodyPart part, Object value, boolean colorCustomization) {
 	    if (value instanceof Integer) {
 	        int intValue = (Integer) value;
-	        switch (part.getPartName()) {
-	            case "SKIN_COLOR": look.setSkin(intValue); break;
-	            case "EYE_TYPE": look.setEyeType(intValue); break;
-	            case "HAIR_STYLE": look.setHair(intValue); break;
-	            case "FACIAL_HAIR": look.setFacialFeature(intValue); break;
-	            case "EYE_COLOR": look.setEyeColor(intValue); break;
-	            case "HAIR_COLOR": look.setHairColor(intValue); break;
-	        }
+	        super.baseSetCurrentBodyPart(look, part, intValue, colorCustomization);	      
 	    } else if (value instanceof Color) {
 	        Color colorValue = (Color) value;
 	        switch (part.getPartName()) {	            
-	            case "SHIRT_COLOR": look.setShirtColor(colorValue); break;
-	            case "SHOES_COLOR": look.setShoesColor(colorValue); break;
+	            case "BASE_SHIRT_COLOR": look.setShirtColor(colorValue); break;
+	            case "BASE_SHOES_COLOR": look.setShoesColor(colorValue); break;
 	        }
 	    } else {
 	        throw new IllegalArgumentException("Unsupported type for body part: " + part.getPartName());
@@ -161,7 +154,7 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	}
 
 	protected void applyLookModifiers(RaceLook look, BodyPart part) {
-		if (part.getPartName() == "SKIN_COLOR" || part.getPartName() == "EYE_TYPE" || part.getPartName() == "EYE_COLOR") {
+		if (part.getPartName() == "BASE_SKIN_COLOR" || part.getPartName() == "BASE_EYE" || part.getPartName() == "BASE_EYE_COLOR") {
 		    look.setHair(0);
 		    look.setFacialFeature(0);
 		}

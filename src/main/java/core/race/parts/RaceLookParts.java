@@ -68,12 +68,18 @@ public abstract class RaceLookParts{
     }
     
     public void defineRaceBodyParts() {
-	  this.addBodyPart("SKIN_COLOR", new BodyPart("SKIN_COLOR", "skincolor", tryGetBaseGameGfx(()->GameSkin.getTotalSkins()),  tryGetBaseGameGfx(()->GameSkin.getTotalSkins())));
-      this.addBodyPart("EYE_TYPE", new BodyPart("EYE_TYPE", "eyetype", tryGetBaseGameGfx(()->GameEyes.getTotalEyeTypes()), tryGetBaseGameGfx(()->GameEyes.getTotalColors())));
-      this.addBodyPart("HAIR_STYLE", new BodyPart("HAIR_STYLE", "hairstyle", tryGetBaseGameGfx(()->GameHair.getTotalHair()),tryGetBaseGameGfx(()->GameHair.getTotalHairColors())));
-      this.addBodyPart("FACIAL_HAIR", new BodyPart("FACIAL_HAIR", "facialhair", tryGetBaseGameGfx(()->GameHair.getTotalFacialFeatures()), tryGetBaseGameGfx(()->GameHair.getTotalHairColors())));
-      this.addBodyPart("SHIRT", new BodyPart("SHIRT", "shirtcolor", DEFAULT_COLORS.length, DEFAULT_COLORS.length));
-      this.addBodyPart("SHOES", new BodyPart("SHOES", "shoescolor", DEFAULT_COLORS.length, DEFAULT_COLORS.length));   
+    	
+    	int b_l = DEFAULT_COLORS.length;
+	  this.addBodyPart("BASE_SKIN", 		new BodyPart("BASE_SKIN", "base_skin",
+			  tryGetBaseGameGfx(()->GameSkin.getTotalSkins()),  tryGetBaseGameGfx(()->GameSkin.getTotalSkins())));
+      this.addBodyPart("BASE_EYE", 			new BodyPart("BASE_EYE", "base_eye",
+    		  tryGetBaseGameGfx(()->GameEyes.getTotalEyeTypes()), tryGetBaseGameGfx(()->GameEyes.getTotalColors())));
+      this.addBodyPart("BASE_HAIR", 		new BodyPart("BASE_HAIR", "base_hair",
+    		  tryGetBaseGameGfx(()->GameHair.getTotalHair()),tryGetBaseGameGfx(()->GameHair.getTotalHairColors())));
+      this.addBodyPart("BASE_FACIAL_HAIR", 	new BodyPart("BASE_FACIAL_HAIR", "base_facial_hair",
+    		  tryGetBaseGameGfx(()->GameHair.getTotalFacialFeatures()), tryGetBaseGameGfx(()->GameHair.getTotalHairColors())));
+      this.addBodyPart("BASE_SHIRT", 		new BodyPart("BASE_SHIRT", "base_shirt", 1, b_l));
+      this.addBodyPart("BASE_SHOES", 		new BodyPart("BASE_SHOES", "base_shoes", 1, b_l));   
     }
 
     public static int tryGetBaseGameGfx(Supplier<Integer> getter) {

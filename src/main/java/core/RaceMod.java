@@ -5,15 +5,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.jar.JarFile;
 
 import core.containers.CustomRaceStylistContainer;
 import core.forms.container.CustomRaceStylistContainerForm;
-import core.gfx.GamePartsLoader;
+import core.gfx.texture.AsyncTextureLoader;
 import core.network.CustomPacketConnectApproved;
 import core.network.CustomPacketPlayerAppearance;
 import core.race.CustomHumanLook;
@@ -39,8 +36,8 @@ import necesse.engine.save.CharacterSave;
 import necesse.entity.mobs.friendly.human.humanShop.ShopContainerData;
 import necesse.entity.mobs.friendly.human.humanShop.StylistHumanMob;
 import necesse.gfx.PlayerSprite;
-import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.forms.MainMenuFormManager;
+import necesse.gfx.gameTexture.GameTexture;
 import necesse.gfx.res.ResourceEncoder;
 import necesse.level.maps.layers.settlement.SettlementLevelLayer;
 import net.bytebuddy.ByteBuddy;
@@ -65,16 +62,20 @@ import versioning.*;
 	
 @ModEntry
 public class RaceMod {
-	public static final String NECESSE_VERSION_STRING = "0.32.0";
+	
+	public static JarFile modJar;
+	public static final String NECESSE_VERSION_STRING = "0.32.1";
 	public static String characterSavePath;
 	public static int CUSTOM_STYLIST_CONTAINER;
 	public static Instrumentation byteBuddyInst;
 	public static SettingsHelper settings = new SettingsHelper();
-	public static String VERSION_STRING = "0.0.20 ALPHA";
+	public static String VERSION_STRING = "0.0.21 ALPHA";
 	public static boolean DUMP_CLASSES = false;
 	public static boolean DEBUG_HOOKS = false;
 	public static boolean NEEDS_VERSIONING = false;
 	public static String OLD_VERSION_STRING;
+	
+	
 	public void preInit() {
 		
 		byteBuddyInst = ByteBuddyAgent.install();
@@ -126,11 +127,7 @@ public class RaceMod {
 
     	RaceDataFactory.initialize(byteBuddyInst);
     	
-    	if(!GlobalData.isServer()) {
-	    	LoadedMod l = LoadedMod.getRunningMod();
-	    	DebugHelper.handleDebugMessage("RaceMod looking for resources...");
-	    	ResourceEncoder.addModResources(l);	
-    	}
+    	modJar = LoadedMod.getRunningMod().jarFile;    
 	}
 	
 	public static void deleteDirectory(File directory) {
@@ -214,9 +211,11 @@ public class RaceMod {
 	//writeBasicSettlementData
 
 	}
-
+	public static GameTexture TEX_MASK_LEFT;
+	public static GameTexture TEX_MASK_RIGHT;
 	public void initResources() {
-		
+		TEX_MASK_LEFT = GameTexture.fromFile("player/mask_left");
+		TEX_MASK_RIGHT = GameTexture.fromFile("player/mask_right");
 	}
 	
     public void init() {    	
@@ -245,20 +244,12 @@ public class RaceMod {
 		RaceRegistry.registerRace(CustomHumanLook.HUMAN_RACE_ID, new CustomHumanLook());
 		RaceRegistry.registerRace(TestFurryRaceLook.TEST_FURRY_RACE_ID, new TestFurryRaceLook());
 		RaceRegistry.registerRace(OrcRaceLook.ORC_RACE_ID, new OrcRaceLook());
-		
-		if(!GlobalData.isServer()) {
-			DebugHelper.handleDebugMessage("Registering extra textures...");
-			TestFurryRaceLook.loadRaceTextures();
-			OrcRaceLook.loadRaceTextures();
-			CustomHumanLook.loadRaceTextures();  
-		}
-       
+		       
     	DebugHelper.handleDebugMessage("Registering network utilities...");
 		PacketRegistry.registerPacket(CustomPacketConnectApproved.class);
 		PacketRegistry.registerPacket(CustomPacketPlayerAppearance.class);
     }
     
-
 	private static void interceptCharacterSavePath() {
 		
 		File saveDirectory = new File(characterSavePath);
@@ -301,10 +292,10 @@ public class RaceMod {
     	}
 	}
 	
-	public void dispost() {
-		GamePartsLoader.killThreads();
+	public void dispose() {
+		
+		AsyncTextureLoader.shutdownThreads();
 	}
-	
 	public static void addMainMenuMessage() {
 	
 		 new ByteBuddy()

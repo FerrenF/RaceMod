@@ -39,7 +39,7 @@ public class Version0_0_16 {
 						for(BodyPart p : new TestFurryRaceParts().getCustomBodyParts()) {
 							if(!lookInfo.hasLoadDataByName(p.getPartName())) {								
 								inter.addByte(p.getPartName(), (byte) 0);
-								if(p.numColors()) {
+								if(p.numColors()>0) {
 									inter.addByte(p.getPartColorName(), (byte) 0);
 								}
 							}
@@ -79,7 +79,7 @@ public class Version0_0_16 {
 							for(BodyPart p : new TestFurryRaceParts().getCustomBodyParts()) {
 								if(!lookInfo.hasLoadDataByName(p.getPartName())) {								
 									inter.addByte(p.getPartName(), (byte) 0);
-									if(p.numColors()) {
+									if(p.numColors()>0) {
 										inter.addByte(p.getPartColorName(), (byte) 0);
 									}
 								}

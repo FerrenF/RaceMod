@@ -1,9 +1,10 @@
 package core.race.parts;
 
 import java.awt.Point;
-import core.gfx.AsyncTextureLoader.TextureLocation;
+
 import core.gfx.EyeTypeGameParts;
 import core.gfx.TextureReplacer;
+import core.gfx.texture.AsyncTextureLoader.TextureLocation;
 import necesse.gfx.gameTexture.GameTexture;
 import necesse.gfx.gameTexture.GameTexture.BlendQuality;
 
@@ -37,8 +38,8 @@ public class EyeBodyPart extends BodyPart {
 		return EyeTypeGameParts.getFullOpenTexture(this, eyeType, skinColor, eyeColor, 1.0F, BlendQuality.NEAREST, TextureLocation.FROM_FILE);
 	}
 	
-	public GameTexture getClosedTexture(int eyeType, int skinColor, int eyeColor) {
-		return EyeTypeGameParts.getFullClosedTexture(this, eyeType, skinColor, eyeColor, 1.0F, BlendQuality.NEAREST, TextureLocation.FROM_FILE);
+	public GameTexture getClosedTexture(int skinColor, int eyeColor) {
+		return EyeTypeGameParts.getFullClosedTexture(this, skinColor, eyeColor, 1.0F, BlendQuality.NEAREST, TextureLocation.FROM_FILE);
 	}
 
 }

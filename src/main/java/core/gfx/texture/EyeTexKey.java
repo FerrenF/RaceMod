@@ -1,4 +1,4 @@
-package core.gfx;
+package core.gfx.texture;
 
 import java.util.Objects;
 

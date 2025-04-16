@@ -67,7 +67,7 @@ public class applyLoadedCharacterPacketPatch {
 	            		rd.raceDataInitialized 
 	            		? rd.getRaceLook() 
 	            		: RaceLook.fromHumanLook(th.look, CustomHumanLook.class));*/
-	            RaceLook ra = RaceLook.raceFromContentPacker(reader,
+	            RaceLook ra = RaceLook.raceFromContentPacket(reader,
 	            		th.look instanceof RaceLook ? (RaceLook)th.look : RaceLook.fromHumanLook(th.look, CustomHumanLook.class));
 	            th.look = ra;
 	            RaceDataFactory.getOrRegisterRaceData(th, ra);

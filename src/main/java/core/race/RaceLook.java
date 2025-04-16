@@ -51,8 +51,8 @@ public abstract class RaceLook extends HumanLook {
 	
 	protected GameRandom randomizer;
 	public IDData idData = new IDData();
-	public Function<Color, Color> colorLimiterFunction = DEFAULT_COLOR_LIMITER;
 	
+	public Function<Color, Color> colorLimiterFunction = DEFAULT_COLOR_LIMITER;
 	public static Function<Color, Color> DEFAULT_COLOR_LIMITER = 
 			(i) -> { return new Color(GameMath.limit(i.getRed(), 25, 225), GameMath.limit(i.getGreen(), 25, 225),GameMath.limit(i.getBlue(), 25, 225));};
 			
@@ -88,6 +88,10 @@ public abstract class RaceLook extends HumanLook {
 	public RaceLook() {
 		super();
 	}
+
+	public GameMessage getRaceDisplayName() {
+		return new LocalMessage("racemod.race", this.getRaceID());
+	}
 	
 	public static RaceLook fromHumanLook(HumanLook look, Class<? extends RaceLook> fallbackClass) {
 		try {
@@ -96,7 +100,6 @@ public abstract class RaceLook extends HumanLook {
 			return ra;
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return new CustomHumanLook(true);
 		}
@@ -149,7 +152,7 @@ public abstract class RaceLook extends HumanLook {
 	
 	public byte getRandomByteFeature(String key) {		
 		   if(!this.getRaceParts().hasPart(key)) return 0;		   
-		   int totalOptions = this.getRaceParts().getBodyPart(key).getTotalTextureOptions(); 
+		   int totalOptions = this.getRaceParts().getBodyPart(key).numTextures(); 
 		   if(totalOptions == 0) return 0;
 		   return (byte) GameRandom.globalRandom.getIntBetween(0, totalOptions-1); 	    
 	}	
@@ -160,9 +163,8 @@ public abstract class RaceLook extends HumanLook {
 		   if(part == null) {
 			   DebugHelper.handleDebugMessage("Part returned null trying to find " + key + " for race " + this.getRaceID() + " with body parts: " + this.getRaceParts().getCustomBodyParts().toString(), 25, MESSAGE_TYPE.ERROR);
 		   }
-		   if(!part.numColors()) return 0; // has no hardcoded color
-		   int totalOptions = part.getTotalColorOptions(); 
-		   if (totalOptions == 0) return 0;
+		   int totalOptions = part.numColors(); 
+		   if(totalOptions == 0) return 0; 
 		   return (byte) GameRandom.globalRandom.getIntBetween(0, totalOptions-1); 	    
 	}	
 	
@@ -185,9 +187,9 @@ public abstract class RaceLook extends HumanLook {
 
 	public byte getRandomFacialFeature() 	{	return getRandomByteFeature("FACIAL_HAIR");		}
 
-	public byte getRandomEyeType() 			{	return getRandomByteFeature("EYE_TYPE");		}
+	public byte getRandomEyeType() 			{	return getRandomByteFeature("EYE");		}
 
-	public byte getRandomHairStyle() 		{	return getRandomByteFeature("HAIR_STYLE");		}
+	public byte getRandomHairStyle() 		{	return getRandomByteFeature("HAIR");		}
 	
 	public Color getRandomShoeColor() {
 		int opts = this.getRaceParts().defaultColors().length;		
@@ -218,6 +220,7 @@ public abstract class RaceLook extends HumanLook {
 	
 	public void randomizeLook(boolean onlyHumanLike, boolean randomFacialFeature, boolean randomSkin,
 			boolean changeEyeType, boolean randomEyeColor) {
+		
 		HumanGender gender = (HumanGender) GameRandom.globalRandom
 				.getOneOf(new HumanGender[]{HumanGender.MALE, HumanGender.FEMALE, HumanGender.NEUTRAL});
 		
@@ -430,7 +433,7 @@ public abstract class RaceLook extends HumanLook {
 	    });	    
 	}
 	
-	public static RaceLook raceFromContentPacker(PacketReader reader, RaceLook fallback) {	
+	public static RaceLook raceFromContentPacket(PacketReader reader, RaceLook fallback) {	
 		
 		PacketReader cpy = new PacketReader(reader);		
 		String raceString = cpy.getNextString();
@@ -520,71 +523,84 @@ public abstract class RaceLook extends HumanLook {
 	
 	public void setHair(int value) {
 		super.setHair(value);
-		this.appearanceByteSet("HAIR_STYLE", (byte) value);
+		this.appearanceByteSet("BASE_HAIR", (byte) value);
 	}
 
 	public void setFacialFeature(int hair) {
 		super.setFacialFeature(hair);
-		this.appearanceByteSet("FACIAL_HAIR", (byte) hair);
+		this.appearanceByteSet("BASE_FACIAL_HAIR", (byte) hair);
 	}
 
 	public void setHairColor(int hairColor) {
 		super.setHairColor(hairColor);
-		this.appearanceByteSet("HAIR_COLOR", (byte) hairColor);
+		this.appearanceByteSet("BASE_HAIR_COLOR", (byte) hairColor);
 	}
 
 	public void setSkin(int skin) {
 		super.setSkin(skin);
-		this.appearanceByteSet("SKIN_COLOR", (byte) skin);
+		this.appearanceByteSet("BASE_SKIN_COLOR", (byte) skin);
 	}
 
 	public void setEyeType(int eyeType) {
 		super.setEyeType(eyeType);
-		this.appearanceByteSet("EYE_TYPE", (byte) eyeType);
+		this.appearanceByteSet("BASE_EYE", (byte) eyeType);
 	}
 
 	public void setEyeColor(int eyeColor) {
 		super.setEyeColor(eyeColor);
-		this.appearanceByteSet("EYE_COLOR", (byte) eyeColor);
+		this.appearanceByteSet("BASE_EYE_COLOR", (byte) eyeColor);
 	}
 
 	public void setShirtColor(Color shirtColor) {
 		super.setShirtColor(shirtColor);
-		this.appearanceColorMap.put("SHIRT_COLOR", shirtColor);
+		this.appearanceColorMap.put("BASE_SHIRT_COLOR", shirtColor);
 	}
 
 	public void setShoesColor(Color shoesColor) {
 		super.setShoesColor(shoesColor);
-		this.appearanceColorMap.put("SHOE_COLOR", shoesColor);
+		this.appearanceColorMap.put("BASE_SHOES_COLOR", shoesColor);
 	}
 	
+	@Override
+	public int getHair() 			{	return appearanceByteGet("BASE_HAIR");		}
 	
-	public int getHair() 			{	return appearanceByteGet("HAIR_STYLE");		}
-
-	public int getFacialFeature() 	{	return appearanceByteGet("FACIAL_HAIR");	}
-
-	public int getHairColor()		{	return appearanceByteGet("HAIR_COLOR");		}
-
-	public int getSkin() 			{	return appearanceByteGet("SKIN_COLOR");		}
-
-	public int getEyeType() 		{	return appearanceByteGet("EYE_TYPE");		}
-
-	public int getEyeColor()		{	return appearanceByteGet("EYE_COLOR");		}
-
-	public Color getShirtColor() 	{	return appearanceColorGet("SHIRT_COLOR");	}
-
-	public Color getShoesColor() 	{	return appearanceColorGet("SHOE_COLOR");	}
+	@Override
+	public int getFacialFeature() 	{	return appearanceByteGet("BASE_FACIAL_HAIR");	}
 	
+	@Override
+	public int getHairColor()		{	return appearanceByteGet("BASE_HAIR_COLOR");		}
+	
+	@Override
+	public int getSkin() 			{	return appearanceByteGet("BASE_SKIN_COLOR");		}
+	
+	@Override
+	public int getEyeType() 		{	return appearanceByteGet("BASE_EYE");		}
+	
+	@Override
+	public int getEyeColor()		{	return appearanceByteGet("BASE_EYE_COLOR");		}
+	
+	@Override
+	public Color getShirtColor() 	{	return appearanceColorGet("BASE_SHIRT_COLOR");	}
+	
+	@Override
+	public Color getShoesColor() 	{	return appearanceColorGet("BASE_SHOES_COLOR");	}
+	
+	@Override
 	public GameTexture getHairTexture() 				{	return GameHair.getHair(this.getHair()).getHairTexture(this.getHairColor());	}
-
+	
+	@Override
 	public GameTexture getBackHairTexture() 			{	return GameHair.getHair(this.getHair()).getBackHairTexture(this.getHairColor());	}
-
+	
+	@Override
 	public GameTexture getWigTexture() 					{	return GameHair.getHair(this.getHair()).getWigTexture(this.getHairColor());	}
-
+	
+	@Override
 	public GameTexture getFacialFeatureTexture() 		{	return GameHair.getFacialFeature(this.getFacialFeature()).getHairTexture(this.getHairColor());	}
-
+	
+	@Override
 	public GameTexture getBackFacialFeatureTexture() 	{	return GameHair.getFacialFeature(this.getFacialFeature()).getBackHairTexture(this.getHairColor());	}
 	
+	@Override
 	public GameSkin getGameSkin(boolean onlyHumanlike) 	{	return GameSkin.getSkin(this.getSkin(), onlyHumanlike);	}	
 
 	public String getCustomizerIconPath() {		
@@ -599,17 +615,9 @@ public abstract class RaceLook extends HumanLook {
 				GameMath.limit(color.getBlue(), 25, 225));
 	}
 
-	public void initParts() {	
-		
-	}
+	public void initParts() {}
 
-	public void onRaceRegistryClosed() {
-		
-	}
-
-	public GameMessage getRaceDisplayName() {
-		return new LocalMessage("racemod.race", this.getRaceID());
-	}
+	public void onRaceRegistryClosed() {}
 
 	public abstract CustomHumanDrawOptions modifyHumanDrawOptions(CustomHumanDrawOptions drawOptions, MaskShaderOptions mask);
 

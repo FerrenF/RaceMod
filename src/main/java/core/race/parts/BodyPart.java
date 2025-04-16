@@ -1,8 +1,5 @@
 package core.race.parts;
-
 import java.awt.Point;
-
-import core.gfx.GameParts;
 import core.gfx.TextureReplacer;
 
 public class BodyPart {
@@ -13,19 +10,17 @@ public class BodyPart {
 	
 	private Class<? extends RaceLookParts> belongsToClass;
 	
-	protected int _stylistCost = STYLIST_COST_DEFAULT;
-	protected boolean _stylistCostIsShards = false;
-
 	protected String name;
     protected String labelKey;
     protected String labelCategory;
     
-    protected boolean isBaseGamePart;
-    
     protected int _numTextures;
     protected int _numColors;
     protected int _numSides;
-    protected boolean hasWigTexture;
+    protected int _stylistCost = STYLIST_COST_DEFAULT;
+    protected boolean _hasWigTexture;
+    protected boolean _isBaseGamePart;
+    protected boolean _stylistCostIsShards = false;
     
 	protected String palettePath;
 	protected String texturePath;
@@ -35,33 +30,34 @@ public class BodyPart {
     
 	protected TextureReplacer partReplacer;
     
-	public Point getAccessoryTextureMapSize() 	{	return accessoryTextureMapSize;	}
-
-	public boolean isBaseGamePart() 			{	return isBaseGamePart;			}
+	public Class<? extends RaceLookParts> getOwnerClass() { return this.belongsToClass;}
+	
+	public int numTextures() 					{	return _numTextures;					}
+	public int numColors() 						{	return _numColors;						}
+	public int numSides() 						{	return _numSides;						}
+	
+	public boolean isReplacerPart()				{	return partReplacer != null; 			}
+    public boolean hasWigTexture() 				{	return _hasWigTexture;					}	
+    public boolean isBaseGamePart() 			{	return _isBaseGamePart;					}
     
-	public int numTextures() 					{	return _numTextures;				}
-	public int numColors() 						{	return _numColors;				}
-	public int numSides() 						{	return _numSides;				}
+	public String getTexturePath() 				{	return texturePath;						}	
+	public String getColorPath() 				{	return this.palettePath;				}	
 	
-	public boolean isReplacerPart()				{	return partReplacer != null; 	}
-    public boolean hasWigTexture() 				{	return hasWigTexture;			}	
-
-	public String getTexturePath() 				{	return texturePath;				}	
-	public String getColorPath() 				{	return this.palettePath;			}	
+	public Point getTextureSpriteMapSize() 		{	return textureSpriteMapSize;			}
+	public Point getAccessoryTextureMapSize() 	{	return accessoryTextureMapSize;			}
 	
-	public Point getTextureSpriteMapSize() 		{	return textureSpriteMapSize;	}
-	
-    public String getPartName() 				{  	return name;   					}   
-    public String getPartColorName() 			{ 	return name + PART_COLOR_NAME_SUFFIX;  }
+    public String getPartName() 				{  	return name;   							}   
+    public String getPartColorName() 			{ 	return name + PART_COLOR_NAME_SUFFIX;  	}
     
-    public String getLabelKey() 				{  	return this.labelKey;    		}
-	public String getLabelCategory() 			{	return this.labelCategory;		}
+    public String getLabelKey() 				{  	return this.labelKey;    				}
+    public String getLabelColorKey() 			{	return getLabelKey() + COLOR_LABEL_SUFFIX;	}
+	public String getLabelCategory() 			{	return this.labelCategory;				}
 	
-	public int stylistCost() 					{	return _stylistCost;				}
+	public int stylistCost() 					{	return _stylistCost;					}
 	public boolean stylistCostIsShards() 		{	return _stylistCostIsShards;			}
     
-	public Class<? extends RaceLookParts> getOwnerClass() { return this.belongsToClass;}
-	public String getLabelColorKey() 			{		return getLabelKey() + COLOR_LABEL_SUFFIX;	}
+
+	
 	
 	// Constructor for base game parts
 	public BodyPart(String name,
@@ -72,7 +68,7 @@ public class BodyPart {
         this.name = name;
         this.labelKey = labelKey;
         this.labelCategory = "ui";
-        this.isBaseGamePart = true;
+        this._isBaseGamePart = true;
         this._numColors = numColorOptions;
         this._numTextures = numTextureOptions;
         this.texturePath = null;
@@ -102,7 +98,7 @@ public class BodyPart {
         this.name = name;
         this.labelKey = labelKey;       
     	this._numSides = numSides;
-    	this.hasWigTexture = hasWigTexture;
+    	this._hasWigTexture = hasWigTexture;
         this._numColors = numColors;
         this.palettePath = colorPath;
         this.texturePath = texturePath;

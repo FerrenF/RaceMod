@@ -78,7 +78,7 @@ public class applySpawnPacketPatch {
 	    		inventoryExtendedField.set(th, reader.getNextBoolean());
 	    		selectedSlotField.set(th, reader.getNextByteUnsigned());
 	
-	    		RaceLook ra = RaceLook.raceFromContentPacker(reader, RaceDataFactory.getRaceLook(th, new CustomHumanLook(true)));
+	    		RaceLook ra = RaceLook.raceFromContentPacket(reader, RaceDataFactory.getRaceLook(th, new CustomHumanLook(true)));
 		        th.look = ra;
 		        RaceDataFactory.getOrRegisterRaceData(th, ra);
 	    		th.getInv().applyContentPacket(reader);

@@ -2,6 +2,7 @@ package core.gfx;
 
 import java.awt.Point;
 
+import core.gfx.texture.TexKey;
 import core.race.parts.BodyPart;
 import core.race.parts.RaceLookParts;
 import necesse.gfx.gameTexture.GameTexture;
@@ -38,12 +39,12 @@ public class GamePart {
 	}
 	
 	public TexKey getTexKey(int sideNum, float scale, int textureNum, int colorNum, GameTexture.BlendQuality blendQuality) {
-		return new TexKey(getPartPath() + getPartName() + (sideNum > 1 ? ("-" + String.valueOf(sideNum)) : "")+"-"+String.valueOf(textureNum),
+		return new TexKey(getPartPath() + getPartName().toLowerCase() + (sideNum > 0 ? ("-" + String.valueOf(sideNum)) : "")+"-"+String.valueOf(textureNum),
 				getPartPalettePath(), scale, colorNum, blendQuality);
 	}
 	
 	public TexKey getWigTexKey(int sideNum, int textureNum, int colorNum) {
-		return new TexKey(getPartPath() + getPartName() + (sideNum > 1 ? ("-" + String.valueOf(sideNum)) : "")+"-"+String.valueOf(textureNum)+"-wig",
+		return new TexKey(getPartPath() + getPartName().toLowerCase() + (sideNum > 0 ? ("-" + String.valueOf(sideNum)) : "")+"-"+String.valueOf(textureNum)+"-wig",
 				null, 1.0F, 0, BlendQuality.NEAREST);
 	}
 }

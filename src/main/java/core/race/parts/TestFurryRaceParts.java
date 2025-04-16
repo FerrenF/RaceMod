@@ -1,11 +1,6 @@
 package core.race.parts;
 
 import java.awt.Point;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import core.gfx.TextureReplacer;
 
 public class TestFurryRaceParts extends RaceLookParts{	
@@ -148,12 +143,12 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "player/race/testfurry/eyes/eyecolors",
         				 "player/race/testfurry/eyes/",
         				 12, 18, 32, new Point(64,64),
-        				 null, null, 5, true, 1)       		 		
+        				 new Point(32, 32),
+        				 null, 5, true, 1)       		 		
         		 );
           
-         this.hidePartCustomizer("SKIN_COLOR");
-         this.hidePartCustomizer("EYE_COLOR");
-         this.hidePartCustomizer("EYE_TYPE");
+         this.hidePartCustomizer("SKIN");
+         this.hidePartCustomizer("EYE");
          
     }
 
