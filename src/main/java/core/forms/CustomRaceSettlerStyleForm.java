@@ -39,7 +39,6 @@ import necesse.gfx.ui.ButtonColor;
 import necesse.gfx.ui.ButtonIcon;
 import necesse.inventory.InventoryItem;
 import necesse.inventory.container.events.StylistSettlersUpdateContainerEvent;
-import necesse.inventory.container.mob.StylistContainer;
 
 public abstract class CustomRaceSettlerStyleForm extends Form {
 	public final CustomRaceStylistContainer container;

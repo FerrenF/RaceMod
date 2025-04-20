@@ -14,6 +14,7 @@ firstsetup=Loading and caching RaceMod resources...
 [racemod.race]
 human=Human
 testfurry=Furry
+orc=Orc
 tail=Tail Style
 ears=Ears Style
 muzzle=Muzzle Style
@@ -30,3 +31,18 @@ feet=Feet Style
 feet_color=Feet Color
 custom_eyes=Eye Style
 custom_eyes_color=Eye Color
+custom_hair=Hair Style
+custom_hair_color=Hair Color
+facehair=Facial Hair
+facehair_color=Facial Hair Color
+facialfeatures=Facial Features
+[ui]
+hair_color=Hair Color
+facial_hair=Facial Hair
+shoes=Shoes
+shoes_color=Shoe Color
+shirt=Shirt
+shirt_color=Shirt Color
+skin_color=Skin Color
+eye=Eye Style
+eye_color=Eye Color

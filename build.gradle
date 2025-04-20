@@ -7,7 +7,7 @@ plugins {
 
 project.ext.modID = "racemod" // The unique id of your mod. Must be all lowercase and cannot use special characters.
 project.ext.modName = "Race Mod" // The display name of your mod.
-project.ext.modVersion = "0.0.21" // Your current builds version. Must follow the xx.xx... format.
+project.ext.modVersion = "0.1.21" // Your current builds version. Must follow the xx.xx... format.
 project.ext.gameVersion = "0.32.1" // The target game version.
 project.ext.modDescription = "An overhaul for Necesse supporting custom character races with different body parts." // Short description of what your mod is.
 project.ext.author = "FerrenFx" // Your name

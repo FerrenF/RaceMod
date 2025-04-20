@@ -79,7 +79,7 @@ public class CustomRaceStylistContainer extends ShopContainer {
 				if (client.isServer()) {
 					
 					RaceLook oldLook = RaceDataFactory.getRaceLook(client.playerMob, RaceLook.fromHumanLook(client.playerMob.look, CustomHumanLook.class));
-					RaceLook newLook = RaceLook.raceFromContentPacker(new PacketReader(content), RaceLook.fromHumanLook(client.playerMob.look, CustomHumanLook.class));
+					RaceLook newLook = RaceLook.raceFromContentPacket(new PacketReader(content), RaceLook.fromHumanLook(client.playerMob.look, CustomHumanLook.class));
 					ArrayList<InventoryItem> cost = CustomRaceStylistContainer.this.getTotalStyleCost(oldLook, newLook);
 					
 					if (CustomRaceStylistContainer.this.canStyle(cost)) {
@@ -113,7 +113,7 @@ public class CustomRaceStylistContainer extends ShopContainer {
 				if (client.isServer()) {
 					PacketReader reader = new PacketReader(content);
 					int mobUniqueID = reader.getNextInt();
-					RaceLook newLook = RaceLook.raceFromContentPacker(contentReader, new CustomHumanLook(true));
+					RaceLook newLook = RaceLook.raceFromContentPacket(contentReader, new CustomHumanLook(true));
 					Level level = client.playerMob.getLevel();
 					ServerClient serverClient = client.getServerClient();
 					if (!level.settlementLayer.doesClientHaveAccess(serverClient)) {
@@ -271,12 +271,12 @@ public class CustomRaceStylistContainer extends ShopContainer {
 					int oldVal = (int)oldID;
 					int newVal = (int)newID;
 					switch(b.getPartName()) {
-					    case "SKIN_COLOR": 	            return this.getSkinColorCost(oldVal, newVal);
-				        case "EYE_TYPE": 	            return this.getEyeTypeCost(oldVal, newVal);
-				        case "EYE_COLOR": 	            return this.getEyeColorCost(oldVal, newVal);
-				        case "HAIR_STYLE": 	            return this.getHairStyleCost(oldVal, newVal);
-				        case "FACIAL_HAIR": 	        return this.getFacialFeatureCost(oldVal, newVal);
-				        case "HAIR_COLOR": 	            return this.getHairColorCost(oldVal, newVal);
+					    case "BASE_SKIN": 	            return this.getSkinColorCost(oldVal, newVal);
+				        case "BASE_EYE": 	            return this.getEyeTypeCost(oldVal, newVal);
+				        case "BASE_EYE_COLOR": 	            return this.getEyeColorCost(oldVal, newVal);
+				        case "BASE_HAIR": 	            return this.getHairStyleCost(oldVal, newVal);
+				        case "BASE_FACIAL_HAIR": 	        return this.getFacialFeatureCost(oldVal, newVal);
+				        case "BASE_HAIR_COLOR": 	            return this.getHairColorCost(oldVal, newVal);
 				        default: 
 				        	return new ArrayList<InventoryItem>(Collections.singletonList(new InventoryItem("coin", this.getRandomPrice(
 									this.styleCostSeed * (long) GameRandom.prime(24) + (long) newID * (long) GameRandom.prime(82),
@@ -287,21 +287,21 @@ public class CustomRaceStylistContainer extends ShopContainer {
 					Color oldVal = (Color)oldID;
 					Color newVal = (Color)newID;
 					switch(b.getPartName()) {
-					 	case "SHIRT_COLOR": 	        return this.getShirtColorCost(oldVal,newVal);
-				        case "SHOES_COLOR": 	        return this.getShoesColorCost(oldVal, newVal);					
+					 	case "BASE_SHIRT": 	        return this.getShirtColorCost(oldVal,newVal);
+				        case "BASE_SHOES": 	        return this.getShoesColorCost(oldVal, newVal);					
 					}
 				}
 			
 			}
 			
-			else if(b.isCostShards()) {
-				return new ArrayList<InventoryItem>(Collections.singletonList(new InventoryItem("voidshard", b.getStylistCost())));
+			else if(b.stylistCostIsShards()) {
+				return new ArrayList<InventoryItem>(Collections.singletonList(new InventoryItem("voidshard", b.stylistCost())));
 			}
-			System.out.println(b.getPartName()+ ", " + (b.isCostShards() ? " shards: " : " coins:") + String.valueOf(b.getStylistCost()));
+			System.out.println(b.getPartName()+ ", " + (b.stylistCostIsShards() ? " shards: " : " coins:") + String.valueOf(b.stylistCost()));
 			
 			int amt = this.getRandomPrice(
 					this.styleCostSeed * (long) GameRandom.prime(24) + (int)newID * (long) GameRandom.prime(82),
-					b.getStylistCost());
+					b.stylistCost());
 			
 			return new ArrayList<InventoryItem>(Collections.singletonList(new InventoryItem("coin", amt)));		
 		};

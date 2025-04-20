@@ -74,7 +74,7 @@ public class CustomPacketConnectApproved extends PacketConnectApproved {
 			this.serverCharacterUniqueID = reader.getNextInt();
 			//HumanLook holder = new HumanLook(reader);
 			
-			RaceLook ra = RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true));			
+			RaceLook ra = RaceLook.raceFromContentPacket(reader, new CustomHumanLook(true));			
 			this.serverCharacterAppearance = ra;	
 			this.serverCharacterLookContent = reader.getNextContentPacket();
 			this.serverCharacterTimePlayed = reader.getNextLong();
