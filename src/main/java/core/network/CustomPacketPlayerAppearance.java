@@ -38,7 +38,7 @@ public class CustomPacketPlayerAppearance extends PacketPlayerAppearance {
 		PacketReader reader = new PacketReader(this);
 		this.slot = reader.getNextByteUnsigned();
 		this.characterUniqueID = reader.getNextInt();
-		RaceLook ra = RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true));	
+		RaceLook ra = RaceLook.raceFromContentPacket(reader, new CustomHumanLook(true));	
 		
 		Server s = GlobalData.getCurrentState() instanceof MainGame 
 				?((MainGame)GlobalData.getCurrentState()).getClient().getLocalServer()

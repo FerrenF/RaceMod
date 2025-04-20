@@ -85,7 +85,7 @@ public class SettlementLevelLayerMethodPatches {
 			teamIDField.set(th, reader.getNextInt());
 			if (reader.getNextBoolean()) {
 				
-				RaceLook ra = RaceLook.raceFromContentPacker(reader, new CustomHumanLook(true));		
+				RaceLook ra = RaceLook.raceFromContentPacket(reader, new CustomHumanLook(true));		
 				lookField.set(th, ra);
 			} else {
 				lookField.set(th, null);

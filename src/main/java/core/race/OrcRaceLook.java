@@ -1,16 +1,11 @@
 package core.race;
 
 import java.awt.Color;
-import java.awt.Point;
-import java.util.List;
-import java.util.function.Function;
-
 import core.forms.FormNewPlayerRaceCustomizer;
 import core.forms.OrcNewPlayerRaceCustomizer;
-import core.gfx.EyeTypeGamePart;
+import core.gfx.EyeTypeGameParts;
 import core.gfx.GameParts;
-import core.gfx.GamePartsLoader;
-import core.gfx.OrcDrawOptions;
+import core.gfx.texture.AsyncTextureLoader.TextureLocation;
 import core.race.factory.RaceDataFactory;
 import core.race.parts.BodyPart;
 import core.race.parts.EyeBodyPart;
@@ -25,8 +20,8 @@ import necesse.entity.mobs.PlayerMob;
 import necesse.gfx.HumanGender;
 import necesse.gfx.HumanLook;
 import necesse.gfx.drawOptions.DrawOptions;
-import necesse.gfx.drawOptions.DrawOptionsList;
 import necesse.gfx.gameTexture.GameTexture;
+import necesse.gfx.gameTexture.GameTexture.BlendQuality;
 import necesse.level.maps.light.GameLight;
 
 
@@ -68,6 +63,7 @@ public class OrcRaceLook extends RaceLook {
 			int customEyesStyle, int customEyesColor) {	
 		
 		this(true);
+		
 		// Base
 		this.setHair(hair);
 		this.setFacialFeature(facialFeature);
@@ -254,6 +250,7 @@ public class OrcRaceLook extends RaceLook {
 	
 	public int getFaceHairColor()				{	return this.appearanceByteGet("FACEHAIR_COLOR");	}
 	
+	
 	// Setters
 		
 	public int setHeadStyle(int id) 	{	return this.appearanceByteSet("HEAD",(byte)id);	}
@@ -288,20 +285,6 @@ public class OrcRaceLook extends RaceLook {
 		
 	public static void loadRaceTextures() {	
 		DebugHelper.handleDebugMessage("Loading race textures for race " + OrcRaceLook.ORC_RACE_ID, 50, MESSAGE_TYPE.DEBUG);
-		
-		for(BodyPart bp : new OrcRaceParts().getCustomBodyParts()) {			
-			GamePartsLoader loader = new GamePartsLoader();
-			loader.startLoaderThreads();
-			if(bp instanceof EyeBodyPart) 
-			{
-				new EyeTypeGamePart(loader, (EyeBodyPart) bp);
-			}
-			else
-			{
-				new GameParts(loader, bp);
-			}
-		}
-		
 	}
 
 	public void randomizeLook(GameRandom random) 
@@ -344,94 +327,58 @@ public class OrcRaceLook extends RaceLook {
 	}
 
 	
-
-	public static <T> List<T> getClosedEyesDrawOptions(int eyeType, int eyeColor, int skinColor, 
-			Function<GameTexture, T> mapper) {
-		return ((EyeTypeGamePart)GameParts.getPart(OrcRaceParts.class, "CUSTOM_EYES"))
-				.getClosedColorTextures(eyeType, eyeColor, skinColor, mapper);
-	}
-
-	public static <T> List<T> getOpenEyesDrawOptions(int eyeType, int eyeColor, int skinColor,
-			Function<GameTexture, T> mapper) {
-		return ((EyeTypeGamePart)GameParts.getPart(OrcRaceParts.class, "CUSTOM_EYES"))
-				.getOpenColorTextures(eyeType, eyeColor, skinColor, mapper);
-	}
-
-	public static DrawOptions getEyesDrawOptions(int eyeType, int eyeColor, int skinColor, boolean humanlikeOnly,
-			boolean closed, int drawX, int drawY, int spriteX, int spriteY, int width, int height, boolean mirrorX,
-			boolean mirrorY, float alpha, GameLight light, MaskShaderOptions mask) {
-		Function<GameTexture, DrawOptions> mapper = (texture) -> {
-			return texture.initDraw().sprite(spriteX, spriteY, 64).light(light).alpha(alpha).size(width, height)
-					.mirror(mirrorX, mirrorY).addMaskShader(mask).pos(drawX, drawY);
-		};
-		return closed
-				? new DrawOptionsList(getClosedEyesDrawOptions(eyeType, eyeColor, skinColor, mapper))
-				: new DrawOptionsList(getOpenEyesDrawOptions(eyeType, eyeColor, skinColor, mapper));
-	}
-	
 	public DrawOptions getEyesDrawOptions(boolean humanlikeOnly, boolean closed, int drawX, int drawY, int spriteX,
 			int spriteY, int width, int height, boolean mirrorX, boolean mirrorY, float alpha, GameLight light,
 			MaskShaderOptions mask) {
-		return getEyesDrawOptions(this.getCustomEyesStyle(), this.getCustomEyesColor(), getBodyColor(), humanlikeOnly, closed, drawX,
-				drawY, spriteX, spriteY, width, height, mirrorX, mirrorY, alpha, light, mask);
+		
+		return closed
+				? getCustomEyesClosedTexture(1.0F, BlendQuality.NEAREST).initDraw().sprite(spriteX, spriteY, 64).light(light).alpha(alpha).size(width, height)
+						.mirror(mirrorX, mirrorY).addMaskShader(mask).pos(drawX, drawY)
+						
+				: getCustomEyesOpenTexture(1.0F, BlendQuality.NEAREST).initDraw().sprite(spriteX, spriteY, 64).light(light).alpha(alpha).size(width, height)
+				.mirror(mirrorX, mirrorY).addMaskShader(mask).pos(drawX, drawY);
 	}
 
-	public GameTexture getHeadTexture(int spriteX, int spriteY) {
-		return GameParts.getPart(OrcRaceParts.class, "HEAD").getTextureSprite(getHeadStyle(), getBodyColor(), spriteX, spriteY);
-	}
-	
-	public GameTexture getHeadTexture(int spriteX, int spriteY, int resizeX, int resizeY) {
-		return GameParts.getPart(OrcRaceParts.class, "HEAD").getTextureSprite(getHeadStyle(), getBodyColor(), spriteX, spriteY, resizeX, resizeY);
-	}
-	
 	public GameTexture getHeadTexture() {
-		return GameParts.getPart(OrcRaceParts.class, "HEAD").getFullTexture(getHeadStyle(), getBodyColor());
+		return GameParts.getFullTexture(this.getRaceParts().getBodyPart("HEAD"), this.getHeadStyle(), getBodyColor());
 	}
 	
 	public GameTexture getBodyTexture() {
-		return GameParts.getPart(OrcRaceParts.class, "BODY").getFullTexture(getBodyStyle(), getBodyColor());
+		return GameParts.getFullTexture(this.getRaceParts().getBodyPart("BODY"), getBodyStyle(), getBodyColor());
 	}
 
 	public GameTexture getLeftArmTexture() {
-		return GameParts.getPart(OrcRaceParts.class, "ARMS").getFullTexture(getArmsStyle(), getArmsColor(), 0);
+		return GameParts.getFullTexture(this.getRaceParts().getBodyPart("ARMS"),getArmsStyle(), getBodyColor(),1);
 	}
 	
 	public GameTexture getRightArmTexture() {
-		return GameParts.getPart(OrcRaceParts.class, "ARMS").getFullTexture(getArmsStyle(), getArmsColor(), 1);
+		return GameParts.getFullTexture(this.getRaceParts().getBodyPart("ARMS"),getArmsStyle(), getBodyColor(),2);
 	}
 	
 	public GameTexture getFeetTexture() {
-		return GameParts.getPart(OrcRaceParts.class, "FEET").getFullTexture(getFeetStyle(), getFeetColor());
+		return GameParts.getFullTexture(this.getRaceParts().getBodyPart("FEET"), getFeetStyle(), getBodyColor());
 	}
 
 	public GameTexture getHairTexture()	{
-		return GameParts.getPart(OrcRaceParts.class, "CUSTOM_HAIR").getFullTexture(getCustomHairStyle(), getCustomHairColor());
+		return GameParts.getFullTexture(this.getRaceParts().getBodyPart("CUSTOM_HAIR"), getCustomHairStyle(), getCustomHairColor());
 	}
 	
 	public GameTexture getFaceHairTexture()	{
-		return GameParts.getPart(OrcRaceParts.class, "FACEHAIR").getFullTexture(getFaceHairStyle(), getFaceHairColor());
+		return GameParts.getFullTexture(this.getRaceParts().getBodyPart("FACEHAIR"), getFaceHairStyle(), getFaceHairColor());
 	}
 	
 	public GameTexture getFacialFeaturesTexture()	{
-		return GameParts.getPart(OrcRaceParts.class, "FACIALFEATURES").getFullTexture(getFacialFeaturesStyle(), getBodyColor());
+		return GameParts.getFullTexture(this.getRaceParts().getBodyPart("FACIALFEATURES"), getFacialFeaturesStyle(), getBodyColor());
 	}
 	
-	public GameTexture getFacialFeaturesTexture(int spriteX, int spriteY) {
-		return GameParts.getPart(OrcRaceParts.class, "FACIALFEATURES").getTextureSprite(getFacialFeaturesStyle(), getBodyColor(), spriteX, spriteY);
+	public GameTexture getCustomEyesOpenTexture(float scale, BlendQuality blendQuality) {		
+		return EyeTypeGameParts.getFullOpenTexture((EyeBodyPart)(this.getRaceParts().getBodyPart("CUSTOM_EYES")),
+				getBodyColor(), getCustomEyesStyle(), getCustomEyesColor(), scale, blendQuality, TextureLocation.FROM_JAR);
 	}
 	
-	public GameTexture getFacialFeaturesTexture(int spriteX, int spriteY, int width, int height) {
-		return GameParts.getPart(OrcRaceParts.class, "FACIALFEATURES").getTextureSprite(getFacialFeaturesStyle(), getBodyColor(), spriteX, spriteY, width, height);
-	}
-	
-	public List<GameTexture> getCustomEyesOpenTextures() {
-		return ((EyeTypeGamePart)GameParts.getPart(OrcRaceParts.class, "CUSTOM_EYES"))
-				.getOpenColorTextures(getCustomEyesStyle(), getCustomEyesColor(), getHeadColor() );
-	}
-	
-	public List<GameTexture> getCustomEyesClosedTexture() {
-		return ((EyeTypeGamePart)GameParts.getPart(OrcRaceParts.class, "CUSTOM_EYES"))
-				.getClosedColorTextures(getCustomEyesStyle(), getCustomEyesColor(), getHeadColor());
+	public GameTexture getCustomEyesClosedTexture(float scale, BlendQuality blendQuality) {
+		return EyeTypeGameParts.getFullClosedTexture((EyeBodyPart)(this.getRaceParts().getBodyPart("CUSTOM_EYES")),
+				getBodyColor(), getCustomEyesColor(), scale, blendQuality, TextureLocation.FROM_JAR);
 	}
 	
 	@Override
@@ -487,26 +434,16 @@ public class OrcRaceLook extends RaceLook {
 					GameLight light, MaskShaderOptions mask) {
 				
 				OrcRaceLook rl = (OrcRaceLook)RaceDataFactory.getRaceLook(player, OrcRaceLook.this);
-				return new OrcDrawOptions(
-						player != null ? player.getLevel() : null, rl)
-						.spriteRes(spriteRes)
-						.size(new Point(width, height))						
-						.facialFeaturesTexture(rl, spriteX, spriteY, true)
-						.dir(dir)
-						.mirrorX(mirrorX)
-						.mirrorY(mirrorY)
-						.allAlpha(alpha)
-						.light(light)
-						.drawOffset(
-								mask == null 
+				return rl.getFacialFeaturesTexture().initDraw()
+						.sprite(spriteX, spriteY, spriteRes)
+						.size(width, height).mirror(mirrorX, mirrorY)					
+						.alpha(alpha)
+						.light(light).addMaskShader(mask)
+						.pos(drawX + ((mask == null)
 								? 0 
-								: mask.drawXOffset,
-								mask == null 
-								? 0 
-								: mask.drawYOffset)
-						.pos(drawX, drawY)
-						.mask(mask)
-						.drawFacialFeatures(true);
+								: mask.drawXOffset), drawY + ((mask == null)
+										? 0 
+												: mask.drawYOffset));
 			}
 		};	
 

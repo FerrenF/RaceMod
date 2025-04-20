@@ -5,8 +5,6 @@ import java.awt.Color;
 import core.forms.FormNewPlayerRaceCustomizer;
 import core.forms.HumanNewPlayerRaceCustomizer;
 import core.race.parts.HumanRaceParts;
-import core.race.parts.RaceLookParts;
-import core.race.parts.TestFurryRaceParts;
 import extensions.CustomHumanDrawOptions;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
@@ -14,7 +12,6 @@ import necesse.engine.network.PacketReader;
 import necesse.engine.util.GameRandom;
 import necesse.entity.mobs.MaskShaderOptions;
 import necesse.gfx.HumanLook;
-import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.gameTexture.GameTexture;
 
 public class CustomHumanLook extends RaceLook {
@@ -110,7 +107,6 @@ public class CustomHumanLook extends RaceLook {
 
 	@Override
 	public CustomHumanDrawOptions modifyHumanDrawOptions(CustomHumanDrawOptions drawOptions, MaskShaderOptions mask) {
-		
 		return drawOptions;
 	}
 	

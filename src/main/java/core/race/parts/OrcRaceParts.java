@@ -22,12 +22,10 @@ public class OrcRaceParts extends RaceLookParts{
          				 "CUSTOM_HAIR",
          				 "racemod.race",
          				 "custom_hair",
-         				 true,
-         				 false,
-         				 true,
-         				 true,
-         				 false,
-         				 true,
+         				 8,
+		    			 0,
+		    			 26,
+		    			 true,
          				 "player/race/orc/haircolors",
          				 "player/race/orc/hair/",
          				 new Point(64,64),
@@ -38,12 +36,10 @@ public class OrcRaceParts extends RaceLookParts{
         				 "FACEHAIR",
         				 "racemod.race",
         				 "facehair",
-        				 true,
-        				 false,
-        				 true,
-        				 true,
-        				 false,
-        				 true,
+        				 2,
+		    			 0,
+		    			 26,
+		    			 true,
         				 "player/race/orc/haircolors",
         				 "player/race/orc/facehair/",
         				 new Point(64,64),
@@ -54,12 +50,10 @@ public class OrcRaceParts extends RaceLookParts{
         				 "FACIALFEATURES",
         				 "racemod.race",
         				 "facialfeatures",
-        				 true,
-        				 false,
-        				 true,
-        				 true,
-        				 false,
-        				 true,
+        				 3,
+		    			 0,
+		    			 17,
+		    			 true,
         				 "player/race/orc/skincolors",
         				 "player/race/orc/facialfeatures/",
         				 new Point(64,64),
@@ -70,12 +64,10 @@ public class OrcRaceParts extends RaceLookParts{
         				 "HEAD",
         				 "racemod.race",
         				 "head",
-        				 true,
-        				 false,
-        				 true,
-        				 true,
-        				 false,
-        				 true,
+        				 2,
+		    			 0,
+		    			 17,
+		    			 true,
         				 "player/race/orc/skincolors",
         				 "player/race/orc/head/",
         				 new Point(64,64),
@@ -86,12 +78,10 @@ public class OrcRaceParts extends RaceLookParts{
         				 "BODY",
         				 "racemod.race",
         				 "body",
-        				 true,
-        				 false,
-        				 true,
-        				 true,
-        				 false,
-        				 true,
+        				 1,
+		    			 0,
+		    			 17,
+		    			 true,
         				 "player/race/orc/skincolors",
         				 "player/race/orc/body/",
         				 new Point(64,64),
@@ -102,12 +92,10 @@ public class OrcRaceParts extends RaceLookParts{
         				 "ARMS",
         				 "racemod.race",
         				 "arms",
-        				 true,
-        				 true,
-        				 true,
-        				 true,
-        				 false,
-        				 true,
+        				 1,
+		    			 2,
+		    			 17,
+		    			 true,
         				 "player/race/orc/skincolors",
         				 "player/race/orc/arms/",
         				 new Point(64,64),
@@ -118,12 +106,10 @@ public class OrcRaceParts extends RaceLookParts{
         				 "FEET",
         				 "racemod.race",
         				 "feet",
-        				 true,
-        				 false,
-        				 true,
-        				 true,
-        				 false,
-        				 true,
+        				 1,
+		    			 0,
+		    			 17,
+		    			 true,
         				 "player/race/orc/skincolors",
         				 "player/race/orc/feet/",
         				 new Point(64,64),
@@ -137,20 +123,21 @@ public class OrcRaceParts extends RaceLookParts{
         				 "player/race/orc/skincolors",
         				 "player/race/orc/eyes/eyecolors",
         				 "player/race/orc/eyes/",
-        				 new Point(64,64),
-        				 null, null, 5, true)       		 		
+        				 12, 16, 32, new Point(64,64),
+        				 null, null, 5, true, 1)       		 		
         		 );
           
-         this.hidePartCustomizer("SKIN_COLOR");
-         this.hidePartCustomizer("EYE_COLOR");
-         this.hidePartCustomizer("EYE_TYPE");
-         this.hidePartCustomizer("HAIR_STYLE");
-         this.hidePartCustomizer("HAIR_COLOR");
+         this.hidePartCustomizer("BASE_SKIN");
+         this.hidePartCustomizer("BASE_SKIN_COLOR");
+         this.hidePartCustomizer("BASE_EYE");
+         this.hidePartCustomizer("BASE_EYE_COLOR");
+         this.hidePartCustomizer("BASE_HAIR");
+         this.hidePartCustomizer("BASE_HAIR_COLOR");
          this.hidePartCustomizer("HEAD_COLOR");
          this.hidePartCustomizer("ARMS_COLOR");
          this.hidePartCustomizer("FEET_COLOR");
          this.hidePartCustomizer("FACIALFEATURES_COLOR");
-         this.hidePartCustomizer("FACIAL_HAIR");
+         this.hidePartCustomizer("BASE_FACIAL_HAIR");
     }
 
 
