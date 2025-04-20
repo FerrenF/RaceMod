@@ -64,7 +64,6 @@ import versioning.*;
 	
 @ModEntry
 public class RaceMod {
-	
 	public static JarFile modJar;
 	public static final String NECESSE_VERSION_STRING = "0.32.1";
 	public static String characterSavePath;
