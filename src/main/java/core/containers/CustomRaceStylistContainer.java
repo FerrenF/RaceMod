@@ -271,12 +271,12 @@ public class CustomRaceStylistContainer extends ShopContainer {
 					int oldVal = (int)oldID;
 					int newVal = (int)newID;
 					switch(b.getPartName()) {
-					    case "SKIN_COLOR": 	            return this.getSkinColorCost(oldVal, newVal);
-				        case "EYE_TYPE": 	            return this.getEyeTypeCost(oldVal, newVal);
-				        case "EYE_COLOR": 	            return this.getEyeColorCost(oldVal, newVal);
-				        case "HAIR_STYLE": 	            return this.getHairStyleCost(oldVal, newVal);
-				        case "FACIAL_HAIR": 	        return this.getFacialFeatureCost(oldVal, newVal);
-				        case "HAIR_COLOR": 	            return this.getHairColorCost(oldVal, newVal);
+					    case "BASE_SKIN": 	            return this.getSkinColorCost(oldVal, newVal);
+				        case "BASE_EYE": 	            return this.getEyeTypeCost(oldVal, newVal);
+				        case "BASE_EYE_COLOR": 	            return this.getEyeColorCost(oldVal, newVal);
+				        case "BASE_HAIR": 	            return this.getHairStyleCost(oldVal, newVal);
+				        case "BASE_FACIAL_HAIR": 	        return this.getFacialFeatureCost(oldVal, newVal);
+				        case "BASE_HAIR_COLOR": 	            return this.getHairColorCost(oldVal, newVal);
 				        default: 
 				        	return new ArrayList<InventoryItem>(Collections.singletonList(new InventoryItem("coin", this.getRandomPrice(
 									this.styleCostSeed * (long) GameRandom.prime(24) + (long) newID * (long) GameRandom.prime(82),
@@ -287,8 +287,8 @@ public class CustomRaceStylistContainer extends ShopContainer {
 					Color oldVal = (Color)oldID;
 					Color newVal = (Color)newID;
 					switch(b.getPartName()) {
-					 	case "SHIRT_COLOR": 	        return this.getShirtColorCost(oldVal,newVal);
-				        case "SHOES_COLOR": 	        return this.getShoesColorCost(oldVal, newVal);					
+					 	case "BASE_SHIRT": 	        return this.getShirtColorCost(oldVal,newVal);
+				        case "BASE_SHOES": 	        return this.getShoesColorCost(oldVal, newVal);					
 					}
 				}
 			

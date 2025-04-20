@@ -1,7 +1,13 @@
 package core.gfx.cache;
 
-public class CacheIndexEntry {
-    public final long offset;
+import java.io.Serializable;
+
+public class CacheIndexEntry implements Serializable {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public final long offset;
     public final int length;
     public final int hash;
 

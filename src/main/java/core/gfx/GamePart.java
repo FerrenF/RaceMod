@@ -19,9 +19,7 @@ public class GamePart {
 	public Point textureMapSize()		{	return this.assignedPart.getTextureSpriteMapSize();			}
 	
 	public boolean isBaseGamePart() 	{	return this.assignedPart.isBaseGamePart();					}
-	
-	public boolean hasWig() 			{	return this.assignedPart.hasWigTexture();					}
-	
+		
 	public int numTextures() 			{	return this.assignedPart.numTextures();						}
 	
 	public int numSides()				{	return this.assignedPart.numSides();						}
@@ -39,12 +37,15 @@ public class GamePart {
 	}
 	
 	public TexKey getTexKey(int sideNum, float scale, int textureNum, int colorNum, GameTexture.BlendQuality blendQuality) {
-		return new TexKey(getPartPath() + getPartName().toLowerCase() + (sideNum > 0 ? ("-" + String.valueOf(sideNum)) : "")+"-"+String.valueOf(textureNum),
+		
+		String texID = getPartName().toLowerCase() + (sideNum > 0 ? ("-" + String.valueOf(sideNum)) : "")+"-"+String.valueOf(textureNum);
+		return new TexKey(texID + "-" +colorNum, getPartPath() + texID,
 				getPartPalettePath(), scale, colorNum, blendQuality);
 	}
 	
 	public TexKey getWigTexKey(int sideNum, int textureNum, int colorNum) {
-		return new TexKey(getPartPath() + getPartName().toLowerCase() + (sideNum > 0 ? ("-" + String.valueOf(sideNum)) : "")+"-"+String.valueOf(textureNum)+"-wig",
-				null, 1.0F, 0, BlendQuality.NEAREST);
+		String texID = getPartName().toLowerCase() + (sideNum > 0 ? ("-" + String.valueOf(sideNum)) : "")+"-"+String.valueOf(textureNum);
+		return new TexKey(texID + "-" +colorNum + "-wig", getPartPath() + texID,
+				getPartPalettePath(), 1.0F, colorNum, BlendQuality.NEAREST);
 	}
 }

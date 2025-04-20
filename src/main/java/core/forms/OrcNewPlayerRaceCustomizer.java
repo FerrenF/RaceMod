@@ -90,10 +90,10 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	    switch (part.getPartName()) {  
 	        case "CUSTOM_HAIR": 	return new Point(0, 0);	 
 	        case "CUSTOM_HAIR_COLOR": 	return new Point(0, 0);	  
-	        case "FACEHAIR": 	return new Point(-12, -52);	 
-	        case "FACEHAIR_COLOR": 	return new Point(-12, -52);	  
-	        case "FACIALFEATURES": 	return new Point(-12, -40);	 
-	        case "FACIALFEATURES_COLOR": 	return new Point(-12, -40);	  
+	        case "FACEHAIR": 	return new Point(0, -20);	 
+	        case "FACEHAIR_COLOR": 	return new Point(0, -20);	  
+	        case "FACIALFEATURES": 	return new Point(0, -10);	 
+	        case "FACIALFEATURES_COLOR": 	return new Point(0, -10);	  
 	        case "HEAD": 		return getHeadTypeDrawOffset();
 	        case "CUSTOM_EYES": return getEyeTypeFaceDrawOffset();
 	        case "CUSTOM_EYES_COLOR": return getEyeColorFaceDrawOffset();
@@ -105,9 +105,9 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 
 	public Point getSkinFaceDrawOffset() 		{	return new Point(-3, -4);	}
 	
-	public Point getEyeTypeFaceDrawOffset() 	{	return new Point(-22, -26);	}
+	public Point getEyeTypeFaceDrawOffset() 	{	return new Point(0, 5);	}
 	
-	public Point getEyeColorFaceDrawOffset() 	{	return new Point(-22, -26);	}
+	public Point getEyeColorFaceDrawOffset() 	{	return new Point(0, 5);	}
 		
 	// Returns the modification cost (stub for customization)
 	protected ArrayList<InventoryItem> getPartModificationCost(Color color) {
@@ -146,7 +146,7 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	        case "FACIALFEATURES": 	        		value = ccr.getFacialFeaturesStyle();	    	break;
 	        case "FACIALFEATURES_COLOR": 	        value = ccr.getFacialFeaturesColor();	    	break;
 	        
-	        default:        value = super.baseGetCurrentBodypartSelection(part);	break;
+	        default:        value = super.baseGetCurrentBodyPartSelection(part, colorCustomization);	break;
 	    }
 	
 	    return value;
@@ -178,14 +178,14 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 		        case "FACEHAIR_COLOR": 	        ccr.setFaceHairColor(intValue);   	break;
 		        case "FACIALFEATURES": 	        		ccr.setFacialFeaturesStyle(intValue);	    	break;
 		        
-		        default: super.baseSetCurrentBodyPart(look, part, intValue, colorCustomization);	break;
+		        default: super.baseSetLookBodyPartValue(look, part, intValue, colorCustomization);	break;
 	        }
 	    } else if (value instanceof Color) {
 	    	
 	        Color colorValue = (Color) value;
 	        switch (part.getPartName()) {	            
-	            case "BASE_SHIRT_COLOR": ccr.setShirtColor(colorValue); break;
-	            case "BASE_SHOES_COLOR": ccr.setShoesColor(colorValue); break;
+	            case "BASE_SHIRT": ccr.setShirtColor(colorValue); break;
+	            case "BASE_SHOES": ccr.setShoesColor(colorValue); break;
 	        }
 	        
 	    } else {
@@ -201,49 +201,20 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 		applyLookModifiers(look, part);
 		CustomHumanDrawOptions options = new CustomHumanDrawOptions(null, look, false);
 		Point offset = getDrawOffset(part);
-		int drawX = x + _width / 2;
-		int drawY = y + _height / 2;
-	
-		
-		if (this.getRaceLookParts().hasCustomPart(part.getPartName())) {
 			
-			 // Handle Hair style drawing
-			
-			int styleIndex = look.appearanceByteGet(part.getPartName());
-			int colorIndex = look.appearanceByteGet(part.getPartColorName());
-			
-			if(part.hasWigTexture()) {
-
-			    GameTexture wigTexture = GameParts.getWigTexture(part, styleIndex, colorIndex, 1);
-			    if(wigTexture == null) {
-			    	
-			    	  DebugHelper.handleFormattedDebugMessage(
-			  	            "Part: %s for race %s could not load style index %d.", 5, MESSAGE_TYPE.ERROR,
-			  	            new Object[] {this.getRaceID(), part.getPartName(), styleIndex} 	        );
-			    	  
-			    }
-			    wigTexture.initDraw()
-			              .size(_height)
-			              .posMiddle(drawX + offset.x, drawY + offset.y)
-			              .draw();
-			}
-			
-			if(part.getPartName().equals("CUSTOM_EYES") || part.getPartName().equals("CUSTOM_EYES_COLOR")
-					|| part.getPartName().equals("FACEHAIR")|| part.getPartName().equals("FACEHAIR_COLOR")
-					|| part.getPartName().equals("FACIALFEATURES")|| part.getPartName().equals("FACIALFEATURES_COLOR")) {					
-				GameTexture.overrideBlendQuality = BlendQuality.NEAREST;
-				getOrcFaceDrawOptions(look, options, button.size.height * 2, x+offset.x, y+offset.y, (opt) -> {
-						opt.sprite(0, 3).dir(3);
-					}).draw();
-				 GameTexture.overrideBlendQuality = null;
-			}
-				
-			
-		}  else {
-			
+		if (!part.isBaseGamePart()) {
+			super.customDrawBodyPartIcon(button, look, part, options, x, y, _width, _height, offset, ()->{
+				return this.getOrcFaceDrawOptions(look, options, button.size.height, x + offset.x, y + offset.y, (opt) -> {
+			        opt.sprite(0, 3).dir(3);  // Set specific sprite direction
+			    });
+			}, (bp)->{
+				return (bp.getPartName().equals("CUSTOM_EYES") || bp.getPartName().equals("CUSTOM_EYES_COLOR")
+						|| bp.getPartName().equals("FACEHAIR")|| bp.getPartName().equals("FACEHAIR_COLOR")
+						|| bp.getPartName().equals("FACIALFEATURES")|| bp.getPartName().equals("FACIALFEATURES_COLOR"));
+			});
+		}  else {			
 			super.baseDrawBodyPartIcon(button, look, part, options, x, y, _width, _height, offset);
-		
-		}		
+		}	
 	
 	}	
 	
@@ -258,48 +229,21 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 
 		CustomHumanDrawOptions options = new CustomHumanDrawOptions(null, look, false);
 		
-		// Center position for the preview
-		int drawX = x + _width / 2;
-		int drawY = y + _height / 2;
-		Point offset = new Point(0,0);//this.getDrawOffset(part);
+		Point offset = this.getDrawOffset(part);
+		if (!part.isBaseGamePart()) {
+			super.customDrawBodyPartIcon(button, look, part, options, x, y, _width, _height, offset, ()->{
+				return this.getOrcFaceDrawOptions(look, options, button.size.height, x + offset.x, y + offset.y, (opt) -> {
+			        opt.sprite(0, 3).dir(3);  // Set specific sprite direction
+			    });
+			}, (bp)->{
+				return (bp.getPartName().equals("CUSTOM_EYES") || bp.getPartName().equals("CUSTOM_EYES_COLOR")
+						|| bp.getPartName().equals("FACEHAIR")|| bp.getPartName().equals("FACEHAIR_COLOR")
+						|| bp.getPartName().equals("FACIALFEATURES")|| bp.getPartName().equals("FACIALFEATURES_COLOR"));
+			});
+		}  else {			
+			super.baseDrawBodyPartIcon(button, look, part, options, x, y, _width, _height, offset);
+		}		
 		
-		
-		// Drawing based on body part type
-		if (this.getRaceLookParts().hasCustomPart(part.getPartName())) {
-			
-			int styleIndex = look.appearanceByteGet(part.getPartName());
-			int colorIndex = look.appearanceByteGet(part.getPartColorName());
-	
-			if(part.hasWigTexture()) {
-				
-				GameTexture wigTexture = GameParts.getWigTexture(part, styleIndex, colorIndex, 1);
-				if(wigTexture == null) {
-					
-					  DebugHelper.handleFormattedDebugMessage(
-				  	            "Could not load style texture ID %d for part %s with color %d in form %s.",
-				  	            5, MESSAGE_TYPE.ERROR, new Object[] {styleIndex, part.getPartName(), colorIndex, this.getClass().getName()} );
-	
-				
-				}
-				wigTexture.initDraw().size(_height).posMiddle(drawX+offset.x, drawY+offset.y).draw();	
-			}
-			else {
-				if(part.getPartName().equals("CUSTOM_EYES")|| part.getPartName().equals("CUSTOM_EYES_COLOR")) {
-					
-				    // Eye preview (using HumanFaceDrawOptions)
-					GameTexture.overrideBlendQuality = BlendQuality.NEAREST;
-					getOrcFaceDrawOptions(look, options, button.size.height, x, y, (opt) -> {
-				        opt.sprite(0, 3).dir(3);  // Set specific sprite direction
-				    }).draw();
-				    GameTexture.overrideBlendQuality = null;
-					
-				}
-			}
-		    
-		    
-		} else {
-			super.baseDrawBodyPartPreview(button, look, part, options, id, x, y, _width, _height);
-		}
 	}
 
 	protected void applyLookModifiers(RaceLook look, BodyPart part) {
@@ -318,10 +262,10 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	
 	// Generates sections dynamically for each body part
 	protected Section createBodyPartSection(BodyPart part, Predicate<Section> isCurrent, int _width) {
-			return super.createBodyPartSection(part, isCurrent, _width);
+			return super.createBodyPartSection(part, false, isCurrent, _width);
 	}
 	
-	protected Section createBodyPartCustomColorSection(BodyPart part, Predicate<Section> isCurrent, int _width) {
+	protected Section createBodyPartColorSection(BodyPart part, Predicate<Section> isCurrent, int _width) {
 
 		 return new Section(					 
     		(button, drawX, drawY, width, height) -> drawBodyPartIcon(button, part, drawX, drawY, width, height),

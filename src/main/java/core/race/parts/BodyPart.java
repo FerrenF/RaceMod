@@ -37,7 +37,6 @@ public class BodyPart {
 	public int numSides() 						{	return _numSides;						}
 	
 	public boolean isReplacerPart()				{	return partReplacer != null; 			}
-    public boolean hasWigTexture() 				{	return _hasWigTexture;					}	
     public boolean isBaseGamePart() 			{	return _isBaseGamePart;					}
     
 	public String getTexturePath() 				{	return texturePath;						}	
@@ -97,8 +96,10 @@ public class BodyPart {
     	this.labelCategory = labelCategory;
         this.name = name;
         this.labelKey = labelKey;       
+        this._isBaseGamePart = false;
     	this._numSides = numSides;
     	this._hasWigTexture = hasWigTexture;
+    	this._numTextures = numTextures;
         this._numColors = numColors;
         this.palettePath = colorPath;
         this.texturePath = texturePath;
@@ -121,5 +122,6 @@ public class BodyPart {
 	public TextureReplacer getReplacer() {
 		return this.partReplacer;
 	}
+
 
 }

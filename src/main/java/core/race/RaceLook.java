@@ -1,11 +1,8 @@
 package core.race;
 
 import java.awt.Color;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -21,23 +18,13 @@ import necesse.engine.save.SaveData;
 import necesse.engine.util.GameMath;
 import necesse.engine.util.GameRandom;
 import necesse.entity.mobs.MaskShaderOptions;
-import necesse.entity.mobs.Mob;
-import necesse.gfx.GameEyes;
 import necesse.gfx.GameHair;
 import necesse.gfx.GameSkin;
 import necesse.gfx.HumanGender;
 import necesse.gfx.HumanLook;
-import necesse.gfx.drawOptions.DrawOptions;
-import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.gfx.gameTexture.GameTexture;
-import necesse.gfx.res.ResourceEncoder;
-import necesse.gfx.res.ResourceFile;
-import net.bytebuddy.implementation.bind.annotation.Super;
 import core.forms.FormNewPlayerRaceCustomizer;
-import core.race.factory.RaceDataFactory;
-import core.race.factory.RaceDataFactory.RaceData;
 import core.race.parts.BodyPart;
-import core.race.parts.HumanRaceParts;
 import core.race.parts.RaceLookParts;
 import core.registries.RaceRegistry;
 import extensions.CustomHumanDrawOptions;
@@ -179,17 +166,17 @@ public abstract class RaceLook extends HumanLook {
 		return colorLimiterFunction.apply(new Color(rand.getIntBetween(50, 200), rand.getIntBetween(50, 200),	rand.getIntBetween(50, 200)));
 	}
 
-	public byte getRandomSkinColor() 		{	return getRandomByteFeature("SKIN_COLOR");	}
+	public byte getRandomSkinColor() 		{	return getRandomByteFeature("BASE_SKIN");	}
 
-	public byte getRandomHairColor() 		{	return getRandomByteFeature("HAIR_COLOR");		}
+	public byte getRandomHairColor() 		{	return getRandomByteFeature("BASE_HAIR_COLOR");		}
 
-	public byte getRandomEyeColor() 		{	return getRandomByteFeature("EYE_COLOR");		}
+	public byte getRandomEyeColor() 		{	return getRandomByteFeature("BASE_EYE_COLOR");		}
 
-	public byte getRandomFacialFeature() 	{	return getRandomByteFeature("FACIAL_HAIR");		}
+	public byte getRandomFacialFeature() 	{	return getRandomByteFeature("BASE_FACIAL_HAIR");		}
 
-	public byte getRandomEyeType() 			{	return getRandomByteFeature("EYE");		}
+	public byte getRandomEyeType() 			{	return getRandomByteFeature("BASE_EYE");		}
 
-	public byte getRandomHairStyle() 		{	return getRandomByteFeature("HAIR");		}
+	public byte getRandomHairStyle() 		{	return getRandomByteFeature("BASE_HAIR");		}
 	
 	public Color getRandomShoeColor() {
 		int opts = this.getRaceParts().defaultColors().length;		
@@ -553,12 +540,12 @@ public abstract class RaceLook extends HumanLook {
 
 	public void setShirtColor(Color shirtColor) {
 		super.setShirtColor(shirtColor);
-		this.appearanceColorMap.put("BASE_SHIRT_COLOR", shirtColor);
+		this.appearanceColorMap.put("BASE_SHIRT", shirtColor);
 	}
 
 	public void setShoesColor(Color shoesColor) {
 		super.setShoesColor(shoesColor);
-		this.appearanceColorMap.put("BASE_SHOES_COLOR", shoesColor);
+		this.appearanceColorMap.put("BASE_SHOES", shoesColor);
 	}
 	
 	@Override
@@ -580,10 +567,10 @@ public abstract class RaceLook extends HumanLook {
 	public int getEyeColor()		{	return appearanceByteGet("BASE_EYE_COLOR");		}
 	
 	@Override
-	public Color getShirtColor() 	{	return appearanceColorGet("BASE_SHIRT_COLOR");	}
+	public Color getShirtColor() 	{	return appearanceColorGet("BASE_SHIRT");	}
 	
 	@Override
-	public Color getShoesColor() 	{	return appearanceColorGet("BASE_SHOES_COLOR");	}
+	public Color getShoesColor() 	{	return appearanceColorGet("BASE_SHOES");	}
 	
 	@Override
 	public GameTexture getHairTexture() 				{	return GameHair.getHair(this.getHair()).getHairTexture(this.getHairColor());	}

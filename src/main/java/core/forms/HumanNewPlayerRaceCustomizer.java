@@ -92,23 +92,18 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	   return super.baseGetDrawOffset(part);
 	}
 
-	// Returns the modification cost (stub for customization)
 	protected ArrayList<InventoryItem> getPartModificationCost(Color color) {
 		return null; // Customize as needed
 	}
 
-	// Updates the player look and triggers necessary updates
 	protected void updateBodyPartSelection(BodyPart part, Object id, boolean colorCustomization) {
 		this.setLookAttribute(this.getRaceLook(), part, id, colorCustomization);		
-		this.onChanged();		
-		
+		this.onChanged();			
 	}
 
 	@Override
 	protected Object getCurrentBodyPartSelection(BodyPart part, boolean colorCustomization) {
-		int DEBUG_VALUE = 80;
-		 Object value = super.baseGetCurrentBodypartSelection(part);		   
-
+		Object value = super.baseGetCurrentBodyPartSelection(part, colorCustomization);		   
 	    return value;
 	}
 
@@ -117,12 +112,12 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	protected void setLookAttribute(RaceLook look, BodyPart part, Object value, boolean colorCustomization) {
 	    if (value instanceof Integer) {
 	        int intValue = (Integer) value;
-	        super.baseSetCurrentBodyPart(look, part, intValue, colorCustomization);	      
+	        super.baseSetLookBodyPartValue(look, part, intValue, colorCustomization);	      
 	    } else if (value instanceof Color) {
 	        Color colorValue = (Color) value;
 	        switch (part.getPartName()) {	            
-	            case "BASE_SHIRT_COLOR": look.setShirtColor(colorValue); break;
-	            case "BASE_SHOES_COLOR": look.setShoesColor(colorValue); break;
+	            case "BASE_SHIRT": look.setShirtColor(colorValue); break;
+	            case "BASE_SHOES": look.setShoesColor(colorValue); break;
 	        }
 	    } else {
 	        throw new IllegalArgumentException("Unsupported type for body part: " + part.getPartName());
@@ -146,15 +141,12 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 		RaceLook look = new CustomHumanLook(this.getRaceLook());
 		applyLookModifiers(look, part);
 		setLookAttribute(look, part, id, colorCustomization);
-		HumanDrawOptions options = new HumanDrawOptions(null, look, false);
-		// Center position for the preview
-		
-		
-		super.baseDrawBodyPartPreview(button, look, part, options, id, x, y, _width, _height);
+		HumanDrawOptions options = new HumanDrawOptions(null, look, false);		
+		super.baseDrawBodyPartPreview(button, look, part, colorCustomization, options, id, x, y, _width, _height);
 	}
 
 	protected void applyLookModifiers(RaceLook look, BodyPart part) {
-		if (part.getPartName() == "BASE_SKIN_COLOR" || part.getPartName() == "BASE_EYE" || part.getPartName() == "BASE_EYE_COLOR") {
+		if (part.getPartName() == "BASE_SKIN" || part.getPartName() == "BASE_EYE") {
 		    look.setHair(0);
 		    look.setFacialFeature(0);
 		}
@@ -166,8 +158,8 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	}			
 	
 	// Generates sections dynamically for each body part
-	protected Section createBodyPartSection(BodyPart part, Predicate<Section> isCurrent, int _width) {
-		return super.createBodyPartSection(part, isCurrent, _width);
+	protected Section createBodyPartSection(BodyPart part, boolean isColorPart, Predicate<Section> isCurrent, int _width) {
+		return super.createBodyPartSection(part, isColorPart, isCurrent, _width);
 	}
 
 	public Point getSkinFaceDrawOffset() 		{	return new Point(-3, -4);	}
@@ -187,12 +179,6 @@ public class HumanNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	}
 
 	public void modifyHumanDrawOptions(HumanDrawOptions drawOptions) {	}
-
-
-	@Override
-	protected Section createBodyPartCustomColorSection(BodyPart part, Predicate<Section> isCurrent, int _width) {
-		return super.createBodyPartSection(part, isCurrent, _width);
-	}
 
 	@Override
 	public void reset() {

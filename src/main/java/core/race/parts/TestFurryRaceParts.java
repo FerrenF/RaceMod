@@ -39,8 +39,8 @@ public class TestFurryRaceParts extends RaceLookParts{
 		    			 "racemod.race",
 		    			 "tail",
 		    			 7,
-		    			 1,
-		    			 32,
+		    			 0,
+		    			 31,
 		    			 true,
 		    			 "player/race/testfurry/skincolors",
 		    			 "player/race/testfurry/tail/",
@@ -56,8 +56,8 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "racemod.race",
         				 "ears",
         				 9,
-		    			 1,
-		    			 32,
+		    			 0,
+		    			 31,
 		    			 true,
         				 "player/race/testfurry/skincolors",
         				 "player/race/testfurry/ears/",
@@ -70,8 +70,8 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "racemod.race",
         				 "muzzle",
         				 7,
-		    			 1,
-		    			 32,
+		    			 0,
+		    			 31,
 		    			 true,
         				 "player/race/testfurry/skincolors",
         				 "player/race/testfurry/muzzle/",
@@ -84,8 +84,8 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "racemod.race",
         				 "head",
         				 6,
-		    			 1,
-		    			 32,
+		    			 0,
+		    			 31,
 		    			 true,
         				 "player/race/testfurry/skincolors",
         				 "player/race/testfurry/head/",
@@ -98,8 +98,8 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "racemod.race",
         				 "body",
         				 2,
-		    			 1,
-		    			 32,
+		    			 0,
+		    			 31,
 		    			 true,
         				 "player/race/testfurry/body/skincolors",
         				 "player/race/testfurry/body/",
@@ -113,7 +113,7 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "arms",
         				 1,
 		    			 2,
-		    			 32,
+		    			 31,
 		    			 true,
         				 "player/race/testfurry/arms/skincolors",
         				 "player/race/testfurry/arms/",
@@ -125,9 +125,9 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "FEET",
         				 "racemod.race",
         				 "feet",
-        				 1,
-		    			 1,
-		    			 32,
+        				 2,
+		    			 0,
+		    			 31,
 		    			 true,
         				 "player/race/testfurry/feet/skincolors",
         				 "player/race/testfurry/feet/",
@@ -142,14 +142,15 @@ public class TestFurryRaceParts extends RaceLookParts{
         				 "player/race/testfurry/skincolors",
         				 "player/race/testfurry/eyes/eyecolors",
         				 "player/race/testfurry/eyes/",
-        				 12, 18, 32, new Point(64,64),
+        				 12, 16, 31, new Point(64,64),
         				 new Point(32, 32),
         				 null, 5, true, 1)       		 		
         		 );
-          
-         this.hidePartCustomizer("SKIN");
-         this.hidePartCustomizer("EYE");
          
+         this.hidePartCustomizer("BASE_SKIN");
+         this.hidePartCustomizer("BASE_SKIN_COLOR");
+         this.hidePartCustomizer("BASE_EYE");     
+         this.hidePartCustomizer("BASE_EYE_COLOR");  
     }
 
 

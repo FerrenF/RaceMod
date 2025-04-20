@@ -70,16 +70,21 @@ public abstract class RaceLookParts{
     public void defineRaceBodyParts() {
     	
     	int b_l = DEFAULT_COLORS.length;
-	  this.addBodyPart("BASE_SKIN", 		new BodyPart("BASE_SKIN", "base_skin",
+	  this.addBodyPart("BASE_SKIN", 		new BodyPart("BASE_SKIN", "skin",
 			  tryGetBaseGameGfx(()->GameSkin.getTotalSkins()),  tryGetBaseGameGfx(()->GameSkin.getTotalSkins())));
-      this.addBodyPart("BASE_EYE", 			new BodyPart("BASE_EYE", "base_eye",
+      this.addBodyPart("BASE_EYE", 			new BodyPart("BASE_EYE", "eye",
     		  tryGetBaseGameGfx(()->GameEyes.getTotalEyeTypes()), tryGetBaseGameGfx(()->GameEyes.getTotalColors())));
-      this.addBodyPart("BASE_HAIR", 		new BodyPart("BASE_HAIR", "base_hair",
+      this.addBodyPart("BASE_HAIR", 		new BodyPart("BASE_HAIR", "hair",
     		  tryGetBaseGameGfx(()->GameHair.getTotalHair()),tryGetBaseGameGfx(()->GameHair.getTotalHairColors())));
-      this.addBodyPart("BASE_FACIAL_HAIR", 	new BodyPart("BASE_FACIAL_HAIR", "base_facial_hair",
+      this.addBodyPart("BASE_FACIAL_HAIR", 	new BodyPart("BASE_FACIAL_HAIR", "facial_hair",
     		  tryGetBaseGameGfx(()->GameHair.getTotalFacialFeatures()), tryGetBaseGameGfx(()->GameHair.getTotalHairColors())));
-      this.addBodyPart("BASE_SHIRT", 		new BodyPart("BASE_SHIRT", "base_shirt", 1, b_l));
-      this.addBodyPart("BASE_SHOES", 		new BodyPart("BASE_SHOES", "base_shoes", 1, b_l));   
+      this.addBodyPart("BASE_SHIRT", 		new BodyPart("BASE_SHIRT", "shirt", 1, b_l));
+      this.addBodyPart("BASE_SHOES", 		new BodyPart("BASE_SHOES", "shoes", 1, b_l));   
+      
+      this.hidePartCustomizer("BASE_SKIN");
+      this.hidePartCustomizer("BASE_SHIRT");
+      this.hidePartCustomizer("BASE_SHOES");
+      this.hidePartCustomizer("BASE_FACIAL_HAIR_COLOR");
     }
 
     public static int tryGetBaseGameGfx(Supplier<Integer> getter) {

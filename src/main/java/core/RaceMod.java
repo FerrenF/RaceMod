@@ -11,6 +11,7 @@ import java.util.jar.JarFile;
 import core.containers.CustomRaceStylistContainer;
 import core.forms.container.CustomRaceStylistContainerForm;
 import core.gfx.texture.AsyncTextureLoader;
+import core.gfx.texture.TextureManager;
 import core.network.CustomPacketConnectApproved;
 import core.network.CustomPacketPlayerAppearance;
 import core.race.CustomHumanLook;
@@ -22,6 +23,7 @@ import core.registries.RaceRegistry;
 import helpers.DebugHelper;
 import helpers.DebugHelper.MESSAGE_TYPE;
 import helpers.SettingsHelper;
+import necesse.engine.GameCache;
 import necesse.engine.GameLoadingScreen;
 import necesse.engine.GlobalData;
 import necesse.engine.localization.Localization;
@@ -69,13 +71,13 @@ public class RaceMod {
 	public static int CUSTOM_STYLIST_CONTAINER;
 	public static Instrumentation byteBuddyInst;
 	public static SettingsHelper settings = new SettingsHelper();
-	public static String VERSION_STRING = "0.0.21 ALPHA";
+	public static String VERSION_STRING = "0.1.21 ALPHA";
 	public static boolean DUMP_CLASSES = false;
 	public static boolean DEBUG_HOOKS = false;
 	public static boolean NEEDS_VERSIONING = false;
 	public static String OLD_VERSION_STRING;
 	
-	
+	public static TextureManager raceTextureManager;
 	public void preInit() {
 		
 		byteBuddyInst = ByteBuddyAgent.install();
@@ -106,6 +108,12 @@ public class RaceMod {
 			if(c2.exists()) {
 				deleteDirectory(c2);
 				}
+			
+			File c3 = new File(GameCache.cachePath() + "texCache.bin.cache");
+			if(c3.exists()) {	c3.delete();	}
+			
+			File c4 = new File(GameCache.cachePath() + "texCache.idx.cache");
+			if(c4.exists()) {	c4.delete();	}
 			
 			SettingsHelper.setSettingsString("DATA", "last_version", VERSION_STRING);			
 		}
@@ -248,6 +256,11 @@ public class RaceMod {
     	DebugHelper.handleDebugMessage("Registering network utilities...");
 		PacketRegistry.registerPacket(CustomPacketConnectApproved.class);
 		PacketRegistry.registerPacket(CustomPacketPlayerAppearance.class);
+		
+		DebugHelper.handleDebugMessage("Initializing texture manager.");
+		raceTextureManager = new TextureManager("texCache", 500);
+		raceTextureManager.init_cache();
+		
     }
     
 	private static void interceptCharacterSavePath() {

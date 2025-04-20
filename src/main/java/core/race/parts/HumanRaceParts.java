@@ -10,6 +10,8 @@ public class HumanRaceParts extends RaceLookParts{
        super(init);
     }
     
-    public void defineCustomRaceBodyParts() {}
+    public void defineCustomRaceBodyParts() {    	
+    	
+    }
    
 }

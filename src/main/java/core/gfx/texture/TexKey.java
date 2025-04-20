@@ -1,49 +1,57 @@
 package core.gfx.texture;
+import java.util.List;
 import java.util.Objects;
 
 import necesse.gfx.gameTexture.GameTexture;
 
-public class TexKey {
-	public final String texturePath;
+public class TexKey extends BaseTexKey {
+	public final String textureID;
     public final String palettePath;
-    public final float scale;
     public final Integer paletteId;
-    public final GameTexture.BlendQuality blendQuality;
     
-    public TexKey(String texturePath, String palettePath, float scale, int paletteId, GameTexture.BlendQuality blendQuality) {
-        this.texturePath = texturePath;
+    public TexKey(String textureID, String texturePath, String palettePath, float scale, int paletteId, GameTexture.BlendQuality blendQuality) {
+    	super(texturePath, scale, blendQuality);
+    	this.textureID = textureID;
     	this.palettePath = palettePath;
-        this.scale = scale;
         this.paletteId = paletteId;
-        this.blendQuality = blendQuality;
     }
     
-    public TexKey(String texturePath, float scale, GameTexture.BlendQuality blendQuality) {
-        this.texturePath = texturePath;
+    public TexKey(String textureID, String texturePath, float scale, GameTexture.BlendQuality blendQuality) {
+    	super(texturePath, scale, blendQuality);
+    	this.textureID = textureID;
     	this.palettePath = null;
-        this.scale = scale;
         this.paletteId = null;
-        this.blendQuality = blendQuality;
     }
     
     public boolean hasPalette() {
     	return this.palettePath != null;
     }
-       
+    
+    List<Integer> palleteIdList(){
+    	return List.of(paletteId);
+    }
+    
+    List<String> requiredPathsToBuild(){
+    	return palettePath != null ? List.of(texturePath, palettePath) : List.of(texturePath);
+    }
+    
+    @Override
+    protected String computeKeyHash() {
+        String data = textureID+ "|"+palettePath + "|" + texturePath + "|" + scale +"|" + paletteId+ "|" + blendQuality;
+        return sha1(data);
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TexKey)) return false;
-        TexKey key = (TexKey) o;
-        return Float.compare(key.scale, scale) == 0 &&
-        		Integer.compare(key.paletteId, paletteId) == 0 &&
-                Objects.equals(texturePath, key.texturePath) &&
-                Objects.equals(palettePath, key.palettePath) &&
-                Objects.equals(blendQuality, key.blendQuality);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(texturePath, palettePath, scale, paletteId, blendQuality);
+        if (!super.equals(o)) return false;
+        TexKey that = (TexKey) o;
+        return Objects.equals(textureID, that.textureID) &&
+        	   Objects.equals(texturePath, that.texturePath) &&
+        	   Objects.equals(scale, that.scale) &&
+               Objects.equals(palettePath, that.palettePath) &&
+               Objects.equals(blendQuality, that.blendQuality) &&
+               Objects.equals(paletteId, that.paletteId);
     }
 }

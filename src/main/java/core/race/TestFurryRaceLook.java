@@ -1,6 +1,8 @@
 package core.race;
 
 import java.awt.Color;
+
+import core.RaceMod;
 import core.forms.FormNewPlayerRaceCustomizer;
 import core.forms.TestFurryNewPlayerRaceCustomizer;
 import core.gfx.EyeTypeGameParts;
@@ -27,9 +29,7 @@ import necesse.level.maps.light.GameLight;
 
 
 public class TestFurryRaceLook extends RaceLook {
-	
-	public static GameTexture TEX_MASK_LEFT;
-	public static GameTexture TEX_MASK_RIGHT;
+
 	public static final String TEST_FURRY_RACE_ID = "testfurry";
 	public static GameTexture raceCustomizerIcon;
 	
@@ -556,18 +556,18 @@ public class TestFurryRaceLook extends RaceLook {
 				MaskShaderOptions m = mask;
 				if(mask == null) {
 					if(dir == 3) {
-						m = new MaskShaderOptions(TEX_MASK_RIGHT, 0, 0, 0, 0); 
+						m = new MaskShaderOptions(RaceMod.TEX_MASK_RIGHT, 0, 0, 0, 0); 
 					}
 					else if(dir == 1) {
-						m = new MaskShaderOptions(TEX_MASK_LEFT, 0, 0, 0, 0); 
+						m = new MaskShaderOptions(RaceMod.TEX_MASK_LEFT, 0, 0, 0, 0); 
 					}
 				}
 				else {
 					if(dir == 3) {
-						m = mask.copyAndAddMask(TEX_MASK_RIGHT, 0, 0); 
+						m = mask.copyAndAddMask(RaceMod.TEX_MASK_RIGHT, 0, 0); 
 					}
 					else if(dir == 1) {
-						m = mask.copyAndAddMask(TEX_MASK_LEFT, 0, 0); 
+						m = mask.copyAndAddMask(RaceMod.TEX_MASK_LEFT, 0, 0); 
 					}
 				}
 		

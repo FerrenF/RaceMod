@@ -23,8 +23,8 @@ public class OrcRaceParts extends RaceLookParts{
          				 "racemod.race",
          				 "custom_hair",
          				 8,
-		    			 2,
-		    			 27,
+		    			 0,
+		    			 26,
 		    			 true,
          				 "player/race/orc/haircolors",
          				 "player/race/orc/hair/",
@@ -37,8 +37,8 @@ public class OrcRaceParts extends RaceLookParts{
         				 "racemod.race",
         				 "facehair",
         				 2,
-		    			 1,
-		    			 27,
+		    			 0,
+		    			 26,
 		    			 true,
         				 "player/race/orc/haircolors",
         				 "player/race/orc/facehair/",
@@ -51,8 +51,8 @@ public class OrcRaceParts extends RaceLookParts{
         				 "racemod.race",
         				 "facialfeatures",
         				 3,
-		    			 1,
-		    			 18,
+		    			 0,
+		    			 17,
 		    			 true,
         				 "player/race/orc/skincolors",
         				 "player/race/orc/facialfeatures/",
@@ -65,8 +65,8 @@ public class OrcRaceParts extends RaceLookParts{
         				 "racemod.race",
         				 "head",
         				 2,
-		    			 1,
-		    			 18,
+		    			 0,
+		    			 17,
 		    			 true,
         				 "player/race/orc/skincolors",
         				 "player/race/orc/head/",
@@ -79,8 +79,8 @@ public class OrcRaceParts extends RaceLookParts{
         				 "racemod.race",
         				 "body",
         				 1,
-		    			 1,
-		    			 18,
+		    			 0,
+		    			 17,
 		    			 true,
         				 "player/race/orc/skincolors",
         				 "player/race/orc/body/",
@@ -94,7 +94,7 @@ public class OrcRaceParts extends RaceLookParts{
         				 "arms",
         				 1,
 		    			 2,
-		    			 18,
+		    			 17,
 		    			 true,
         				 "player/race/orc/skincolors",
         				 "player/race/orc/arms/",
@@ -107,8 +107,8 @@ public class OrcRaceParts extends RaceLookParts{
         				 "racemod.race",
         				 "feet",
         				 1,
-		    			 1,
-		    			 18,
+		    			 0,
+		    			 17,
 		    			 true,
         				 "player/race/orc/skincolors",
         				 "player/race/orc/feet/",
@@ -123,20 +123,21 @@ public class OrcRaceParts extends RaceLookParts{
         				 "player/race/orc/skincolors",
         				 "player/race/orc/eyes/eyecolors",
         				 "player/race/orc/eyes/",
-        				 1, 18, 32, new Point(64,64),
+        				 12, 16, 32, new Point(64,64),
         				 null, null, 5, true, 1)       		 		
         		 );
           
-         this.hidePartCustomizer("SKIN_COLOR");
-         this.hidePartCustomizer("EYE_COLOR");
-         this.hidePartCustomizer("EYE_TYPE");
-         this.hidePartCustomizer("HAIR");
-         this.hidePartCustomizer("HAIR_COLOR");
+         this.hidePartCustomizer("BASE_SKIN");
+         this.hidePartCustomizer("BASE_SKIN_COLOR");
+         this.hidePartCustomizer("BASE_EYE");
+         this.hidePartCustomizer("BASE_EYE_COLOR");
+         this.hidePartCustomizer("BASE_HAIR");
+         this.hidePartCustomizer("BASE_HAIR_COLOR");
          this.hidePartCustomizer("HEAD_COLOR");
          this.hidePartCustomizer("ARMS_COLOR");
          this.hidePartCustomizer("FEET_COLOR");
          this.hidePartCustomizer("FACIALFEATURES_COLOR");
-         this.hidePartCustomizer("FACIAL_HAIR");
+         this.hidePartCustomizer("BASE_FACIAL_HAIR");
     }
 
 

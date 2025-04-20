@@ -1,172 +1,175 @@
 package core.gfx.texture;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.io.*;
+import java.util.concurrent.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
 import javax.imageio.ImageIO;
 
 import core.RaceMod;
-import core.gfx.GameParts;
-import core.gfx.cache.TextureCache;
-import core.gfx.cache.TextureCache.TexCacheElement;
-import necesse.engine.GlobalData;
-import necesse.engine.modLoader.LoadedMod;
+import core.gfx.cache.TextureByteCache;
+import core.gfx.cache.TextureByteCache.TexCacheElement;
 import necesse.gfx.gameTexture.GameTexture;
-import necesse.gfx.res.ResourceEncoder;
 import necesse.gfx.ui.GameTextureData;
 
 public class AsyncTextureLoader {
- public static String rawTextureLocationRoot = GlobalData.rootPath();
- private static final ExecutorService executor = Executors.newFixedThreadPool(2);
- private TextureCache textureCache;
- public enum TextureLocation{
-	 FROM_JAR,
-	 FROM_FILE,
-	 FROM_CACHE,
-	 DONT_LOAD
- }
- 
- public AsyncTextureLoader() {	 
-	 this.textureCache = null;
- }
- 
- public AsyncTextureLoader(TextureCache textureCache) {
-	 this.textureCache = textureCache;
- }
- 
- public void requestLoad(TexKey key, TextureLocation location) throws Exception {
-	 if(this.textureCache == null) throw new Exception("Cache wasn't initialized at the time of resource request.");
-     executor.submit(() -> {
-         try {                	
-             switch(location) {
-	             case FROM_JAR: 
-	            	 	loadImageFromJar(key, this.textureCache);
-	            	 break;
-	             case FROM_FILE:
-	            	 	loadImageFromFile(key, this.textureCache);
-	            	 break;
-	             case FROM_CACHE:
-	            	 	loadImageFromCache(key, this.textureCache);
-	            	 break;
-	             default:
-	            	 throw new IllegalArgumentException("Can't request to load an image without a valid location.");
-             }  
-  
-         } catch (Exception e) {
-             e.printStackTrace();
-         }
-     });
- }
- 
- public void requestLoadFromCache(Integer key) throws Exception {
-	 if(this.textureCache == null) throw new Exception("Cache wasn't initialized at the time of resource request.");
-     executor.submit(() -> {
-         try {              	 
-	          loadImageFromCache(key, this.textureCache);
-         } catch (Exception e) {
-             e.printStackTrace();
-         }
-     });
- }
- 
- private void loadImageFromFile(TexKey key, TextureCache toCache) {
-	 try {
-        GameTextureData textureData = loadGameTextureDataFromFile(rawTextureLocationRoot + key.texturePath + ".png", key.blendQuality);
-        GameTextureData paletteData = loadGameTextureDataFromFile(rawTextureLocationRoot + key.palettePath + ".png", null);
-        toCache.set(key.hashCode(), textureData, paletteData);
-        toCache.markLoadComplete(key.hashCode());
-    } catch (IOException e) {
-        System.err.println("Failed to load texture from file for "+rawTextureLocationRoot + key.texturePath +" key " + key);
-        
-    }
-}
 
-private GameTextureData loadGameTextureDataFromFile(String path, GameTexture.BlendQuality blendQuality) throws IOException {
-	
-	File f = new java.io.File(path);
-    BufferedImage img = ImageIO.read(f);
-    if (img == null) throw new IOException("Failed to decode image from file: " + path);  
-    GameTextureData result = new GameTextureData(img.getWidth(), img.getHeight(), imageToByteArray(img), false, blendQuality);
-    img.flush();
-    return result;
-}
-	
-private void loadImageFromCache(TexKey key, TextureCache toCache) throws Exception {
-	  loadImageFromCache(key.hashCode(), toCache);
-}
+    public static String rawTextureLocationRoot = "gamecache/";
 
-private void loadImageFromCache(Integer key, TextureCache toCache) throws Exception {
-    if (toCache.containsLoadedKey(key)) {  
-        return;
-    }    
-    TexCacheElement diskElement = toCache.loadDiskCacheElement(key.hashCode());
-    if (diskElement != null) {
-        toCache.set(key, diskElement.textureData, diskElement.paletteData);
-        toCache.markLoadComplete(key);
-    } else {
-        throw new IOException("Could not load texture from disk cache for key: " + key);
-    }
-}
+    private static final ExecutorService executor = Executors.newFixedThreadPool(4);
+    private final ConcurrentHashMap<Integer, Boolean> loadingFlags = new ConcurrentHashMap<>();
 
-private void loadImageFromJar(TexKey key, TextureCache toCache) throws IOException {
-    GameTextureData textureData = loadGameTextureDataFromJar(key.texturePath,  key.blendQuality);
-    GameTextureData paletteData = loadGameTextureDataFromJar(key.palettePath, null);
-    toCache.set(key.hashCode(), textureData, paletteData);
-    toCache.markLoadComplete(key.hashCode());
-}
+    private TextureByteCache textureCache;
 
-private GameTextureData loadGameTextureDataFromJar(String path, GameTexture.BlendQuality blendQuality) throws IOException {
-    JarFile jar = RaceMod.modJar;
-
-    // Normalize path, just in case
-    String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
-
-    normalizedPath = "resources/" + normalizedPath + ".png";
-    JarEntry entry = jar.getJarEntry(normalizedPath );
-    if (entry == null) {
-        throw new IOException("Missing resource: " + normalizedPath);
+    public enum TextureLocation {
+        FROM_JAR,
+        FROM_FILE,
+        NONE
     }
 
-    try (InputStream stream = jar.getInputStream(entry)) {
-        BufferedImage img = ImageIO.read(stream);
+    public AsyncTextureLoader() {}
+
+    public AsyncTextureLoader(TextureByteCache textureCache) {
+        this.textureCache = textureCache;
+    }
+
+    public void requestLoad(String texturePath, TextureLocation location, int cacheKey,
+                            GameTexture.BlendQuality blendQuality, Runnable onComplete) throws Exception {
+        if (this.textureCache == null)
+            throw new Exception("Cache not initialized at time of resource request.");
+        if (location == TextureLocation.NONE) return;
+
+        if (loadingFlags.putIfAbsent(cacheKey, true) != null) return;
+
+        executor.submit(() -> {
+            try {
+                switch (location) {
+                    case FROM_JAR: loadImageFromJar(texturePath, cacheKey, blendQuality); break;
+                    case FROM_FILE: loadImageFromFile(texturePath, cacheKey, blendQuality); break;
+                    default: throw new IllegalArgumentException("Unsupported texture location: " + location);
+                }
+                if (onComplete != null) onComplete.run();
+            } catch (Exception e) {
+                logError("Failed to load texture from " + location + ": " + texturePath, e);
+                textureCache.markLoadFailed(cacheKey);
+            } finally {
+                loadingFlags.remove(cacheKey);
+            }
+        });
+    }
+
+    public void requestLoadFromCache(int cacheKey, Runnable onComplete) throws Exception {
+        if (this.textureCache == null)
+            throw new Exception("Cache not initialized at time of disk cache request.");
+
+        if (loadingFlags.putIfAbsent(cacheKey, true) != null) return;
+
+        executor.submit(() -> {
+            try {
+                if (textureCache.containsLoadedKey(cacheKey) || textureCache.isLoading(cacheKey))
+                    return;
+
+                if (!textureCache.indexContainsKey(cacheKey))
+                    return;
+
+                TexCacheElement diskElement = textureCache.loadDiskCacheElement(cacheKey);
+                if (diskElement != null) {
+                    textureCache.set(cacheKey, diskElement);
+                    textureCache.markLoadComplete(cacheKey);
+                    if (onComplete != null) onComplete.run();
+                } else {
+                    throw new IOException("Could not load texture from disk cache for key: " + cacheKey);
+                }
+            } catch (Exception e) {
+                logError("Failed to load texture from disk cache for key: " + cacheKey, e);
+                textureCache.markLoadFailed(cacheKey);
+            } finally {
+                loadingFlags.remove(cacheKey);
+            }
+        });
+    }
+
+    private void loadImageFromFile(String texturePath, int cacheKey, GameTexture.BlendQuality blendQuality) throws IOException {
+        String fullPath = rawTextureLocationRoot + normalizeTexturePath(texturePath);
+        GameTextureData textureData = loadGameTextureDataFromFile(fullPath, blendQuality);
+        textureCache.set(cacheKey, new TexCacheElement(cacheKey, textureData));
+        textureCache.markLoadComplete(cacheKey);
+    }
+
+    private void loadImageFromJar(String texturePath, int cacheKey, GameTexture.BlendQuality blendQuality) throws IOException {
+        GameTextureData textureData = loadGameTextureDataFromJar(texturePath, blendQuality);
+        textureCache.set(cacheKey, new TexCacheElement(cacheKey, textureData));
+        textureCache.markLoadComplete(cacheKey);
+    }
+
+    private GameTextureData loadGameTextureDataFromFile(String path, GameTexture.BlendQuality blendQuality) throws IOException {
+        File file = new File(path);
+        if (!file.exists()) throw new FileNotFoundException("File not found: " + path);
+        BufferedImage img = ImageIO.read(file);
         if (img == null) throw new IOException("Failed to decode image: " + path);
-
-        GameTextureData result = new GameTextureData(
-            img.getWidth(),
-            img.getHeight(),
-            imageToByteArray(img),
-            false,
-            blendQuality
-        );
+        GameTextureData result = new GameTextureData(img.getWidth(), img.getHeight(), imageToByteArray(img), false, blendQuality);
         img.flush();
         return result;
     }
-}
-	
-private byte[] imageToByteArray(BufferedImage bufferedImage) {
-	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	try {
-		ImageIO.write(bufferedImage, "png", baos);
-	} catch (IOException e) {
-		 throw new RuntimeException(e);
-	}
-	return baos.toByteArray();
-}
-public void setCache(TextureCache textureDataCache) {
-		this.textureCache = textureDataCache;
-	}
 
-	public static void shutdownThreads() {
-		executor.shutdownNow();
-		
-	}
+    private GameTextureData loadGameTextureDataFromJar(String texturePath, GameTexture.BlendQuality blendQuality) throws IOException {
+        JarFile jar = RaceMod.modJar;
+        String entryPath = "resources/" + normalizeTexturePath(texturePath);
+        JarEntry entry = jar.getJarEntry(entryPath);
+        if (entry == null) throw new IOException("Missing resource in jar: " + entryPath);
 
+        try (InputStream stream = jar.getInputStream(entry)) {
+            BufferedImage img = ImageIO.read(stream);
+            if (img == null) throw new IOException("Failed to decode image: " + entryPath);
+            GameTextureData result = new GameTextureData(img.getWidth(), img.getHeight(), imageToByteArray(img), false, blendQuality);
+            img.flush();
+            return result;
+        }
+    }
+
+    private String normalizeTexturePath(String path) {
+        path = path.startsWith("/") ? path.substring(1) : path;
+        return path.endsWith(".png") ? path : path + ".png";
+    }
+
+    private byte[] imageToByteArray(BufferedImage bufferedImage) {
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        byte[] pixels = new byte[width * height * 4]; // RGBA
+
+        int[] argbPixels = bufferedImage.getRGB(0, 0, width, height, null, 0, width);
+
+        for (int i = 0; i < argbPixels.length; i++) {
+            int argb = argbPixels[i];
+            int baseIndex = i * 4;
+            pixels[baseIndex]     = (byte)((argb >> 16) & 0xFF); // R
+            pixels[baseIndex + 1] = (byte)((argb >> 8) & 0xFF);  // G
+            pixels[baseIndex + 2] = (byte)(argb & 0xFF);         // B
+            pixels[baseIndex + 3] = (byte)((argb >> 24) & 0xFF); // A
+        }
+
+        return pixels;
+    }
+
+    public void setCache(TextureByteCache textureCache) {
+        this.textureCache = textureCache;
+    }
+
+    public static void shutdownThreads() {
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void logError(String message, Exception e) {
+        System.err.println(message);
+        e.printStackTrace(System.err);
+    }
 }
-

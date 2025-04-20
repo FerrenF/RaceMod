@@ -5,6 +5,8 @@ import java.awt.Point;
 import core.gfx.EyeTypeGameParts;
 import core.gfx.TextureReplacer;
 import core.gfx.texture.AsyncTextureLoader.TextureLocation;
+import necesse.gfx.GameSkin;
+import necesse.gfx.GameSkinColors;
 import necesse.gfx.gameTexture.GameTexture;
 import necesse.gfx.gameTexture.GameTexture.BlendQuality;
 
@@ -15,6 +17,7 @@ public class EyeBodyPart extends BodyPart {
 	private String skinColorPath;
 	public EyeBodyPart(String name, String labelKey, int textureOptions, int colorOptions, int closedEyeOptions) {
 		super(name, labelKey, textureOptions, colorOptions);
+		this._numSkinColors = GameSkin.getTotalSkins();
 	}
 
 	public EyeBodyPart(Class<? extends RaceLookParts> belongsToClass, String name, String labelCategory,
@@ -23,7 +26,7 @@ public class EyeBodyPart extends BodyPart {
 			Point spriteMapSize, Point accessoryTextureMapSize, TextureReplacer replacer, int stylistCost,
 			boolean costIsShards, int closedEyeOptions) {
 		
-		super(belongsToClass, name, labelCategory, labelKey, numTextures, 1, numColors, true, palettePath, partTexturePath, spriteMapSize,
+		super(belongsToClass, name, labelCategory, labelKey, numTextures, 0, numColors, true, palettePath, partTexturePath, spriteMapSize,
 				accessoryTextureMapSize, replacer, stylistCost, costIsShards);
 		
 		this.skinColorPath = skinColorPath;
