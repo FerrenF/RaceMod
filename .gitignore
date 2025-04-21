@@ -52,3 +52,10 @@ tmp/
 *.env
 *.local.properties
 *.aseprite
+
+# Unrelated directories
+./unprocessed_textures
+./bck
+
+# Generated files
+steam_appid.txt
