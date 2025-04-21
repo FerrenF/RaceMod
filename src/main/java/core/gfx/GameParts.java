@@ -44,8 +44,13 @@ public class GameParts {
 	}
 
 
-	public static GameTexture getWigTexture(BodyPart part, int textureID, int colorID, int sideNumber) {
+	public static GameTexture getWigTexture(BodyPart part, int textureID, int colorID, int sideNumber) {		
+		
 	    GamePart p = new GamePart(part);
+	    
+	    if(textureID == -1) {
+	    	return RaceMod.TEX_DISABLE_PART;
+	    }
 	    TexKey spriteTex = p.getWigTexKey(sideNumber, textureID + 1, colorID + 1);
 
 	    DebugHelper.handleFormattedDebugMessage("[getWigTexture] Requesting wig texture for: %s", 85, MESSAGE_TYPE.INFO,

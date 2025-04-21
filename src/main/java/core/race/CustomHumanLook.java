@@ -18,6 +18,12 @@ public class CustomHumanLook extends RaceLook {
 	
 	public static GameTexture raceCustomizerIcon;
 	public static final String HUMAN_RACE_ID = "human";
+	
+	@Override
+	public String getRaceID() {
+		return CustomHumanLook.HUMAN_RACE_ID;
+	}
+	
 	public CustomHumanLook(GameRandom random, boolean onlyHumanLike) {		
 		this(true);
 		this.randomizer = random;
@@ -26,7 +32,7 @@ public class CustomHumanLook extends RaceLook {
 	
 	public static CustomHumanLook getCustomRaceLook(RaceLook _look) {	
 		if (!_look.getRaceID().equals(CustomHumanLook.HUMAN_RACE_ID)) {
-			DebugHelper.handleDebugMessage(String.format("Draw options for raceID %s requested for non-raceID %s from %s. Using defaults.", TestFurryRaceLook.TEST_FURRY_RACE_ID, _look.getRaceID(), _look.getClass().getName()), 25);
+			DebugHelper.handleDebugMessage(String.format("Draw options for raceID %s requested for non-raceID %s from %s. Using defaults.", CustomHumanLook.HUMAN_RACE_ID, _look.getRaceID(), _look.getClass().getName()), 25);
 			return new CustomHumanLook(true);
 		}
 		return (CustomHumanLook)_look;
@@ -119,9 +125,6 @@ public class CustomHumanLook extends RaceLook {
 		DebugHelper.handleDebugMessage("Loading race textures for race " + CustomHumanLook.HUMAN_RACE_ID, 50, MESSAGE_TYPE.DEBUG);
 	}
 
-	@Override
-	public String getRaceID() {
-		return CustomHumanLook.HUMAN_RACE_ID;
-	}
+
 
 }

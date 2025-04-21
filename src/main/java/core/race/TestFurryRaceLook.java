@@ -474,9 +474,11 @@ public class TestFurryRaceLook extends RaceLook {
 						
 				return rl.getMuzzleTexture().initDraw()
 						.sprite(spriteX, spriteY, spriteRes)
-						.size(width, height).mirror(mirrorX, mirrorY)					
+						.size(width, height)
+						.mirror(mirrorX, mirrorY)					
 						.alpha(alpha)
-						.light(light).addMaskShader(mask)
+						.light(light)
+						.addMaskShader(mask)
 						.pos(drawX + ((mask == null)
 								? 0 
 								: mask.drawXOffset), drawY + ((mask == null)
@@ -495,9 +497,11 @@ public class TestFurryRaceLook extends RaceLook {
 					
 					return rl.getTailTexture().initDraw()
 							.sprite(spriteX, spriteY, spriteRes)
-							.size(width, height).mirror(mirrorX, mirrorY)					
+							.size(width, height)
+							.mirror(mirrorX, mirrorY)					
 							.alpha((dir == 1 || dir == 3) ? alpha : 0)
-							.light(light).addMaskShader(mask)
+							.light(light)
+							.addMaskShader(mask)
 							.pos(drawX + ((mask == null)
 									? 0 
 									: mask.drawXOffset), drawY + ((mask == null)
@@ -515,9 +519,11 @@ public class TestFurryRaceLook extends RaceLook {
 				
 				return rl.getEarsTexture().initDraw()
 						.sprite(spriteX, spriteY, spriteRes)
-						.size(width, height).mirror(mirrorX, mirrorY)					
+						.size(width, height)
+						.mirror(mirrorX, mirrorY)					
 						.alpha((dir == 2 || dir == 3 || dir == 1) ? alpha : 0)
-						.light(light).addMaskShader(mask)
+						.light(light)
+						.addMaskShader(mask)
 						.pos(drawX + ((mask == null)
 								? 0 
 								: mask.drawXOffset), drawY + ((mask == null)
@@ -535,9 +541,11 @@ public class TestFurryRaceLook extends RaceLook {
  					
  					return rl.getTailTexture().initDraw()
  							.sprite(spriteX, spriteY, spriteRes)
- 							.size(width, height).mirror(mirrorX, mirrorY)					
+ 							.size(width, height)
+ 							.mirror(mirrorX, mirrorY)					
  							.alpha(!(dir == 1 || dir == 3) ? alpha : 0)
- 							.light(light).addMaskShader(mask)
+ 							.light(light)
+ 							.addMaskShader(mask)
  							.pos(drawX + ((mask == null)
  									? 0 
  									: mask.drawXOffset), drawY + ((mask == null)
@@ -573,9 +581,11 @@ public class TestFurryRaceLook extends RaceLook {
 		
 				return rl.getEarsTexture().initDraw()
 							.sprite(spriteX, spriteY, spriteRes)
-							.size(width, height).mirror(mirrorX, mirrorY)					
+							.size(width, height)
+							.mirror(mirrorX, mirrorY)					
 							.alpha((dir == 0 || dir == 3 || dir == 1) ? alpha : 0)
-							.light(light).addMaskShader(mask)
+							.light(light)
+							.addMaskShader(m)
 							.pos(drawX + ((m == null)
 									? 0 
 									: m.drawXOffset), drawY + ((m == null)

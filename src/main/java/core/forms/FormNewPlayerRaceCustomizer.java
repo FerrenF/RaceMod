@@ -217,9 +217,6 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	    int startX = 0;
 	    int startY = flow.next();
 	    
-	       
-	    
-
 	    int maxSectionHeight = 0;
 	    for (maxSectionHeight = 0; maxSectionHeight < sections.size(); ++maxSectionHeight) {
 	        Section section = sections.get(maxSectionHeight);
@@ -386,7 +383,8 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 			        this.updateLook();
 			       // this.updateComponents();          
 			    },
-			    (color)->{return costFunc.apply(color);}
+			    (color)->{return costFunc.apply(color);},
+			    false
 			),
 			isCurrent
 			);
@@ -407,8 +405,8 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		            _width
 		        );
 		}
-		else {
-			
+		else {			
+	
 		 return new Section(					 
     		(button, drawX, drawY, width, height) -> drawBodyPartIcon(button, part, drawX, drawY, width, height),
     			new LocalMessage(part.getLabelCategory(), isColorPart ? part.getLabelColorKey() : part.getLabelKey()),			    			
@@ -416,7 +414,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
             (button, id, x, y, w, h, current, hovering) -> drawBodyPartPreview(button, part, isColorPart, id, x, y, w, h),
             id -> id == (Integer)getCurrentBodyPartSelection(part, isColorPart),
             (id, event) -> updateBodyPartSelection(part, id, isColorPart),
-            (color)->this.getPartModificationCost(new Color(color))	),
+            (color)->this.getPartModificationCost(new Color(color)), !isColorPart ? part.isOptionalPart() : false),
         		isCurrent
     		);
 		}	 
@@ -470,6 +468,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	}
 
 	public void baseDrawBodyPartIcon(FormContentVarToggleButton button, RaceLook look, BodyPart part, HumanDrawOptions options, int x, int y, int _width, int _height, Point offset){
+		
 		int drawX = x + _width / 2;
 		int drawY = y + _height / 2;
 	
@@ -506,9 +505,8 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		}
 	}
 	
-	public void baseDrawBodyPartPreview(FormContentVarToggleButton button, RaceLook look, BodyPart part, boolean isColorPart, HumanDrawOptions options, int id, int x, int y, int _width, int _height)
-	{
-		
+	public void baseDrawBodyPartPreview(FormContentVarToggleButton button, RaceLook look, BodyPart part, boolean isColorPart, HumanDrawOptions options, int id, int x, int y, int _width, int _height)	{
+				
 			int drawX = x + _width / 2;
 			int drawY = y + _height / 2;
 	
@@ -517,17 +515,8 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 			    GameTexture wigTexture = isColorPart			    		
 			    		? GameHair.getHair(look.getHair()).getWigTexture(id)
 			    		: GameHair.getHair(id).getWigTexture(look.getHairColor()) ;
-			    wigTexture.initDraw().size(_height).posMiddle(drawX, drawY).draw();	 
-			    
-			 /*   if (look.getHair() == 0) {		    	
-			        Color color = (Color) GameHair.colors.getSkinColor(id).colors.get(3);
-			        Settings.UI.paintbrush_grayscale.initDraw().color(color).posMiddle(drawX, drawY).draw();
-			        Settings.UI.paintbrush_handle.initDraw().posMiddle(drawX, drawY).draw();	        
-			    } else {	   	
-			        GameSprite hairSprite = new GameSprite(GameHair.getHair(look.getHair()).getWigTexture(id), button.size.height);
-			        hairSprite.initDraw().light(new GameLight(136.36363F)).posMiddle(drawX, drawY).draw();    
-			    }*/
-			    
+			    wigTexture.initDraw().size(_height).posMiddle(drawX, drawY).draw();	 			    
+    
 			} else if (part.getPartName() == "BASE_FACIAL_HAIR") {			
 			    GameTexture wigTexture = GameHair.getFacialFeature(id).getWigTexture(look.getHairColor());
 			    wigTexture.initDraw().size(_height).posMiddle(drawX, drawY).draw();	    
@@ -576,7 +565,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 	public Form getSelectionContentIcons(FormInputSize buttonSize, int width, int count,
 		IntFunction<GameSprite> buttonContent, IntPredicate isCurrent,
 		BiConsumer<Integer, FormInputEvent<FormButton>> onClicked,
-		Function<Integer, ArrayList<InventoryItem>> costGetter) {
+		Function<Integer, ArrayList<InventoryItem>> costGetter, boolean isOptionalSelection) {
 	return this.getSelectionContent(buttonSize, width, count,
 			(button, id, drawX, drawY, w, h, current, hovering) -> {
 				GameSprite sprite = (GameSprite) buttonContent.apply(id);
@@ -585,13 +574,13 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 							.posMiddle(drawX + w / 2, drawY + h / 2).draw();
 				}
 	
-			}, isCurrent, onClicked, costGetter);
+			}, isCurrent, onClicked, costGetter, isOptionalSelection);
 	}
 
 	public Form getSelectionContentColors(FormInputSize buttonSize, int width, int count,
 		IntFunction<Color> buttonColor, IntPredicate isCurrent,
 		BiConsumer<Integer, FormInputEvent<FormButton>> onClicked,
-		Function<Integer, ArrayList<InventoryItem>> costGetter) {
+		Function<Integer, ArrayList<InventoryItem>> costGetter, boolean isOptionalSelection) {
 	return this.getSelectionContent(buttonSize, width, count,
 			(button, id, drawX, drawY, w, h, current, hovering) -> {
 				int buttonExtra = button.size.buttonDownContentDrawOffset;
@@ -599,12 +588,12 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 						.colorLight((Color) buttonColor.apply(id),
 								new GameLight(!current && !hovering ? 120.0F : 150.0F))
 						.draw(drawX, drawY - buttonExtra);
-			}, isCurrent, onClicked, costGetter);
+			}, isCurrent, onClicked, costGetter, isOptionalSelection);
 	}
 
 	public Form getSelectionContentNumber(FormInputSize buttonSize, int width, int count, IntPredicate isCurrent,
 		BiConsumer<Integer, FormInputEvent<FormButton>> onClicked,
-		Function<Integer, ArrayList<InventoryItem>> costGetter) {
+		Function<Integer, ArrayList<InventoryItem>> costGetter, boolean isOptionalSelection) {
 	return this.getSelectionContent(buttonSize, width, count,
 			(button, id, drawX, drawY, w, h, current, hovering) -> {
 				FontOptions fontOptions = button.size.getFontOptions().color(Settings.UI.activeTextColor);
@@ -612,12 +601,12 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 				int textWidth = FontManager.bit.getWidthCeil(text, fontOptions);
 				FontManager.bit.drawString((float) (drawX + w / 2 - textWidth / 2),
 						(float) (drawY + button.size.fontDrawOffset - 2), text, fontOptions);
-			}, isCurrent, onClicked, costGetter);
+			}, isCurrent, onClicked, costGetter, isOptionalSelection);
 	}
 
 	public Form getSelectionColorOrCustom(FormInputSize buttonSize, int width,
 		final SelectionButtonDrawFunction contentDraw, Color[] colorOptions, Supplier<Color> currentColorGetter,
-		Consumer<Color> onSelected, Consumer<Color> onApply, Function<Color, ArrayList<InventoryItem>> costGetter) {		
+		Consumer<Color> onSelected, Consumer<Color> onApply, Function<Color, ArrayList<InventoryItem>> costGetter, boolean isOptionalSelection) {		
 		
 	return this.getSelectionContent(buttonSize, width, colorOptions.length + 1, new SelectionButtonDrawFunction() {
 		
@@ -661,39 +650,56 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		return id < colorOptions.length
 				? (ArrayList<InventoryItem>) costGetter.apply(colorOptions[id])
 				: (ArrayList<InventoryItem>) costGetter.apply((Color) null);
-	});
+	}, isOptionalSelection);
 	}
 
 	public Form getSelectionContent(FormInputSize buttonSize, int width, int count,
 		SelectionButtonDrawFunction contentDraw, IntPredicate isCurrent,
 		BiConsumer<Integer, FormInputEvent<FormButton>> onClicked,
-		Function<Integer, ArrayList<InventoryItem>> costGetter) {
+		Function<Integer, ArrayList<InventoryItem>> costGetter, boolean optionalSelction) {
+		
 	return this.getSelectionContent(buttonSize, width, count, contentDraw, isCurrent, onClicked, costGetter,
-			(Function<Integer, GameMessage>) null);
+			(Function<Integer, GameMessage>) null, optionalSelction);
 	}
 
 	public Form getSelectionContent(FormInputSize buttonSize, int width, int count,
 		final SelectionButtonDrawFunction contentDraw, IntPredicate isCurrent,
 		BiConsumer<Integer, FormInputEvent<FormButton>> onClicked,
 		final Function<Integer, ArrayList<InventoryItem>> costGetter,
-		final Function<Integer, GameMessage> tooltipGetter) {
+		final Function<Integer, GameMessage> tooltipGetter, boolean optionalSelection) {
 		
 	Form form = new Form(width, 10);
 	form.drawBase = false;
+	
+	if(optionalSelection) {
+		// an extra button at the front for 'disable part'
+		count += 1;
+	}
+	
 	int contentPadding = 4;
 	int buttonPadding = 1;
 	int totalButtonWidth = buttonSize.height + buttonPadding * 2;
 	int buttonsPerRow = GameMath.limit(width / totalButtonWidth, 1, count);
 	int totalRows = (int) Math.ceil((double) count / (double) buttonsPerRow);
 	
-	for (int i = 0; i < count; ++i) {
-		final int index = i;
+	for (int i = 0; i < count; ++i) {		
+		
 		int column = i % buttonsPerRow;
 		int row = i / buttonsPerRow;
 		int buttonsThisRow = Math.min(count - buttonsPerRow * row, buttonsPerRow);
 		int xOffset = width / 2 - buttonsThisRow * totalButtonWidth / 2 - buttonPadding;
 		int buttonX = contentPadding + xOffset + column * totalButtonWidth + buttonPadding;
 		int buttonY = contentPadding + row * totalButtonWidth + buttonPadding;
+		
+		final int index;
+		if(optionalSelection && i == 0) {
+			index = -1;
+		}
+		else {
+			index = i - (optionalSelection ? 1 : 0);	
+		}
+					
+	
 		FormContentVarToggleButton button = (FormContentVarToggleButton) form
 				.addComponent(new FormContentVarToggleButton(buttonX, buttonY, buttonSize.height, buttonSize,
 						ButtonColor.BASE, () -> {
@@ -749,7 +755,7 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		});
 	}
 
-	form.setHeight((totalRows+1) * totalButtonWidth + contentPadding * 2);
+		form.setHeight((totalRows+1) * totalButtonWidth + contentPadding * 2);
 		return form;
 	}
 
@@ -905,14 +911,16 @@ public abstract class FormNewPlayerRaceCustomizer extends Form {
 		int colorIndex = look.appearanceByteGet(part.getPartColorName());
 		
 	
+		if(styleIndex == -1) {
+			offset = new Point(-3,-5);
+		}
 		if(isNotWigIconDraw.test(part)) {			
 		    // Eye preview (using HumanFaceDrawOptions)
 			GameTexture.overrideBlendQuality = BlendQuality.NEAREST;
 			faceDrawOptionsGetter.get().draw();
 		    GameTexture.overrideBlendQuality = null;
 			
-		} else {
-			
+		} else {			
 			GameTexture wigTexture = GameParts.getWigTexture(part, styleIndex, colorIndex, part.numSides() > 1 ? 1 : 0);
 		    if(wigTexture == null) {
 		    	  DebugHelper.handleFormattedDebugMessage(
