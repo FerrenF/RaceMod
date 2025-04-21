@@ -27,7 +27,7 @@ public class EyeBodyPart extends BodyPart {
 			boolean costIsShards, int closedEyeOptions) {
 		
 		super(belongsToClass, name, labelCategory, labelKey, numTextures, 0, numColors, true, palettePath, partTexturePath, spriteMapSize,
-				accessoryTextureMapSize, replacer, stylistCost, costIsShards);
+				accessoryTextureMapSize, replacer, stylistCost, costIsShards, false);
 		
 		this.skinColorPath = skinColorPath;
 		this._numSkinColors = numSkinColors;

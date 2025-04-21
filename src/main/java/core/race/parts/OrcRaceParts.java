@@ -29,7 +29,7 @@ public class OrcRaceParts extends RaceLookParts{
          				 "player/race/orc/haircolors",
          				 "player/race/orc/hair/",
          				 new Point(64,64),
-         				 new Point(32,32), new TextureReplacer(TextureReplacer.TARGET.HAIR), 5, true));
+         				 new Point(32,32), new TextureReplacer(TextureReplacer.TARGET.HAIR), 5, true, true));
  	   
          this.addBodyPart("FACEHAIR",
         		 new BodyPart(OrcRaceParts.class,
@@ -43,7 +43,10 @@ public class OrcRaceParts extends RaceLookParts{
         				 "player/race/orc/haircolors",
         				 "player/race/orc/facehair/",
         				 new Point(64,64),
-        				 new Point(32,32), new TextureReplacer(TextureReplacer.TARGET.FACE_HAIR), 5, true));
+        				 new Point(32,32), new TextureReplacer(TextureReplacer.TARGET.FACE_HAIR),
+        				 5, 
+        				 true,
+        				 true));
          
          this.addBodyPart("FACIALFEATURES",
         		 new BodyPart(OrcRaceParts.class,
@@ -57,7 +60,7 @@ public class OrcRaceParts extends RaceLookParts{
         				 "player/race/orc/skincolors",
         				 "player/race/orc/facialfeatures/",
         				 new Point(64,64),
-        				 new Point(32, 32), null, 5, true));
+        				 new Point(32, 32), null, 5, true, false));
          
          this.addBodyPart("HEAD",
         		 new BodyPart(OrcRaceParts.class,
@@ -71,7 +74,7 @@ public class OrcRaceParts extends RaceLookParts{
         				 "player/race/orc/skincolors",
         				 "player/race/orc/head/",
         				 new Point(64,64),
-        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.HEAD), 5, true	));
+        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.HEAD), 5, true, false	));
          
          this.addBodyPart("BODY",
         		 new BodyPart(OrcRaceParts.class,
@@ -85,7 +88,7 @@ public class OrcRaceParts extends RaceLookParts{
         				 "player/race/orc/skincolors",
         				 "player/race/orc/body/",
         				 new Point(64,64),
-        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.BODY), 5, true	));
+        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.BODY), 5, true, false	));
          
          this.addBodyPart("ARMS",
         		 new BodyPart(OrcRaceParts.class,
@@ -99,7 +102,7 @@ public class OrcRaceParts extends RaceLookParts{
         				 "player/race/orc/skincolors",
         				 "player/race/orc/arms/",
         				 new Point(64,64),
-        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.ARMS), 5, true	));
+        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.ARMS), 5, true, false	));
          
          this.addBodyPart("FEET",
         		 new BodyPart(OrcRaceParts.class,
@@ -113,7 +116,7 @@ public class OrcRaceParts extends RaceLookParts{
         				 "player/race/orc/skincolors",
         				 "player/race/orc/feet/",
         				 new Point(64,64),
-        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.SHOES), 5, true	));
+        				 new Point(32, 32), new TextureReplacer(TextureReplacer.TARGET.SHOES), 5, true, false	));
 
          this.addBodyPart("CUSTOM_EYES",
         		 new EyeBodyPart(OrcRaceParts.class,

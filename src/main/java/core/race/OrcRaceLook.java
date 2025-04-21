@@ -208,13 +208,13 @@ public class OrcRaceLook extends RaceLook {
 	
 	public int getRandomCustomEyesColor() 	{	return this.getRandomByteColorFeature("CUSTOM_EYES_COLOR");	}
 	
-	public int getRandomCustomHairStyle()	{	return this.getRandomByteColorFeature("CUSTOM_HAIR");	}
+	public int getRandomCustomHairStyle()	{	return this.getRandomByteFeature("CUSTOM_HAIR");	}
 	
 	public int getRandomCustomHairColor()	{	return this.getRandomByteColorFeature("CUSTOM_HAIR_COLOR");	}
 	
-	public int getRandomFaceHairStyle()		{	return this.getRandomByteColorFeature("CUSTOM_EYES_COLOR");	}
+	public int getRandomFaceHairStyle()		{	return this.getRandomByteFeature("FACEHAIR");	}
 	
-	public int getRandomFacialFeatures()	{	return this.getRandomByteColorFeature("FACIALFEATURES");	}
+	public int getRandomFacialFeatures()	{	return this.getRandomByteFeature("FACIALFEATURES");	}
 	
 	// Getters
 		

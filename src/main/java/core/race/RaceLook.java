@@ -138,10 +138,11 @@ public abstract class RaceLook extends HumanLook {
 	}
 	
 	public byte getRandomByteFeature(String key) {		
-		   if(!this.getRaceParts().hasPart(key)) return 0;		   
+		   if(!this.getRaceParts().hasPart(key)) return 0;	
+		   BodyPart bp = this.getRaceParts().getBodyPart(key);
 		   int totalOptions = this.getRaceParts().getBodyPart(key).numTextures(); 
 		   if(totalOptions == 0) return 0;
-		   return (byte) GameRandom.globalRandom.getIntBetween(0, totalOptions-1); 	    
+		   return (byte) GameRandom.globalRandom.getIntBetween(bp.isOptionalPart() ? -1 : 0, totalOptions-1); 	    
 	}	
 	
 	public byte getRandomByteColorFeature(String key) {		
@@ -283,12 +284,12 @@ public abstract class RaceLook extends HumanLook {
 		
 		
 		if (includeColor) {
-			writer.putNextByteUnsigned(super.getShirtColor().getRed());
-			writer.putNextByteUnsigned(super.getShirtColor().getGreen());
-			writer.putNextByteUnsigned(super.getShirtColor().getBlue());
-			writer.putNextByteUnsigned(super.getShoesColor().getRed());
-			writer.putNextByteUnsigned(super.getShoesColor().getGreen());
-			writer.putNextByteUnsigned(super.getShoesColor().getBlue());
+			writer.putNextByteUnsigned((byte) super.getShirtColor().getRed());
+			writer.putNextByteUnsigned((byte) super.getShirtColor().getGreen());
+			writer.putNextByteUnsigned((byte) super.getShirtColor().getBlue());
+			writer.putNextByteUnsigned((byte) super.getShoesColor().getRed());
+			writer.putNextByteUnsigned((byte) super.getShoesColor().getGreen());
+			writer.putNextByteUnsigned((byte) super.getShoesColor().getBlue());
 		}
 		
 		writer.putNextInt(appearanceByteMap.size()); // Store the number of entries
@@ -301,9 +302,9 @@ public abstract class RaceLook extends HumanLook {
 		    writer.putNextInt(appearanceColorMap.size()); // Store size
 		    this.appearanceColorMap.forEach((key, value) -> {
 		        writer.putNextString(key);
-		        writer.putNextByteUnsigned(value.getRed());
-		        writer.putNextByteUnsigned(value.getGreen());
-		        writer.putNextByteUnsigned(value.getBlue());
+		        writer.putNextByteUnsigned((byte)value.getRed());
+		        writer.putNextByteUnsigned((byte)value.getGreen());
+		        writer.putNextByteUnsigned((byte)value.getBlue());
 		    });
 		}
 

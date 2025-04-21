@@ -21,6 +21,7 @@ public class BodyPart {
     protected boolean _hasWigTexture;
     protected boolean _isBaseGamePart;
     protected boolean _stylistCostIsShards = false;
+    protected boolean partIsOptional;
     
 	protected String palettePath;
 	protected String texturePath;
@@ -36,6 +37,7 @@ public class BodyPart {
 	public int numColors() 						{	return _numColors;						}
 	public int numSides() 						{	return _numSides;						}
 	
+	public boolean isOptionalPart()				{	return partIsOptional;					}
 	public boolean isReplacerPart()				{	return partReplacer != null; 			}
     public boolean isBaseGamePart() 			{	return _isBaseGamePart;					}
     
@@ -74,6 +76,7 @@ public class BodyPart {
         this.palettePath = null;
         this.belongsToClass = HumanRaceParts.class;
         this.partReplacer=null;
+        this.partIsOptional = false;
     }
         
     public BodyPart(Class<? extends RaceLookParts> belongsToClass,
@@ -90,7 +93,8 @@ public class BodyPart {
     		Point accessoryTextureMapSize,
     		TextureReplacer replacer,
     		int stylistCost,
-    		boolean stylistCostIsShards) {
+    		boolean stylistCostIsShards,
+    		boolean partIsOptional) {
     	
     	this.belongsToClass = belongsToClass;
     	this.labelCategory = labelCategory;
@@ -108,6 +112,7 @@ public class BodyPart {
         this.partReplacer = replacer;
         this._stylistCost = stylistCost;
         this._stylistCostIsShards = stylistCostIsShards;
+        this.partIsOptional = partIsOptional;
     }
 
 	public Class<? extends RaceLookParts> getRacePartsClass() {

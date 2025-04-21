@@ -89,25 +89,13 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 	public Point getDrawOffset(BodyPart part) {
 	    switch (part.getPartName()) {  
 	        case "CUSTOM_HAIR": 	return new Point(0, 0);	 
-	        case "CUSTOM_HAIR_COLOR": 	return new Point(0, 0);	  
-	        case "FACEHAIR": 	return new Point(0, -20);	 
-	        case "FACEHAIR_COLOR": 	return new Point(0, -20);	  
-	        case "FACIALFEATURES": 	return new Point(0, -10);	 
-	        case "FACIALFEATURES_COLOR": 	return new Point(0, -10);	  
-	        case "HEAD": 		return getHeadTypeDrawOffset();
-	        case "CUSTOM_EYES": return getEyeTypeFaceDrawOffset();
-	        case "CUSTOM_EYES_COLOR": return getEyeColorFaceDrawOffset();
-	        default: 			return super.baseGetDrawOffset(part);
+	        case "FACEHAIR": 		return new Point(-12, -55);	   
+	        case "FACIALFEATURES": 	return new Point(-12, -40);	
+	        case "HEAD": 			return new Point(0, 0);	
+	        case "CUSTOM_EYES": 	return new Point(-15, -25);	
+	        default: 				return super.baseGetDrawOffset(part);
 	    }
 	}
-	
-	private Point getHeadTypeDrawOffset() 		{	return new Point(0, 0);		}
-
-	public Point getSkinFaceDrawOffset() 		{	return new Point(-3, -4);	}
-	
-	public Point getEyeTypeFaceDrawOffset() 	{	return new Point(0, 5);	}
-	
-	public Point getEyeColorFaceDrawOffset() 	{	return new Point(0, 5);	}
 		
 	// Returns the modification cost (stub for customization)
 	protected ArrayList<InventoryItem> getPartModificationCost(Color color) {
@@ -204,7 +192,7 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 			
 		if (!part.isBaseGamePart()) {
 			super.customDrawBodyPartIcon(button, look, part, options, x, y, _width, _height, offset, ()->{
-				return this.getOrcFaceDrawOptions(look, options, button.size.height, x + offset.x, y + offset.y, (opt) -> {
+				return this.getOrcFaceDrawOptions(look, options, button.size.height * 2, x + offset.x, y + offset.y, (opt) -> {
 			        opt.sprite(0, 3).dir(3);  // Set specific sprite direction
 			    });
 			}, (bp)->{
@@ -232,7 +220,7 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
 		Point offset = this.getDrawOffset(part);
 		if (!part.isBaseGamePart()) {
 			super.customDrawBodyPartIcon(button, look, part, options, x, y, _width, _height, offset, ()->{
-				return this.getOrcFaceDrawOptions(look, options, button.size.height, x + offset.x, y + offset.y, (opt) -> {
+				return this.getOrcFaceDrawOptions(look, options, button.size.height * 2, x + offset.x, y + offset.y, (opt) -> {
 			        opt.sprite(0, 3).dir(3);  // Set specific sprite direction
 			    });
 			}, (bp)->{
@@ -274,7 +262,7 @@ public class OrcNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomizer {
             (button, id, x, y, w, h, current, hovering) -> drawBodyPartPreview(button, part, true, id, x, y, w, h),
             id -> id == (Integer)getCurrentBodyPartSelection(part, true),
             (id, event) -> updateBodyPartSelection(part, id, true),
-            (color)->this.getPartModificationCost(new Color(color))	),
+            (color)->this.getPartModificationCost(new Color(color)), false),
         		isCurrent
     		);
 	}

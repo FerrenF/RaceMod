@@ -12,9 +12,12 @@ import core.containers.CustomRaceStylistContainer;
 import core.forms.container.CustomRaceStylistContainerForm;
 import core.gfx.texture.AsyncTextureLoader;
 import core.gfx.texture.TextureManager;
+import core.items.EmperorsNewShirt;
+import core.items.EmperorsNewShoes;
 import core.network.CustomPacketConnectApproved;
 import core.network.CustomPacketPlayerAppearance;
 import core.race.CustomHumanLook;
+import core.race.NekoRaceLook;
 import core.race.OrcRaceLook;
 import core.race.RaceLook;
 import core.race.TestFurryRaceLook;
@@ -33,6 +36,7 @@ import necesse.engine.network.PacketReader;
 import necesse.engine.network.client.loading.ClientLoadingSelectCharacter;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.ContainerRegistry;
+import necesse.engine.registries.ItemRegistry;
 import necesse.engine.registries.PacketRegistry;
 import necesse.engine.save.CharacterSave;
 import necesse.entity.mobs.friendly.human.humanShop.ShopContainerData;
@@ -51,8 +55,8 @@ import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 import patches.MainMenuMessagePatch;
 import patches.PlayerSpriteHooks;
-import patches.characterSavesPathPatch;
-import patches.getStylistOpenShopPacketPatch;
+import patches.CharacterSavesPathPatch;
+import patches.GetStylistOpenShopPacketPatch;
 import patches.debug.debugGNDItemPatch;
 import patches.server.ClientLoadingCharacterSelectSubmitConnectAcceptedPacketPatch;
 import patches.server.ClientLoadingSelectCharacterStartPatch;
@@ -187,7 +191,7 @@ public class RaceMod {
 		  new ByteBuddy()
 			  .redefine(StylistHumanMob.class)
 	          .method(ElementMatchers.named("getOpenShopPacket"))
-	          .intercept(Advice.to(getStylistOpenShopPacketPatch.class)) 
+	          .intercept(Advice.to(GetStylistOpenShopPacketPatch.class)) 
 	          .make() 
 	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 
 		  
@@ -220,9 +224,12 @@ public class RaceMod {
 	}
 	public static GameTexture TEX_MASK_LEFT;
 	public static GameTexture TEX_MASK_RIGHT;
+	public static GameTexture TEX_DISABLE_PART;
+	
 	public void initResources() {
 		TEX_MASK_LEFT = GameTexture.fromFile("player/mask_left");
 		TEX_MASK_RIGHT = GameTexture.fromFile("player/mask_right");
+		TEX_DISABLE_PART = GameTexture.fromFile("ui/primal/button_x");
 	}
 	
     public void init() {    	
@@ -249,6 +256,7 @@ public class RaceMod {
         
     	DebugHelper.handleDebugMessage("Registering races...");
 		RaceRegistry.registerRace(CustomHumanLook.HUMAN_RACE_ID, new CustomHumanLook());
+		RaceRegistry.registerRace(NekoRaceLook.NEKO_RACE_ID, new NekoRaceLook());
 		RaceRegistry.registerRace(TestFurryRaceLook.TEST_FURRY_RACE_ID, new TestFurryRaceLook());
 		RaceRegistry.registerRace(OrcRaceLook.ORC_RACE_ID, new OrcRaceLook());
 		       
@@ -260,6 +268,9 @@ public class RaceMod {
 		raceTextureManager = new TextureManager("texCache", 500);
 		raceTextureManager.init_cache();
 		
+		
+		ItemRegistry.registerItem("emperorsnewshirt", new EmperorsNewShirt(0) , 50, true);
+		ItemRegistry.registerItem("emperorsnewshoes", new EmperorsNewShoes(0) , 50, true);
     }
     
 	private static void interceptCharacterSavePath() {
@@ -272,7 +283,7 @@ public class RaceMod {
 	        	new ByteBuddy()
 	            .redefine(CharacterSave.class)
 	            .method(ElementMatchers.named("getCharacterSavesPath"))
-	            .intercept(MethodDelegation.to(characterSavesPathPatch.class)) // Redirect to custom logic
+	            .intercept(MethodDelegation.to(CharacterSavesPathPatch.class)) // Redirect to custom logic
 	            .make()
 	            .load(PlayerSprite.class.getClassLoader(), ClassReloadingStrategy.fromInstalledAgent());	        
 	        	DebugHelper.handleDebugMessage("Successfully patched character save path. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);    

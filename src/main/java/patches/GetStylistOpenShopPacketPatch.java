@@ -13,7 +13,7 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatchers;
 
 //@ModMethodPatch(target = StylistHumanMob.class, name = "getOpenShopPacket", arguments = {Server.class, ServerClient.class})
-public class getStylistOpenShopPacketPatch {
+public class GetStylistOpenShopPacketPatch {
 	
 	@Advice.OnMethodExit
     static void onExit(@Advice.This StylistHumanMob th, 

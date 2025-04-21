@@ -234,8 +234,8 @@ public class TextureManager {
     }
     
     public static byte[] getBlankTextureBytes() {
-        // 1x1 white pixel = 4 bytes: R, G, B, A
-        return new byte[] {(byte)255, (byte)255, (byte)255, (byte)255};
+        // 1x1 transparent pixel = 4 bytes: R, G, B, A
+        return new byte[] {(byte)255, (byte)255, (byte)255, (byte)0};
     }
 
 	public void init_cache() {

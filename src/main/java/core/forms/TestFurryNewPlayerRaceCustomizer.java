@@ -86,31 +86,18 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 		
 		this.getCustomRaceLook().modifyHumanDrawOptions(drawOptions, null);		
 	}
+	
+	@Override
 	public Point getDrawOffset(BodyPart part) {
 	    switch (part.getPartName()) {	     
-	        case "TAIL": 		return getTailTypeDrawOffset();
-	        case "EARS": 		return getEarsTypeFaceDrawOffset();
-	        case "MUZZLE": 		return getMuzzleTypeFaceDrawOffset();
-	        case "HEAD": 		return getHeadTypeDrawOffset();
-	        case "CUSTOM_EYES": return getEyeTypeFaceDrawOffset();
-	        case "CUSTOM_EYES_COLOR": return getEyeColorFaceDrawOffset();
+	        case "TAIL": 		return new Point(0, 0);
+	        case "EARS": 		return new Point(0, 8);	
+	        case "MUZZLE": 		return new Point(0, -5);
+	        case "HEAD": 		return new Point(0, 0);	
+	        case "CUSTOM_EYES": return new Point(-15, -25);
 	        default: 			return super.baseGetDrawOffset(part);
 	    }
 	}
-	
-	private Point getHeadTypeDrawOffset() 		{	return new Point(0, 0);		}
-
-	public Point getSkinFaceDrawOffset() 		{	return new Point(-3, -4);	}
-	
-	public Point getEyeTypeFaceDrawOffset() 	{	return new Point(-5, 5);	}
-	
-	public Point getEyeColorFaceDrawOffset() 	{	return new Point(-5, 5);	}
-	
-	private Point getTailTypeDrawOffset() 		{	return new Point(0, 0);		}
-	
-	private Point getMuzzleTypeFaceDrawOffset() {	return new Point(0, -8);		}
-
-	private Point getEarsTypeFaceDrawOffset() 	{	return new Point(0, 8);		}
 	
 	// Returns the modification cost (stub for customization)
 	protected ArrayList<InventoryItem> getPartModificationCost(Color color) {
@@ -131,7 +118,7 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 	    TestFurryRaceLook ccr = this.getCustomRaceLook();
 	    String targetPartName = colorCustomization ? part.getPartColorName() : part.getPartName();
 	    switch (targetPartName) {	    
-	        // Custom Race Parts
+	        
 	        case "TAIL": 	            	value = ccr.getTailStyle();	        break;
 	        case "TAIL_COLOR": 	            value = ccr.getTailColor();	        break;
 	        case "EARS": 	        		value = ccr.getEarsStyle();	        break;
@@ -214,9 +201,9 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 		
 		if (part.getAccessoryTextureMapSize() != null) {
 			super.customDrawBodyPartIcon(button, look, part, options, x, y, _width, _height, offset, ()->{
-				return this.getFurryFaceDrawOptions(look, options, button.size.height, x, y, (opt) -> {
+				return this.getFurryFaceDrawOptions(look, options, button.size.height*2, x, y, (opt) -> {
 			        opt.sprite(0, 3).dir(3);  // Set specific sprite direction
-			    });
+			    }, offset);
 			}, (bp)->{
 				return (bp.getPartName().equals("CUSTOM_EYES"));
 			});
@@ -243,11 +230,11 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 		// Drawing based on body part type
 		if (part.getAccessoryTextureMapSize() != null) {
 			super.customDrawBodyPartIcon(button, look, part, options, x, y, _width, _height, offset, ()->{
-				return this.getFurryFaceDrawOptions(look, options, button.size.height, x, y, (opt) -> {
+				return this.getFurryFaceDrawOptions(look, options, button.size.height*2, x, y, (opt) -> {
 			        opt.sprite(0, 3).dir(3);  // Set specific sprite direction
-			    });
+			    }, offset);
 			}, (bp)->{
-				return (bp.getPartName().equals("CUSTOM_EYES") || bp.getPartName().equals("CUSTOM_EYES_COLOR"));
+				return (bp.getPartName().equals("CUSTOM_EYES"));
 			});
 		}  else {			
 			super.baseDrawBodyPartIcon(button, look, part, options, x, y, _width, _height, offset);
@@ -284,7 +271,7 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
             (button, id, x, y, w, h, current, hovering) -> drawBodyPartPreview(button, part, true, id, x, y, w, h),
             id -> id == (Integer)getCurrentBodyPartSelection(part, true),
             (id, event) -> updateBodyPartSelection(part, id, true),
-            (color)->this.getPartModificationCost(new Color(color))	),
+            (color)->this.getPartModificationCost(new Color(color)),false	),
         		isCurrent
     		);
 	}
@@ -305,14 +292,13 @@ public class TestFurryNewPlayerRaceCustomizer extends FormNewPlayerRaceCustomize
 	}
 	
 	public DrawOptions getFurryFaceDrawOptions(RaceLook look, CustomHumanDrawOptions humanDrawOptions, int size, int drawX,
-			int drawY) {
-		return getFurryFaceDrawOptions(look, humanDrawOptions, size, drawX, drawY, (Consumer<CustomHumanDrawOptions>) null);
+			int drawY, Point offset) {
+		return getFurryFaceDrawOptions(look, humanDrawOptions, size, drawX, drawY, (Consumer<CustomHumanDrawOptions>) null, offset);
 	}
 	
 	public DrawOptions getFurryFaceDrawOptions(RaceLook look, CustomHumanDrawOptions humanDrawOptions, int size, int drawX, int drawY,
-			Consumer<CustomHumanDrawOptions> additionalModifiers) {
+			Consumer<CustomHumanDrawOptions> additionalModifiers, Point offset) {
 		
-		Point offset = getFaceHairTextureOffset();
 		float sizeChange = 32.0F / (float) size;
 		int offsetX = (int) ((float) offset.x / sizeChange);
 		int offsetY = (int) ((float) offset.y / sizeChange);

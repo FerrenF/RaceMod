@@ -2,7 +2,7 @@ package patches;
 
 import core.RaceMod;
 
-public class characterSavesPathPatch {
+public class CharacterSavesPathPatch {
 	
 	public static String getCharacterSavesPath() {
 		return RaceMod.characterSavePath;	

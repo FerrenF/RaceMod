@@ -13,7 +13,8 @@ versionchange=RaceMod updated. Deleting cache...
 firstsetup=Loading and caching RaceMod resources...
 [racemod.race]
 human=Human
-testfurry=Furry
+testfurry=Beastfolk
+neko=Neko
 orc=Orc
 tail=Tail Style
 ears=Ears Style
@@ -46,3 +47,6 @@ shirt_color=Shirt Color
 skin_color=Skin Color
 eye=Eye Style
 eye_color=Eye Color
+[item]
+emperorsnewshirt=The Emperor's New Shirt
+emperorsnewshoes=The Emperor's New Shoes
