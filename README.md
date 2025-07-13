@@ -30,6 +30,11 @@ Both server and client must have this mod installed to allow clients to join wit
 Please join the modding channel in Necesse's discord and let me know if you have any suggestions or issues. Alternatively, comment in the appropriate steam workshop thread for bugs/issues/suggestions. I will probably not respond to random friend requests.
 
 ## Patch Notes
+
+0.1.24 - Patch 0.33 fixes.
+
+0.1.22 - Cache improvements, Fix for silent errors when blank Orc facial hair is selected.
+
 0.1.21 - Introduced Orcs, Neko Race, Texture Loader overhaul.
 
 0.0.21 - Called it. Updated for hotfix 0.32.1
