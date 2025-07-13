@@ -26,7 +26,10 @@ public class GameParts {
 
 	protected static final ConcurrentHashMap<TexKey, Object> wigLocks = new ConcurrentHashMap<>();
 
-	public static GameTexture getFullTexture(BodyPart part, int sideID, int textureID, int colorID, float scale, GameTexture.BlendQuality blendQuality, TextureLocation fromWhereIfNotCached) {
+	public static GameTexture getFullTexture(BodyPart part, int sideID, int textureID, int colorID, float scale, GameTexture.BlendQuality blendQuality, TextureLocation fromWhereIfNotCached) {	
+		 if(textureID == -1) {
+		    	return TextureManager.BLANK_TEXTURE;
+		    }
 		return RaceMod.raceTextureManager.getTexture(new GamePart(part)
 				.getTexKey(sideID, scale, textureID+1, colorID+1, blendQuality), true, fromWhereIfNotCached);
 	}

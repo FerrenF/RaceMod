@@ -439,11 +439,7 @@ public class OrcRaceLook extends RaceLook {
 						.size(width, height).mirror(mirrorX, mirrorY)					
 						.alpha(alpha)
 						.light(light).addMaskShader(mask)
-						.pos(drawX + ((mask == null)
-								? 0 
-								: mask.drawXOffset), drawY + ((mask == null)
-										? 0 
-												: mask.drawYOffset));
+						.pos(drawX, drawY);
 			}
 		};	
 

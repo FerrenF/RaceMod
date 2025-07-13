@@ -42,7 +42,8 @@ public class CustomPacketConnectApproved extends PacketConnectApproved {
 	public final boolean needAppearance;
 	public final PermissionLevel permissionLevel;
 	public final boolean hasNewJournalEntry;
-	public final boolean allowClientsPower;
+	//public final boolean allowClientsPower; removed 0.33
+	public final boolean strictServerAuthority; // added 0.33
 	public final Packet activeSeasonsContent;
 	public final Packet worldSettingsContent;
 	public final NetworkManager.PlatformConnectApprovedData platformConnectApprovedData;
@@ -99,7 +100,7 @@ public class CustomPacketConnectApproved extends PacketConnectApproved {
 		
 		this.permissionLevel = PermissionLevel.getLevel(reader.getNextByteUnsigned());
 		this.hasNewJournalEntry = reader.getNextBoolean();
-		this.allowClientsPower = reader.getNextBoolean();
+		this.strictServerAuthority = reader.getNextBoolean();
 		this.activeSeasonsContent = reader.getNextContentPacket();
 		this.worldSettingsContent = reader.getNextContentPacket();
 		this.platformConnectApprovedData = Platform.getNetworkManager().createPlatformConnectApprovedData();
@@ -134,7 +135,7 @@ public class CustomPacketConnectApproved extends PacketConnectApproved {
 
 		this.permissionLevel = client.getPermissionLevel();
 		this.hasNewJournalEntry = client.hasNewJournalEntry;
-		this.allowClientsPower = Settings.giveClientsPower;
+		this.strictServerAuthority = Settings.strictServerAuthority;
 		this.activeSeasonsContent = new Packet();
 		GameSeasons.writeSeasons(new PacketWriter(this.activeSeasonsContent));
 		this.worldSettingsContent = new Packet();
@@ -158,7 +159,7 @@ public class CustomPacketConnectApproved extends PacketConnectApproved {
 
 		writer.putNextByteUnsigned(this.permissionLevel.getLevel());
 		writer.putNextBoolean(this.hasNewJournalEntry);
-		writer.putNextBoolean(this.allowClientsPower);
+		writer.putNextBoolean(this.strictServerAuthority);
 		writer.putNextContentPacket(this.activeSeasonsContent);
 		writer.putNextContentPacket(this.worldSettingsContent);
 		this.platformConnectApprovedData = Platform.getNetworkManager().createPlatformConnectApprovedData();

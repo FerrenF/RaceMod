@@ -392,12 +392,13 @@ public class CustomRaceStylistContainer extends ShopContainer {
 		(new StylistSettlersUpdateContainerEvent(mob, client)).write(writer);
 		return new ShopContainerData(packet, baseData.shopManager);
 	 */
-	public static Packet getStylistContainerContent(StylistHumanMob mob, ServerClient client) {
+		
+	public static ShopContainerData getStylistContainerContent(StylistHumanMob mob, ServerClient client) {
 		ShopContainerData baseData = mob.getShopContainerData(client);
 		Packet packet = new Packet();
 		PacketWriter writer = new PacketWriter(packet);	
 		writer.putNextContentPacket(baseData.content);
 		(new StylistSettlersUpdateContainerEvent(mob, client)).write(writer);
-		return packet;
+		return new ShopContainerData(packet, baseData.shopManager);
 	}
 }

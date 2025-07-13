@@ -37,14 +37,16 @@ public class ClientSubmitConnectAcceptedPatch {
 	        Field slotsField 	= Client.class.getDeclaredField("slots");
 	        Field slotField 	= Client.class.getDeclaredField("slot");
 	        Field worldUniqueIDField = Client.class.getDeclaredField("worldUniqueID");
-	        Field allowClientsPowerField = Client.class.getDeclaredField("allowClientsPower");
+	      //  Field allowClientsPowerField = Client.class.getDeclaredField("allowClientsPower"); Removed 0.33
+	        Field strictServerAuthorityField =  Client.class.getDeclaredField("strictServerAuthority"); 
 	        Field permissionLevelField = Client.class.getDeclaredField("permissionLevel");
 	        
 	        playersField.setAccessible(true);
 	        slotsField.setAccessible(true);
 	        slotField.setAccessible(true);
 	        worldUniqueIDField.setAccessible(true);
-	        allowClientsPowerField.setAccessible(true);
+	       // allowClientsPowerField.setAccessible(true);
+	        strictServerAuthorityField.setAccessible(true);
 	        permissionLevelField.setAccessible(true);
 	        
 			th.sessionID = p.sessionID;
@@ -55,7 +57,8 @@ public class ClientSubmitConnectAcceptedPatch {
 			worldUniqueIDField.set(th, p.uniqueID);
 			
 			th.worldSettings = p.getWorldSettings(th);
-			allowClientsPowerField.set(th, p.allowClientsPower);
+			//allowClientsPowerField.set(th, p.allowClientsPower);
+			strictServerAuthorityField.set(th, p.strictServerAuthority);
 			permissionLevelField.set(th, p.permissionLevel);
 			th.hasNewJournalEntry = p.hasNewJournalEntry;
 			th.loading.submitApprovedPacket(p);
