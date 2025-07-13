@@ -36,6 +36,8 @@ Please join the modding channel in Necesse's discord and let me know if you have
 
 ## Patch Notes
 
+0.1.24 - Patch 0.33 Fixes
+
 0.1.22 - Cache improvements, Fix for silent errors when blank Orc facial hair is selected.
 
 0.1.21 - Introduced Orcs, Neko Race, Texture Loader overhaul.
