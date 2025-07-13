@@ -199,11 +199,7 @@ public class NekoRaceLook extends RaceLook {
 							.alpha((dir == 2 || dir == 3 || dir == 1) ? alpha : 0)
 							.light(light)
 							.addMaskShader(mask)
-							.pos(drawX + ((mask == null)
-									? 0 
-									: mask.drawXOffset), drawY + ((mask == null)
-											? 0 
-													: mask.drawYOffset));	
+							.pos(drawX, drawY);
 				}
 			});	
 		}
@@ -224,11 +220,7 @@ public class NekoRaceLook extends RaceLook {
 							.alpha((dir == 1 || dir == 3) ? alpha : 0)
 							.light(light)
 							.addMaskShader(mask)
-							.pos(drawX + ((mask == null)
-									? 0 
-									: mask.drawXOffset), drawY + ((mask == null)
-											? 0 
-													: mask.drawYOffset));							
+							.pos(drawX, drawY);						
 			}
 			});	
 
@@ -246,11 +238,7 @@ public class NekoRaceLook extends RaceLook {
 									.alpha(!(dir == 1 || dir == 3) ? alpha : 0)
 									.light(light)
 									.addMaskShader(mask)
-									.pos(drawX + ((mask == null)
-											? 0 
-											: mask.drawXOffset), drawY + ((mask == null)
-													? 0 
-															: mask.drawYOffset));	
+									.pos(drawX, drawY);
 					}
 				});		
 		}
@@ -287,11 +275,7 @@ public class NekoRaceLook extends RaceLook {
 								.alpha((dir == 0 || dir == 3 || dir == 1) ? alpha : 0)
 								.light(light)
 								.addMaskShader(m)
-								.pos(drawX + ((m == null)
-										? 0 
-										: m.drawXOffset), drawY + ((m == null)
-												? 0 
-														: m.drawYOffset));
+								.pos(drawX, drawY);
 				}
 			});
 		}

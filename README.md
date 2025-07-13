@@ -3,8 +3,13 @@
 ![Preview](./src/main/resources/preview.png)  
 
 ## Overview  
-This mod overhauls Necesse to support the use of multiple character races. Adds Orc, Beastfolk, and Neko races into the game for selection at character creation.
+This mod overhauls Necesse to support the use of multiple character races. 
 
+## Features
+* Adds Orc, Beastfolk, and Neko races into the game for selection at character creation.
+* Allows toggle-able clothes during character creation.
+* Adds two items ("The Emperor's New Shirt" and "The Emperor's New Shoes") to the Elder's shop. These cosmetic items serve to simply hide pieces of armor.
+  
 ![Orc Race](./preview_orc.png)  
 ![Beastfolk Race](./preview_beastfolk.png)
 
@@ -30,8 +35,6 @@ Both server and client must have this mod installed to allow clients to join wit
 Please join the modding channel in Necesse's discord and let me know if you have any suggestions or issues. Alternatively, comment in the appropriate steam workshop thread for bugs/issues/suggestions. I will probably not respond to random friend requests.
 
 ## Patch Notes
-
-0.1.24 - Patch 0.33 fixes.
 
 0.1.22 - Cache improvements, Fix for silent errors when blank Orc facial hair is selected.
 

@@ -43,8 +43,8 @@ public class CustomRaceStylistContainerForm<T extends CustomRaceStylistContainer
 	protected void addShopDialogueOptions() {
 		
 		super.addShopDialogueOptions();
-		if (((CustomRaceStylistContainer) this.container).humanShop instanceof StylistHumanMob
-				&& ((CustomRaceStylistContainer) this.container).items != null) {
+		//if (((CustomRaceStylistContainer) this.container).humanShop instanceof StylistHumanMob
+		//		&& ((CustomRaceStylistContainer) this.container).items != null) {
 			this.dialogueForm.addDialogueOption(new LocalMessage("ui", "stylistwantchange"), () -> {
 				this.makeCurrent(this.playerStyleForm);
 			});
@@ -53,7 +53,7 @@ public class CustomRaceStylistContainerForm<T extends CustomRaceStylistContainer
 					this.makeCurrent(this.settlerStyleForm);
 				});
 			}
-		}
+		//}
 
 	}
 
