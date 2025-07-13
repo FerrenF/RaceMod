@@ -31,7 +31,7 @@ public class DebugHelper{
 		handleDebugMessage(msg, messageLevel, MESSAGE_TYPE.INFO);
 	}
 	
-	public static void handleFormattedDebugMessage(String msg, int messageLevel, MESSAGE_TYPE msgType, Object[] args) {
+	public static void handleFormattedDebugMessage(String msg, int messageLevel, MESSAGE_TYPE msgType, Object... args) {
 		handleDebugMessage(String.format(msg, args), messageLevel, msgType);
 	}
 	

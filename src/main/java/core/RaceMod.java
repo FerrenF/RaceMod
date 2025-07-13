@@ -74,7 +74,7 @@ public class RaceMod {
 	public static int CUSTOM_STYLIST_CONTAINER;
 	public static Instrumentation byteBuddyInst;
 	public static SettingsHelper settings = new SettingsHelper();
-	public static String VERSION_STRING = "0.1.21 ALPHA";
+	public static String VERSION_STRING = "0.1.23 ALPHA";
 	public static boolean DUMP_CLASSES = false;
 	public static boolean DEBUG_HOOKS = false;
 	public static boolean NEEDS_VERSIONING = false;
@@ -187,19 +187,7 @@ public class RaceMod {
 	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 
 	  
 		  DebugHelper.handleDebugMessage("Deployed ServerClientLoadClientLookPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
-			 		  
-		  new ByteBuddy()
-			  .redefine(StylistHumanMob.class)
-	          .method(ElementMatchers.named("getOpenShopPacket"))
-	          .intercept(Advice.to(GetStylistOpenShopPacketPatch.class)) 
-	          .make() 
-	          .load(ClassLoader.getSystemClassLoader(), ClassReloadingStrategy.fromInstalledAgent()); 
-		  
-		  DebugHelper.handleDebugMessage("Deployed getStylistOpenShopPacketPatch. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
-		  
 		
-		  //HumanDrawOptionsArmorDrawOptionsAccessPatch
-		  
 		  // SettlementLevelLayer
 		  
 		  new ByteBuddy()
@@ -219,7 +207,6 @@ public class RaceMod {
   
 	  DebugHelper.handleDebugMessage("Deployed SettlementLevelLayerMethodPatches. Good luck everybody!", 40, MESSAGE_TYPE.DEBUG);
 	  
-	//writeBasicSettlementData
 
 	}
 	public static GameTexture TEX_MASK_LEFT;
